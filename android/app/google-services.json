@@ -1,0 +1,29 @@
+{
+  "project_info": {
+    "project_number": "538796607449",
+    "project_id": "daily-gist-9bc06",
+    "storage_bucket": "daily-gist-9bc06.appspot.com"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:538796607449:android:16a01c26434a05d38ffbc8",
+        "android_client_info": {
+          "package_name": "com.example.gt_daily"
+        }
+      },
+      "oauth_client": [],
+      "api_key": [
+        {
+          "current_key": "AIzaSyAd1AJa-Ok9-on5uBa6ofxGXbkP_gAXUrk"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": []
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}
