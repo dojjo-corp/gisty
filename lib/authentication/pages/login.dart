@@ -1,6 +1,9 @@
+// ignore_for_file: use_build_context_synchronously
+
 import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:gt_daily/authentication/components/buttons.dart';
+import 'package:gt_daily/authentication/repository/auth_repo.dart';
 
 import '../../global/homepage.dart';
 import '../components/custom_back_button.dart';
@@ -13,6 +16,7 @@ class LoginPage extends StatefulWidget {
 }
 
 class _LoginPageState extends State<LoginPage> {
+  final _formKey = GlobalKey<FormState>();
   Color _prefixIconColorEmail = Colors.grey;
   Color _prefixIconColorPassword = Colors.grey;
   final emailController = TextEditingController();
@@ -21,6 +25,31 @@ class _LoginPageState extends State<LoginPage> {
 
   @override
   Widget build(BuildContext context) {
+    final auth = AuthRepository();
+    Future<void> login() async {
+      try {
+        final u = await auth.login(
+          email: emailController.text,
+          password: passwordController.text,
+        );
+        if (u != null) {
+          Navigator.pushReplacement(
+            context,
+            MaterialPageRoute(
+              builder: (context) => const MyHomePage(title: 'Gisty'),
+            ),
+          );
+        }
+      } catch (e) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(
+            content: Text(e.toString()),
+            backgroundColor: Theme.of(context).dialogBackgroundColor,
+          ),
+        );
+      }
+    }
+
     return SafeArea(
       child: Scaffold(
         body: Stack(
@@ -42,86 +71,90 @@ class _LoginPageState extends State<LoginPage> {
                         ),
                         const SizedBox(height: 30),
                         const SizedBox(height: 15),
-                        TextFormField(
-                          controller: emailController,
-                          decoration: InputDecoration(
-                              filled: true,
-                              fillColor: Colors.white,
-                              border: OutlineInputBorder(
-                                borderSide: BorderSide.none,
-                                borderRadius: BorderRadius.circular(12),
-                              ),
-                              prefixIcon: const Icon(Icons.email_rounded),
-                              prefixIconColor: _prefixIconColorEmail,
-                              hintText: 'Enter Your Email'),
-                          onChanged: (value) {
-                            if (emailController.text.isNotEmpty) {
-                              setState(() {
-                                _prefixIconColorEmail =
-                                    Theme.of(context).primaryColor;
-                              });
-                            } else {
-                              setState(() {
-                                _prefixIconColorEmail = Colors.grey;
-                              });
-                            }
-                          },
-                          validator: (value) {
-                            if (value!.isEmpty) {
-                              return 'Field can\'t be empty!';
-                            }
-                            return null;
-                          },
-                        ),
-                        const SizedBox(height: 15),
-                        TextFormField(
-                          controller: passwordController,
-                          obscureText: _obscureText,
-                          decoration: InputDecoration(
-                            filled: true,
-                            fillColor: Colors.white,
-                            border: OutlineInputBorder(
-                              borderSide: BorderSide.none,
-                              borderRadius: BorderRadius.circular(12),
-                            ),
-                            prefixIcon: const Icon(Icons.lock_rounded),
-                            prefixIconColor: _prefixIconColorPassword,
-                            hintText: 'Password',
-                            suffixIcon: GestureDetector(
-                              onTap: () {
-                                setState(() {
-                                  _obscureText = !_obscureText;
-                                });
-                              },
-                              child: _obscureText
-                                  ? const Icon(
-                                      Icons.visibility_rounded,
-                                      color: Colors.grey,
-                                    )
-                                  : const Icon(
-                                      Icons.visibility_off_rounded,
-                                      color: Colors.grey,
+                        Form(
+                          key: _formKey,
+                          child: Column(
+                            children: [
+                              TextFormField(
+                                controller: emailController,
+                                decoration: InputDecoration(
+                                    filled: true,
+                                    fillColor: Colors.white,
+                                    border: OutlineInputBorder(
+                                      borderSide: BorderSide.none,
+                                      borderRadius: BorderRadius.circular(12),
                                     ),
-                            ),
+                                    prefixIcon: const Icon(Icons.email_rounded),
+                                    prefixIconColor: _prefixIconColorEmail,
+                                    hintText: 'Enter Your Email'),
+                                onChanged: (value) {
+                                  if (emailController.text.isNotEmpty) {
+                                    setState(() {
+                                      _prefixIconColorEmail =
+                                          Theme.of(context).primaryColor;
+                                    });
+                                  } else {
+                                    setState(() {
+                                      _prefixIconColorEmail = Colors.grey;
+                                    });
+                                  }
+                                },
+                                validator: (value) {
+                                  if (value!.isEmpty) {
+                                    return 'Field can\'t be empty!';
+                                  }
+                                  return null;
+                                },
+                              ),
+                              const SizedBox(height: 15),
+                              TextFormField(
+                                controller: passwordController,
+                                obscureText: _obscureText,
+                                decoration: InputDecoration(
+                                  filled: true,
+                                  fillColor: Colors.white,
+                                  border: OutlineInputBorder(
+                                    borderSide: BorderSide.none,
+                                    borderRadius: BorderRadius.circular(12),
+                                  ),
+                                  prefixIcon: const Icon(Icons.lock_rounded),
+                                  prefixIconColor: _prefixIconColorPassword,
+                                  hintText: 'Password',
+                                  suffixIcon: GestureDetector(
+                                    onTap: () {
+                                      setState(() {
+                                        _obscureText = !_obscureText;
+                                      });
+                                    },
+                                    child: _obscureText
+                                        ? const Icon(Icons.visibility_rounded,
+                                            color: Colors.grey)
+                                        : const Icon(
+                                            Icons.visibility_off_rounded,
+                                            color: Colors.grey),
+                                  ),
+                                ),
+                                onChanged: (value) {
+                                  if (passwordController.text.isNotEmpty) {
+                                    setState(() {
+                                      _prefixIconColorPassword =
+                                          Theme.of(context).primaryColor;
+                                    });
+                                  } else {
+                                    setState(() {
+                                      _prefixIconColorPassword = Colors.grey;
+                                    });
+                                  }
+                                },
+                                validator: (value) {
+                                  if (value!.isEmpty) {
+                                    return 'Field can\'t be empty!';
+                                  }
+                                  return null;
+                                },
+                              ),
+                            ],
                           ),
-                          onChanged: (value) {
-                            if (passwordController.text.isNotEmpty) {
-                              setState(() {
-                                _prefixIconColorPassword =
-                                    Theme.of(context).primaryColor;
-                              });
-                            } else {
-                              setState(() {
-                                _prefixIconColorPassword = Colors.grey;
-                              });
-                            }
-                          },
-                          validator: (value) {
-                            if (value!.isEmpty) {
-                              return 'Field can\'t be empty!';
-                            }
-                            return null;
-                          },
                         ),
                         const SizedBox(height: 15),
                         Row(
@@ -135,16 +168,7 @@ class _LoginPageState extends State<LoginPage> {
                         ),
                         const SizedBox(height: 20),
                         MyButton(
-                          onPressed: () async {
-                            // firebase auth login method
-                            Navigator.push(
-                              context,
-                              MaterialPageRoute(
-                                builder: (context) =>
-                                    const MyHomePage(title: 'Gisty'),
-                              ),
-                            );
-                          },
+                          onPressed: login,
                           btnText: 'Login',
                           isPrimary: true,
                         ),

@@ -14,8 +14,9 @@ class MyButton extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     Color backgroundColor =
-        isPrimary ? Theme.of(context).primaryColor : Colors.grey;
-    Color textColor = !isPrimary ? Theme.of(context).primaryColor : Colors.white;
+        isPrimary ? Theme.of(context).primaryColor : Colors.grey[300]!;
+    Color textColor =
+        !isPrimary ? Theme.of(context).primaryColor : Colors.white70;
     return ElevatedButton(
       onPressed: onPressed,
       style: ElevatedButton.styleFrom(
@@ -25,7 +26,7 @@ class MyButton extends StatelessWidget {
       ),
       child: Text(
         btnText,
-        style: TextStyle(color: textColor),
+        style: TextStyle(color: textColor, fontWeight: FontWeight.w600),
       ),
     );
   }

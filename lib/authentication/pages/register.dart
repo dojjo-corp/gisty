@@ -1,8 +1,13 @@
+import 'dart:developer';
+// import 'dart:js_interop';
+
+import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:gt_daily/authentication/components/buttons.dart';
+import 'package:gt_daily/authentication/repository/auth_repo.dart';
+import 'package:gt_daily/authentication/repository/firestore_repo.dart';
 
-import '../../global/homepage.dart';
 import '../components/custom_back_button.dart';
 
 class RegisterPage extends StatefulWidget {
@@ -17,12 +22,75 @@ class _RegisterPageState extends State<RegisterPage> {
   Color _prefixIconColorEmail = Colors.grey;
   Color _prefixIconColorPassword = Colors.grey;
   final nameController = TextEditingController();
+  final userNameController = TextEditingController();
   final emailController = TextEditingController();
   final passwordController = TextEditingController();
   bool _obscureText = true;
+  String selectedUserType = 'student';
+  final List<String> userTypes = [
+    'student',
+    'university professional',
+    'industry professional'
+  ];
+  
+  // firebase models
+  final firestoreRepo = FirestoreRepo();
+  final auth = AuthRepository();
 
   @override
   Widget build(BuildContext context) {
+    // registration function
+    Future<void> register() async {
+      try {
+        // authenticate user with firebase auth
+        final userCredential = await auth.register(
+          email: emailController.text,
+          password: passwordController.text,
+        );
+        final user = userCredential?.user;
+
+        // make firestore entry
+        if (userCredential != null) {
+          switch (selectedUserType) {
+            case 'student':
+              firestoreRepo.createStudentDoc(
+                uid: user!.uid,
+                fullName: nameController.text,
+                userName: userNameController.text,
+                email: emailController.text,
+              );
+              break;
+            case 'industry professional':
+              firestoreRepo.createIndustryProfessionalDoc(
+                uid: user!.uid,
+                fullName: nameController.text,
+                userName: userNameController.text,
+                email: emailController.text,
+              );
+              break;
+            case 'university professional':
+              firestoreRepo.createUniversityProfessionalDoc(
+                uid: user!.uid,
+                fullName: nameController.text,
+                userName: userNameController.text,
+                email: emailController.text,
+              );
+              break;
+            default:
+              log('Invalid user type');
+          }
+          Navigator.of(context).pushNamed('/home');
+        }
+      } on FirebaseException catch (e) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(
+            content: Text(e.code),
+            duration: const Duration(seconds: 5),
+          ),
+        );
+      }
+    }
+
     return SafeArea(
       child: Scaffold(
         body: Stack(
@@ -58,7 +126,8 @@ class _RegisterPageState extends State<RegisterPage> {
                           onChanged: (value) {
                             if (nameController.text.isNotEmpty) {
                               setState(() {
-                                _prefixIconColorName = Theme.of(context).primaryColor;
+                                _prefixIconColorName =
+                                    Theme.of(context).primaryColor;
                               });
                             } else {
                               setState(() {
@@ -89,7 +158,8 @@ class _RegisterPageState extends State<RegisterPage> {
                           onChanged: (value) {
                             if (emailController.text.isNotEmpty) {
                               setState(() {
-                                _prefixIconColorEmail = Theme.of(context).primaryColor;
+                                _prefixIconColorEmail =
+                                    Theme.of(context).primaryColor;
                               });
                             } else {
                               setState(() {
@@ -125,14 +195,21 @@ class _RegisterPageState extends State<RegisterPage> {
                                 });
                               },
                               child: _obscureText
-                                  ? const Icon(Icons.visibility_rounded, color: Colors.grey,)
-                                  : const Icon(Icons.visibility_off_rounded, color: Colors.grey,),
+                                  ? const Icon(
+                                      Icons.visibility_rounded,
+                                      color: Colors.grey,
+                                    )
+                                  : const Icon(
+                                      Icons.visibility_off_rounded,
+                                      color: Colors.grey,
+                                    ),
                             ),
                           ),
                           onChanged: (value) {
                             if (passwordController.text.isNotEmpty) {
                               setState(() {
-                                _prefixIconColorPassword = Theme.of(context).primaryColor;
+                                _prefixIconColorPassword =
+                                    Theme.of(context).primaryColor;
                               });
                             } else {
                               setState(() {
@@ -159,16 +236,7 @@ class _RegisterPageState extends State<RegisterPage> {
                         ),
                         const SizedBox(height: 20),
                         MyButton(
-                          onPressed: () async {
-                            // firebase auth login method
-                            Navigator.push(
-                              context,
-                              MaterialPageRoute(
-                                builder: (context) =>
-                                    const MyHomePage(title: 'Gisty'),
-                              ),
-                            );
-                          },
+                          onPressed: register,
                           btnText: 'Register',
                           isPrimary: true,
                         ),
@@ -178,7 +246,8 @@ class _RegisterPageState extends State<RegisterPage> {
                           children: [
                             const Text('Already Have An Account?'),
                             GestureDetector(
-                              onTap: () => Navigator.of(context).pushNamed('/login'),
+                              onTap: () =>
+                                  Navigator.of(context).pushNamed('/login'),
                               child: Text(
                                 'Sign In',
                                 style: GoogleFonts.poppins(
@@ -194,11 +263,7 @@ class _RegisterPageState extends State<RegisterPage> {
                 ),
               ),
             ),
-             const Positioned(
-              top: 25, 
-              left:25,
-              child: MyBackButton()
-            ),
+            const Positioned(top: 25, left: 25, child: MyBackButton()),
           ],
         ),
       ),
