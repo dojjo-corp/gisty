@@ -1,6 +1,7 @@
 import 'dart:developer';
 
 import 'package:cloud_firestore/cloud_firestore.dart';
+import 'package:firebase_auth/firebase_auth.dart';
 
 class FirestoreRepo {
   FirestoreRepo();
@@ -23,6 +24,7 @@ class FirestoreRepo {
         'departmentId': departmentId,
         'download-id': []
       });
+      
     } on FirebaseException {
       rethrow;
     }

@@ -19,7 +19,7 @@ class EnterPhonePage extends StatelessWidget {
       Navigator.push(
         context,
         MaterialPageRoute(
-          builder: (context) => const MyHomePage(title: 'Gisty'),
+          builder: (context) => MyHomePage(pageIndex: 0),
         ),
       );
     }

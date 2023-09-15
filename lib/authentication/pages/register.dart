@@ -5,7 +5,7 @@ import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:gt_daily/authentication/components/buttons.dart';
-import 'package:gt_daily/authentication/repository/auth_repo.dart';
+import 'package:gt_daily/authentication/repository/authentication_repo.dart';
 import 'package:gt_daily/authentication/repository/firestore_repo.dart';
 
 import '../components/custom_back_button.dart';
@@ -79,7 +79,8 @@ class _RegisterPageState extends State<RegisterPage> {
             default:
               log('Invalid user type');
           }
-          Navigator.of(context).pushNamed('/home');
+          user?.updateDisplayName(nameController.text.split(' ')[0]);
+          Navigator.of(context).pushNamed('/enter-phone');
         }
       } on FirebaseException catch (e) {
         ScaffoldMessenger.of(context).showSnackBar(

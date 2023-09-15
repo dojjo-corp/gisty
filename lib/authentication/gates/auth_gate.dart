@@ -1,3 +1,4 @@
+import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 import 'package:gt_daily/authentication/pages/login.dart';
 
@@ -8,11 +9,13 @@ class AuthGate extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return StreamBuilder(builder: (context, snapshot) {
+    return StreamBuilder(
+      stream: FirebaseAuth.instance.authStateChanges(),
+      builder: (context, snapshot) {
       if (!snapshot.hasData){
         return const LoginPage();
       }
-      return const MyHomePage(title: '',);
+      return MyHomePage(pageIndex: 0,);
     },);
   }
 }

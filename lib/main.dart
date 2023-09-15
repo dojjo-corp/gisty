@@ -35,7 +35,7 @@ class MyApp extends StatelessWidget {
         '/register': (context) => const RegisterPage(),
         '/enter-phone': (context) => const EnterPhonePage(),
         '/verify-phone': (context) => const PhoneverificationPage(),
-        '/home': (context) => const MyHomePage(title: 'Gisty'),
+        '/home': (context) => MyHomePage(pageIndex: 0),
       },
     );
   }

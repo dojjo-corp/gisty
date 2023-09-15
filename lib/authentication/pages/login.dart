@@ -3,7 +3,7 @@
 import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:gt_daily/authentication/components/buttons.dart';
-import 'package:gt_daily/authentication/repository/auth_repo.dart';
+import 'package:gt_daily/authentication/repository/authentication_repo.dart';
 
 import '../../global/homepage.dart';
 import '../components/custom_back_button.dart';
@@ -22,12 +22,16 @@ class _LoginPageState extends State<LoginPage> {
   final emailController = TextEditingController();
   final passwordController = TextEditingController();
   bool _obscureText = true;
+  Widget loginBtnChild = const Text('Login');
 
   @override
   Widget build(BuildContext context) {
     final auth = AuthRepository();
     Future<void> login() async {
       try {
+        setState(() {
+          loginBtnChild = const CircularProgressIndicator();
+        });
         final u = await auth.login(
           email: emailController.text,
           password: passwordController.text,
@@ -36,11 +40,14 @@ class _LoginPageState extends State<LoginPage> {
           Navigator.pushReplacement(
             context,
             MaterialPageRoute(
-              builder: (context) => const MyHomePage(title: 'Gisty'),
+              builder: (context) => MyHomePage(pageIndex: 0),
             ),
           );
         }
       } catch (e) {
+        setState(() {
+          loginBtnChild = const Text('Login');
+        });
         ScaffoldMessenger.of(context).showSnackBar(
           SnackBar(
             content: Text(e.toString()),
