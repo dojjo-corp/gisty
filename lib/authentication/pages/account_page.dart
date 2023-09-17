@@ -1,5 +1,6 @@
 // ignore_for_file: prefer_const_constructors
 
+import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
 
@@ -11,6 +12,8 @@ class UserAccountPage extends StatefulWidget {
 }
 
 class _UserAccountPageState extends State<UserAccountPage> {
+  final currentUser = FirebaseAuth.instance.currentUser!;
+
   @override
   Widget build(BuildContext context) {
     return Column(
@@ -28,7 +31,7 @@ class _UserAccountPageState extends State<UserAccountPage> {
             'Name',
             style: GoogleFonts.poppins(color: Colors.grey),
           ),
-          subtitle: Text('John '),
+          subtitle: Text(currentUser.displayName!),
         ),
         ListTile(
           leading:
@@ -37,7 +40,7 @@ class _UserAccountPageState extends State<UserAccountPage> {
             'Email',
             style: GoogleFonts.poppins(color: Colors.grey),
           ),
-          subtitle: Text('john@gmail.com '),
+          subtitle: Text(currentUser.email!),
         ),
         ListTile(
           leading:
@@ -46,7 +49,7 @@ class _UserAccountPageState extends State<UserAccountPage> {
             'Contact',
             style: GoogleFonts.poppins(color: Colors.grey),
           ),
-          subtitle: Text('0241234567'),
+          subtitle: Text(currentUser.phoneNumber ?? 'No phone number yet'),
         )
       ],
     );

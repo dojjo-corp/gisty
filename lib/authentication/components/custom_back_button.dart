@@ -8,6 +8,7 @@ class MyBackButton extends StatelessWidget {
     return GestureDetector(
       onTap: () => Navigator.of(context).pop(),
       child: Container(
+        constraints: BoxConstraints(maxHeight: 40, maxWidth: 40),
         height: 40,
         width: 40,
         decoration: BoxDecoration(

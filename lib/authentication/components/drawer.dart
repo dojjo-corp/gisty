@@ -35,6 +35,23 @@ class MyDrawer extends StatelessWidget {
               GestureDetector(
                 onTap: () {
                   // Navigate to project archive
+                  Navigator.popAndPushNamed(context, '/add-project');
+                },
+                child: ListTile(
+                  leading: Icon(
+                    Icons.add,
+                    color: Theme.of(context).primaryColor,
+                  ),
+                  title: Text(
+                    'Add Project',
+                    style: GoogleFonts.poppins(
+                        color: Theme.of(context).primaryColor),
+                  ),
+                ),
+              ),
+              GestureDetector(
+                onTap: () {
+                  // Navigate to project archive
                   Navigator.pushReplacement(
                       context,
                       MaterialPageRoute(

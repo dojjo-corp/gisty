@@ -22,6 +22,7 @@ class _LoginPageState extends State<LoginPage> {
   final emailController = TextEditingController();
   final passwordController = TextEditingController();
   bool _obscureText = true;
+  bool _isLoading = false;
   Widget loginBtnChild = const Text('Login');
 
   @override
@@ -30,7 +31,7 @@ class _LoginPageState extends State<LoginPage> {
     Future<void> login() async {
       try {
         setState(() {
-          loginBtnChild = const CircularProgressIndicator();
+          _isLoading = true;
         });
         final u = await auth.login(
           email: emailController.text,
@@ -45,20 +46,23 @@ class _LoginPageState extends State<LoginPage> {
           );
         }
       } catch (e) {
-        setState(() {
-          loginBtnChild = const Text('Login');
-        });
         ScaffoldMessenger.of(context).showSnackBar(
           SnackBar(
-            content: Text(e.toString()),
+            content: Text('Error logging user in: ${e.toString()}'),
             backgroundColor: Theme.of(context).dialogBackgroundColor,
           ),
         );
+      } finally {
+        setState(() {
+          _isLoading = false;
+        });
       }
     }
 
     return SafeArea(
       child: Scaffold(
+        floatingActionButton:
+            _isLoading ? const CircularProgressIndicator() : null,
         body: Stack(
           children: [
             Padding(

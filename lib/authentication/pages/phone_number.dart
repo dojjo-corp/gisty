@@ -1,3 +1,5 @@
+import 'package:cloud_firestore/cloud_firestore.dart';
+import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:gt_daily/authentication/components/buttons.dart';
@@ -6,13 +8,28 @@ import '../../global/homepage.dart';
 import '../components/custom_back_button.dart';
 
 class EnterPhonePage extends StatelessWidget {
-  const EnterPhonePage({super.key});
+  EnterPhonePage({required this.userId, super.key});
+  final String userId;
+  final _key = GlobalKey<FormState>();
+  final contactController = TextEditingController();
+  final auth = FirebaseAuth.instance;
 
   @override
   Widget build(BuildContext context) {
-    void goToVerifyPhone() {
-      // navigate to verification page
-      Navigator.pushNamed(context, '/verify-phone');
+    void goToVerifyPhone() async {
+      // validate phone number
+      if (_key.currentState!.validate()) {
+        _key.currentState!.save();
+        await FirebaseFirestore.instance
+            .collection('users')
+            .doc(userId)
+            .update({'contact': contactController.text.split(' ').join()});
+
+        // todo: initiate phone number verification process
+
+        // navigate to verification page
+        Navigator.pushNamed(context, '/verify-phone');
+      }
     }
 
     void goToHome() {
@@ -41,33 +58,40 @@ class EnterPhonePage extends StatelessWidget {
                         style: GoogleFonts.poppins(
                             fontSize: 40, fontWeight: FontWeight.bold),
                       ),
-
                       const SizedBox(height: 60),
-
-                      TextFormField(
-                        decoration: InputDecoration(
-                          filled: true,
-                          fillColor: Colors.white,
-                          border: OutlineInputBorder(
-                            borderSide: BorderSide.none,
-                            borderRadius: BorderRadius.circular(12),
+                      Form(
+                        key: _key,
+                        child: TextFormField(
+                          decoration: InputDecoration(
+                            filled: true,
+                            fillColor: Colors.white,
+                            border: OutlineInputBorder(
+                              borderSide: BorderSide.none,
+                              borderRadius: BorderRadius.circular(12),
+                            ),
+                            focusedBorder: OutlineInputBorder(
+                                borderSide: BorderSide(
+                                  color: Theme.of(context).primaryColor,
+                                  width: 2,
+                                ),
+                                borderRadius: BorderRadius.circular(12)),
+                            prefixIcon: Icon(Icons.phone_rounded,
+                                color: Theme.of(context).primaryColor),
+                            hintText: '0241 234 567',
                           ),
-                          focusedBorder: OutlineInputBorder(
-                              borderSide: BorderSide(
-                                color: Theme.of(context).primaryColor,
-                                width: 2,
-                              ),
-                              borderRadius: BorderRadius.circular(12)),
-                          prefixIcon: Icon(Icons.phone_rounded,
+                          style: GoogleFonts.poppins(
                               color: Theme.of(context).primaryColor),
-                          hintText: '+233 241 234 567'
+                          validator: (value) {
+                            if (value!.isEmpty) {
+                              return 'Enter phone number';
+                            } else if (value.split(' ').join().length != 10) {
+                              return 'Number must be 10 digits';
+                            }
+                            return null;
+                          },
                         ),
-                        style: GoogleFonts.poppins(
-                            color: Theme.of(context).primaryColor),
                       ),
-
                       const SizedBox(height: 30),
-
                       MyButton(
                           onPressed: goToVerifyPhone,
                           btnText: 'Verification',
