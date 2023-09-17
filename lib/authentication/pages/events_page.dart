@@ -1,24 +1,285 @@
+import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/material.dart';
+import 'package:google_fonts/google_fonts.dart';
 
+import '../components/buttons.dart';
 import '../components/event_tile.dart';
 
-class EventsPage extends StatelessWidget {
+class EventsPage extends StatefulWidget {
   const EventsPage({super.key});
 
   @override
+  State<EventsPage> createState() => _EventsPageState();
+}
+
+class _EventsPageState extends State<EventsPage> {
+  // MODAL BOTTOM SHEET STATE VARIABLES
+  final jobTitleController = TextEditingController();
+  final companyNameController = TextEditingController();
+  final locationController = TextEditingController();
+  final descriptionController = TextEditingController();
+  final contactController = TextEditingController();
+  String selectedJobType = 'Internship';
+  final List<String> jobTypes = [
+    'Internship',
+    'Full Time',
+    'Part Time',
+    'Contract',
+  ];
+
+  Color prefixIconColorTitle = Colors.grey;
+  Color prefixIconColorName = Colors.grey;
+  Color prefixIconColorLocation = Colors.grey;
+
+  @override
   Widget build(BuildContext context) {
-    return ListView.separated(
-      itemCount: 4,
-      itemBuilder: (context, index) {
-        return const EventTile(
-          title: 'Event Title',
-          organisation: 'Organisation',
-          location: 'Location',
-        );
-      },
-      separatorBuilder: (context, index) {
-        return const SizedBox(height: 10);
-      },
+    return Stack(
+      children: [
+        ListView.separated(
+          itemCount: 4,
+          itemBuilder: (context, index) {
+            return const EventTile(
+              title: 'Event Title',
+              organisation: 'Organisation',
+              location: 'Location',
+            );
+          },
+          separatorBuilder: (context, index) {
+            return const SizedBox(height: 10);
+          },
+        ),
+        Positioned(
+          bottom: 20,
+          right: 20,
+          child: FloatingActionButton(
+            onPressed: () {
+              showModalBottomSheet(
+                backgroundColor: Theme.of(context).scaffoldBackgroundColor,
+                isScrollControlled: true,
+                useSafeArea: true,
+                shape: RoundedRectangleBorder(
+                    borderRadius: BorderRadius.circular(5)),
+                context: context,
+                builder: (context) {
+                  return Padding(
+                    padding: const EdgeInsets.all(5.0),
+                    child: Center(
+                      child: 
+                      ListView(
+                        children: [
+                          Text(
+                            'Add New Job Opportunity',
+                            style: GoogleFonts.montserrat(
+                              fontSize: 25,
+                              letterSpacing: 5,
+                            ),
+                            textAlign: TextAlign.center,
+                          ),
+                          const SizedBox(height: 10),
+                          // JOB TITLE TEXT FIELD
+                          TextFormField(
+                            controller: jobTitleController,
+                            decoration: InputDecoration(
+                              filled: true,
+                              fillColor: Colors.white,
+                              border: OutlineInputBorder(
+                                borderSide: BorderSide.none,
+                                borderRadius: BorderRadius.circular(12),
+                              ),
+                              prefixIcon: const Icon(Icons.school),
+                              prefixIconColor: prefixIconColorTitle,
+                              hintText: 'Job Title',
+                              labelText: 'Job Title',
+                            ),
+                            validator: (value) {
+                              if (value!.isEmpty) {
+                                return 'Field can\'t be empty!';
+                              }
+                              return null;
+                            },
+                          ),
+                          const SizedBox(height: 10),
+                          Row(
+                            children: [
+                              Expanded(
+                                child: TextFormField(
+                                  controller: locationController,
+                                  decoration: InputDecoration(
+                                    filled: true,
+                                    fillColor: Colors.white,
+                                    border: OutlineInputBorder(
+                                      borderSide: BorderSide.none,
+                                      borderRadius: BorderRadius.circular(12),
+                                    ),
+                                    prefixIcon:
+                                        const Icon(Icons.location_on_rounded),
+                                    prefixIconColor: prefixIconColorLocation,
+                                    hintText: 'Location',
+                                    labelText: 'Location',
+                                  ),
+                                  validator: (value) {
+                                    if (value!.isEmpty) {
+                                      return 'Field can\'t be empty!';
+                                    }
+                                    return null;
+                                  },
+                                ),
+                              ),
+                              const SizedBox(width: 10),
+                              // COMPANY NAME TEXT FIELD
+                              Expanded(
+                                child: TextFormField(
+                                  controller: companyNameController,
+                                  decoration: InputDecoration(
+                                    filled: true,
+                                    fillColor: Colors.white,
+                                    border: OutlineInputBorder(
+                                      borderSide: BorderSide.none,
+                                      borderRadius: BorderRadius.circular(12),
+                                    ),
+                                    prefixIcon: const Icon(Icons.title_rounded),
+                                    prefixIconColor: prefixIconColorName,
+                                    hintText: 'Company Name',
+                                    labelText: 'Company Name',
+                                  ),
+                                  validator: (value) {
+                                    if (value!.isEmpty) {
+                                      return 'Field can\'t be empty!';
+                                    }
+                                    return null;
+                                  },
+                                ),
+                              ),
+                            ],
+                          ),
+
+                          const SizedBox(height: 10),
+                          // LOCATION TEXT FIELD
+                          Row(
+                            children: [
+                              Expanded(
+                                child: TextFormField(
+                                  controller: contactController,
+                                  decoration: InputDecoration(
+                                    filled: true,
+                                    fillColor: Colors.white,
+                                    border: OutlineInputBorder(
+                                      borderSide: BorderSide.none,
+                                      borderRadius: BorderRadius.circular(12),
+                                    ),
+                                    prefixIcon: const Icon(Icons.phone_rounded),
+                                    prefixIconColor: prefixIconColorLocation,
+                                    hintText: 'Company Contacts',
+                                    labelText: 'Company Contacts',
+                                  ),
+                                  validator: (value) {
+                                    if (value!.isEmpty) {
+                                      return 'Field can\'t be empty!';
+                                    }
+                                    return null;
+                                  },
+                                ),
+                              ),
+                              const SizedBox(width: 10),
+                              Expanded(
+                                child: DropdownButtonFormField(
+                                  decoration: InputDecoration(
+                                    filled: true,
+                                    fillColor: Colors.white,
+                                    border: OutlineInputBorder(
+                                        borderSide: BorderSide.none,
+                                        borderRadius:
+                                            BorderRadius.circular(12)),
+                                  ),
+                                  value: selectedJobType,
+                                  items: jobTypes
+                                      .map(
+                                        (String category) =>
+                                            DropdownMenuItem<String>(
+                                          value: category,
+                                          child: Text(category),
+                                        ),
+                                      )
+                                      .toList(),
+                                  onChanged: (value) {
+                                    setState(() {
+                                      selectedJobType = value!;
+                                    });
+                                  },
+                                ),
+                              ),
+                            ],
+                          ),
+
+                          const SizedBox(height: 10),
+                          TextFormField(
+                            controller: descriptionController,
+                            decoration: InputDecoration(
+                                alignLabelWithHint: true,
+                                filled: true,
+                                fillColor: Colors.white,
+                                border: OutlineInputBorder(
+                                  borderSide: BorderSide.none,
+                                  borderRadius: BorderRadius.circular(12),
+                                ),
+                                hintText: 'Description',
+                                labelText: 'Description'),
+                            maxLines: 6,
+                            minLines: 5,
+                            validator: (value) {
+                              if (value!.isEmpty) {
+                                return 'Field can\'t be empty!';
+                              }
+                              return null;
+                            },
+                          ),
+                          const SizedBox(height: 10),
+                          MyButton(
+                            onPressed: () async {
+                              List<String> contacts;
+                              if (contactController.text.characters
+                                  .contains(',')) {
+                                contacts =
+                                    contactController.text.trim().split(',');
+                              } else if (contactController.text.characters
+                                  .contains('/')) {
+                                contacts =
+                                    contactController.text.trim().split('/');
+                              } else {
+                                contacts = [contactController.text.trim()];
+                              }
+                              final Map<String, dynamic> jobDetails = {
+                                'title': jobTitleController.text.trim(),
+                                'company-name':
+                                    companyNameController.text.trim(),
+                                'location': locationController.text.trim(),
+                                'company-contacts': contacts,
+                                'details': descriptionController.text.trim(),
+                              };
+
+                              print('Event added: $jobDetails');
+                              Navigator.pop(context);
+                              // store job event in firestore
+                              // await FirebaseFirestore.instance
+                              //     .collection('Events')
+                              //     .doc()
+                              //     .set(jobDetails);
+                            },
+                            btnText: 'Add Event',
+                            isPrimary: true,
+                          )
+                        ],
+                      ),
+                    
+                    ),
+                  );
+                },
+              );
+            },
+            child: const Icon(Icons.add),
+          ),
+        )
+      ],
     );
   }
 }

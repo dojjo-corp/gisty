@@ -1,3 +1,4 @@
+// ignore: unused_import
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
@@ -9,8 +10,9 @@ import '../authentication/pages/dsahboard.dart';
 import '../authentication/pages/events_page.dart';
 import '../authentication/pages/search_page.dart';
 
+// ignore: must_be_immutable
 class MyHomePage extends StatefulWidget {
-   MyHomePage({super.key, required this.pageIndex});
+  MyHomePage({super.key, required this.pageIndex});
 
   int pageIndex;
 
@@ -25,7 +27,12 @@ class _MyHomePageState extends State<MyHomePage> {
     const EventsPage(),
     const UserAccountPage(),
   ];
-  final List<String> _pageTitle = ['Dashboard', 'Search', 'Events', 'Account'];
+  final List<String> _pageTitle = [
+    'Dashboard',
+    'Search',
+    'Events',
+    'Account',
+  ];
 
   @override
   Widget build(BuildContext context) {
@@ -90,6 +97,7 @@ class _MyHomePageState extends State<MyHomePage> {
           padding: const EdgeInsets.symmetric(horizontal: 15.0),
           child: _pages[widget.pageIndex],
         ),
+        resizeToAvoidBottomInset: true,
       ),
     );
   }

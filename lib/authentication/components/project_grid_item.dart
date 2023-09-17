@@ -24,9 +24,11 @@ class _ProjectGridItemState extends State<ProjectGridItem> {
       case 'web':
         return const Color.fromARGB(255, 57, 134, 198);
       case 'mobile':
-        return const Color.fromARGB(255, 234, 166, 64);
+        return const Color.fromARGB(255, 234, 206, 64);
       case 'data':
         return const Color.fromARGB(255, 188, 137, 197);
+        case 'hardware':
+        return const Color.fromARGB(255, 6, 134, 4);
       default:
         return Colors.blue;
     }
@@ -34,27 +36,31 @@ class _ProjectGridItemState extends State<ProjectGridItem> {
 
   @override
   Widget build(BuildContext context) {
-    final _projectColor = setProjectColor(widget.category);
-    final _likedIcon = Icon(
+    final projectColor = setProjectColor(widget.category);
+    final likedIcon = Icon(
       Icons.bookmark_added,
-      color: _projectColor,
+      color: projectColor,
     );
-    final _notLikedIcon = const Icon(Icons.bookmark_add_outlined);
+    const notLikedIcon = Icon(Icons.bookmark_add_outlined);
     return Container(
-      constraints: BoxConstraints(
-        maxWidth: MediaQuery.of(context).size.width - 50,
+      constraints: const BoxConstraints(
+        minWidth: 0,
+        maxWidth: double.infinity,
       ),
       height: 180,
       padding: const EdgeInsets.only(right: 10),
       decoration: BoxDecoration(
         borderRadius: const BorderRadius.horizontal(right: Radius.circular(12)),
-        color: _projectColor.withOpacity(0.4),
+        gradient: LinearGradient(colors: [
+          projectColor.withOpacity(0.1),
+          projectColor.withOpacity(0.4)
+        ]),
       ),
       child: Row(
         children: [
           VerticalDivider(
-            thickness: 9,
-            color: _projectColor,
+            thickness: 6,
+            color: projectColor,
             width: 9,
           ),
           const SizedBox(width: 8),
@@ -70,7 +76,7 @@ class _ProjectGridItemState extends State<ProjectGridItem> {
                     Text(
                       widget.title,
                       style: GoogleFonts.montserrat(
-                          fontWeight: FontWeight.bold, fontSize: 25),
+                          fontWeight: FontWeight.bold, fontSize: 25, color: projectColor),
                     ),
                     Row(
                       children: [
@@ -104,7 +110,7 @@ class _ProjectGridItemState extends State<ProjectGridItem> {
                         print('Read more on project');
                       },
                       style: ElevatedButton.styleFrom(
-                        backgroundColor: _projectColor,
+                        backgroundColor: projectColor,
                         foregroundColor: Colors.white,
                         minimumSize: const Size(100, 40),
                         shape: RoundedRectangleBorder(
@@ -119,7 +125,7 @@ class _ProjectGridItemState extends State<ProjectGridItem> {
                           _isLiked = !_isLiked;
                         });
                       },
-                      icon: _isLiked ? _likedIcon : _notLikedIcon,
+                      icon: _isLiked ? likedIcon : notLikedIcon,
                     )
                   ],
                 )

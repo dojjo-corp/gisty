@@ -1,10 +1,10 @@
 import 'package:firebase_core/firebase_core.dart';
 import 'package:flutter/material.dart';
+import 'package:gt_daily/authentication/pages/add_project_page.dart';
 import 'package:gt_daily/authentication/pages/login.dart';
 import 'package:gt_daily/global/homepage.dart';
 
 import 'authentication/gates/auth_gate.dart';
-import 'authentication/pages/phone_number.dart';
 import 'authentication/pages/phone_verification.dart';
 import 'authentication/pages/register.dart';
 import 'firebase_options.dart';
@@ -33,9 +33,9 @@ class MyApp extends StatelessWidget {
         '/': (context) => const AuthGate(),
         '/login': (context) => const LoginPage(),
         '/register': (context) => const RegisterPage(),
-        '/enter-phone': (context) => const EnterPhonePage(),
         '/verify-phone': (context) => const PhoneverificationPage(),
         '/home': (context) => MyHomePage(pageIndex: 0),
+        '/add-project': (context)=>const NewProjectPage()
       },
     );
   }

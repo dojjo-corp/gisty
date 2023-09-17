@@ -1,13 +1,13 @@
 import 'dart:developer';
 // import 'dart:js_interop';
 
-import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:gt_daily/authentication/components/buttons.dart';
 import 'package:gt_daily/authentication/repository/authentication_repo.dart';
 import 'package:gt_daily/authentication/repository/firestore_repo.dart';
 
+import '../../global/homepage.dart';
 import '../components/custom_back_button.dart';
 
 class RegisterPage extends StatefulWidget {
@@ -20,19 +20,23 @@ class RegisterPage extends StatefulWidget {
 class _RegisterPageState extends State<RegisterPage> {
   Color _prefixIconColorName = Colors.grey;
   Color _prefixIconColorEmail = Colors.grey;
+  Color _prefixIconColorId = Colors.grey;
   Color _prefixIconColorPassword = Colors.grey;
   final nameController = TextEditingController();
   final userNameController = TextEditingController();
   final emailController = TextEditingController();
+  final idController = TextEditingController();
   final passwordController = TextEditingController();
   bool _obscureText = true;
-  String selectedUserType = 'student';
+  bool _isLoading = false;
+  String selectedUserType = 'Choose User Type';
   final List<String> userTypes = [
-    'student',
-    'university professional',
-    'industry professional'
+    'Choose User Type',
+    'Student',
+    'University professional',
+    'Industry professional'
   ];
-  
+
   // firebase models
   final firestoreRepo = FirestoreRepo();
   final auth = AuthRepository();
@@ -42,6 +46,9 @@ class _RegisterPageState extends State<RegisterPage> {
     // registration function
     Future<void> register() async {
       try {
+        setState(() {
+          _isLoading = true;
+        });
         // authenticate user with firebase auth
         final userCredential = await auth.register(
           email: emailController.text,
@@ -51,26 +58,26 @@ class _RegisterPageState extends State<RegisterPage> {
 
         // make firestore entry
         if (userCredential != null) {
-          switch (selectedUserType) {
+          switch (selectedUserType.toLowerCase()) {
             case 'student':
-              firestoreRepo.createStudentDoc(
-                uid: user!.uid,
+              await firestoreRepo.createStudentDoc(
+                uid: idController.text,
                 fullName: nameController.text,
                 userName: userNameController.text,
                 email: emailController.text,
               );
               break;
             case 'industry professional':
-              firestoreRepo.createIndustryProfessionalDoc(
-                uid: user!.uid,
+              await firestoreRepo.createIndustryProfessionalDoc(
+                uid: idController.text,
                 fullName: nameController.text,
                 userName: userNameController.text,
                 email: emailController.text,
               );
               break;
             case 'university professional':
-              firestoreRepo.createUniversityProfessionalDoc(
-                uid: user!.uid,
+              await firestoreRepo.createUniversityProfessionalDoc(
+                uid: idController.text,
                 fullName: nameController.text,
                 userName: userNameController.text,
                 email: emailController.text,
@@ -79,21 +86,31 @@ class _RegisterPageState extends State<RegisterPage> {
             default:
               log('Invalid user type');
           }
-          user?.updateDisplayName(nameController.text.split(' ')[0]);
-          Navigator.of(context).pushNamed('/enter-phone');
+          await user?.updateDisplayName(nameController.text.split(' ')[0]);
+          Navigator.of(context).pushReplacement(
+            MaterialPageRoute(
+              builder: (context) => MyHomePage(pageIndex: 0),
+            ),
+          );
         }
-      } on FirebaseException catch (e) {
+      } catch (e) {
         ScaffoldMessenger.of(context).showSnackBar(
           SnackBar(
-            content: Text(e.code),
+            content: Text('Error registering user: ${e.toString()}'),
             duration: const Duration(seconds: 5),
           ),
         );
+      } finally {
+        setState(() {
+          _isLoading = false;
+        });
       }
     }
 
     return SafeArea(
       child: Scaffold(
+        floatingActionButton:
+            _isLoading ? const CircularProgressIndicator() : null,
         body: Stack(
           children: [
             Padding(
@@ -177,6 +194,66 @@ class _RegisterPageState extends State<RegisterPage> {
                         ),
                         const SizedBox(height: 15),
                         TextFormField(
+                          controller: idController,
+                          decoration: InputDecoration(
+                              filled: true,
+                              fillColor: Colors.white,
+                              border: OutlineInputBorder(
+                                borderSide: BorderSide.none,
+                                borderRadius: BorderRadius.circular(12),
+                              ),
+                              prefixIcon: const Icon(Icons.web_rounded),
+                              prefixIconColor: _prefixIconColorId,
+                              hintText: 'Enter Your Id Number'),
+                          onChanged: (value) {
+                            if (idController.text.isNotEmpty) {
+                              setState(() {
+                                _prefixIconColorId =
+                                    Theme.of(context).primaryColor;
+                              });
+                            } else {
+                              setState(() {
+                                _prefixIconColorId = Colors.grey;
+                              });
+                            }
+                          },
+                          validator: (value) {
+                            if (value!.isEmpty) {
+                              return 'Field can\'t be empty!';
+                            }
+                            return null;
+                          },
+                        ),
+                        const SizedBox(height: 15),
+                        DropdownButtonFormField(
+                          decoration: InputDecoration(
+                            border: OutlineInputBorder(
+                              borderRadius: BorderRadius.circular(12),
+                              borderSide: BorderSide.none,
+                            ),
+                            fillColor: Colors.white,
+                            filled: true,
+                          ),
+                          value: selectedUserType,
+                          items: userTypes
+                              .map(
+                                (String category) => DropdownMenuItem<String>(
+                                  value: category,
+                                  child: Text(
+                                    category,
+                                    style: TextStyle(color: Colors.grey[700]),
+                                  ),
+                                ),
+                              )
+                              .toList(),
+                          onChanged: (value) {
+                            setState(() {
+                              selectedUserType = value!;
+                            });
+                          },
+                        ),
+                        const SizedBox(height: 15),
+                        TextFormField(
                           controller: passwordController,
                           obscureText: _obscureText,
                           decoration: InputDecoration(
@@ -224,16 +301,6 @@ class _RegisterPageState extends State<RegisterPage> {
                             }
                             return null;
                           },
-                        ),
-                        const SizedBox(height: 15),
-                        Row(
-                          mainAxisAlignment: MainAxisAlignment.end,
-                          children: [
-                            Text(
-                              'Forgot password?',
-                              style: TextStyle(color: Colors.grey[800]),
-                            )
-                          ],
                         ),
                         const SizedBox(height: 20),
                         MyButton(
