@@ -1,22 +1,43 @@
 class ProjectModel {
-  String title, year, studentId, description, category, supervisorId;
+  String title,
+      year,
+      studentName,
+      description,
+      category,
+      supervisorName,
+      projectDocumentFileName;
   ProjectModel({
     required this.title,
     required this.year,
-    required this.studentId,
+    required this.studentName,
     required this.description,
     required this.category,
-    required this.supervisorId,
+    required this.supervisorName,
+    required this.projectDocumentFileName,
   });
 
-  Map<String, dynamic> get projectData => {
-        'title': title,
-        'year': year,
-        'student': studentId,
-        'category': category,
-        'supervisor-id': supervisorId,
-        'description': description,
-        'comments': []
-      };
-}
+  String get pid {
+    final List<String> id = [
+      studentName.splitMapJoin(' '),
+      supervisorName.splitMapJoin(' '),
+      year
+    ];
+    id.sort();
+    return id.join();
+  }
 
+  Map<String, dynamic> toMap() {
+    return {
+      'pid': pid,
+      'title': title,
+      'year': year,
+      'student-name': studentName,
+      'category': category,
+      'supervisor-name': supervisorName,
+      'description': description,
+      'project-document': projectDocumentFileName,
+      'comments': [],
+      'saved':[]
+    };
+  }
+}

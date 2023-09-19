@@ -1,6 +1,8 @@
+import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
+import 'package:gt_daily/authentication/models/project_model.dart';
 
 import '../components/project_grid_item.dart';
 
@@ -26,6 +28,10 @@ class _DashboardState extends State<Dashboard>
     _tabController.dispose();
     super.dispose();
   }
+
+  Widget noProjectToDisplay() => const Center(
+        child: Text('No Project To Display!'),
+      );
 
   @override
   Widget build(BuildContext context) {
@@ -57,88 +63,95 @@ class _DashboardState extends State<Dashboard>
               ],
             ),
             Flexible(
-              child: TabBarView(
-                controller: _tabController,
-                children: [
-                  ListView(
-                    children: const [
-                      ProjectGridItem(
-                        category: 'web',
-                        title: 'FINAL PROJECT',
-                        year: '2023',
-                        student: 'Martinson Tetteh',
-                        description:
-                            'Mollit excepteur incididunt id tempor laborum dolore id.',
-                      ),
-                      SizedBox(height: 15),
-                      ProjectGridItem(
-                        category: 'web',
-                        title: 'FINAL PROJECT',
-                        year: '2023',
-                        student: 'Martinson Tetteh',
-                        description: 'Et sit esse eu adipisicing est.',
-                      ),
-                      SizedBox(height: 15),
-                      ProjectGridItem(
-                        category: 'web',
-                        title: 'FINAL PROJECT',
-                        year: '2023',
-                        student: 'Martinson Tetteh',
-                        description:
-                            'Anim dolor consectetur consectetur culpa culpa Lorem exercitation.',
-                      ),
-                      SizedBox(height: 15),
-                    ],
-                  ),
-                  // MOBILE CATEGORY OF PROJECTS
-                  ListView(
-                    children: const [
-                      ProjectGridItem(
-                        category: 'mobile',
-                        title: 'FINAL PROJECT',
-                        year: '2023',
-                        student: 'Martinson Tetteh',
-                        description:
-                            'Ipsum pariatur fugiat occaecat cupidatat mollit esse et laboris consequat.',
-                      ),
-                      SizedBox(height: 15),
-                      ProjectGridItem(
-                        category: 'mobile',
-                        title: 'FINAL PROJECT',
-                        year: '2023',
-                        student: 'Martinson Tetteh',
-                        description:
-                            'Exercitation nulla fugiat velit enim nisi ut aute dolore non reprehenderit in aliquip aliquip.',
-                      ),
-                      SizedBox(height: 15),
-                    ],
-                  ),
-                  ListView(
-                    children: const [
-                      ProjectGridItem(
-                        category: 'data',
-                        title: 'FINAL PROJECT',
-                        year: '2023',
-                        student: 'Martinson Tetteh',
-                        description:
-                            'Tempor laborum aute culpa excepteur officia anim.',
-                      ),
-                    ],
-                  ),
-                  ListView(
-                    children: const [
-                      ProjectGridItem(
-                        category: 'hardware',
-                        title: 'FINAL PROJECT',
-                        year: '2023',
-                        student: 'Martinson Tetteh',
-                        description:
-                            'Tempor laborum aute culpa excepteur officia anim.',
-                      ),
-                    ],
-                  ),
-                ],
-              ),
+              child: StreamBuilder(
+                  stream: FirebaseFirestore.instance
+                      .collection('All Projects')
+                      .snapshots(),
+                  builder: (context, snapshot) {
+                    if (!snapshot.hasData) {
+                      return const Center(
+                        child: Text('No Projects Yet'),
+                      );
+                    }
+
+                    // on error
+                    if (snapshot.hasError) {
+                      return Center(
+                        child:
+                            Text('Error loading Projects: ${snapshot.error}'),
+                      );
+                    }
+
+                    final docs = snapshot.data!.docs;
+                    List<Map<String, dynamic>> webProjects = [];
+                    List<Map<String, dynamic>> mobileProjects = [];
+                    List<Map<String, dynamic>> dataProjects = [];
+                    List<Map<String, dynamic>> hardwareProjects = [];
+                    for (var doc in docs) {
+                      final category = doc.data()['category'].toLowerCase();
+                      final data = doc.data();
+                      if (category == 'web') {
+                        webProjects.add(data);
+                      } else if (category == 'mobile') {
+                        mobileProjects.add(data);
+                      } else if (category == 'data') {
+                        dataProjects.add(data);
+                      } else if (category == 'hardware') {
+                        hardwareProjects.add(data);
+                      }
+                    }
+                    
+
+                    return TabBarView(
+                      controller: _tabController,
+                      children: [
+                        // WEB CATEGORY OF PROJECTS
+                        webProjects.isNotEmpty
+                            ? ListView.separated(
+                                itemBuilder: (context, index) {
+                                  return ProjectGridItem(
+                                      projectData: webProjects[index]);
+                                },
+                                separatorBuilder: (context, index) =>
+                                    const SizedBox(height: 10),
+                                itemCount: webProjects.length)
+                            : noProjectToDisplay(),
+                        // MOBILE CATEGORY OF PROJECTS
+                        mobileProjects.isNotEmpty
+                            ? ListView.separated(
+                                itemBuilder: (context, index) {
+                                  return ProjectGridItem(
+                                      projectData: mobileProjects[index]);
+                                },
+                                separatorBuilder: (context, index) =>
+                                    const SizedBox(height: 10),
+                                itemCount: webProjects.length)
+                            : noProjectToDisplay(),
+                        // DATA CATEGORY OF PROJECTS
+                        dataProjects.isNotEmpty
+                            ? ListView.separated(
+                                itemBuilder: (context, index) {
+                                  return ProjectGridItem(
+                                      projectData: dataProjects[index]);
+                                },
+                                separatorBuilder: (context, index) =>
+                                    const SizedBox(height: 10),
+                                itemCount: webProjects.length)
+                            : noProjectToDisplay(),
+                        // HARDWARE CATEGORY OF PROJECTS
+                        hardwareProjects.isNotEmpty
+                            ? ListView.separated(
+                                itemBuilder: (context, index) {
+                                  return ProjectGridItem(
+                                      projectData: hardwareProjects[index]);
+                                },
+                                separatorBuilder: (context, index) =>
+                                    const SizedBox(height: 10),
+                                itemCount: webProjects.length)
+                            : noProjectToDisplay(),
+                      ],
+                    );
+                  }),
             ),
           ],
         ),

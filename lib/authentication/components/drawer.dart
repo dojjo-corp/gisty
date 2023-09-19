@@ -18,12 +18,13 @@ class MyDrawer extends StatelessWidget {
           Column(
             children: [
               UserAccountsDrawerHeader(
+                currentAccountPicture: Image.asset('assets/GCTU-Logo-600x600.png'),
                 accountName: Text(
                   currentUser.displayName ?? 'user name',
                   style: GoogleFonts.poppins(
                     fontWeight: FontWeight.w600,
                   ),
-                ),
+                ),currentAccountPictureSize: const Size(90, 90),
                 accountEmail: Text(
                   currentUser.email ?? 'user email',
                   style: GoogleFonts.poppins(),

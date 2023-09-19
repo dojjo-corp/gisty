@@ -102,7 +102,7 @@ class FirestoreRepo {
     try {
       await store
           .collection('All Projects')
-          .doc()
+          .doc(projectData['pid'])
           .set(projectData, SetOptions(merge: true));
     } catch (e) {
       rethrow;

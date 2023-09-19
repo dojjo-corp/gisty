@@ -4,6 +4,7 @@ import 'package:google_fonts/google_fonts.dart';
 
 import '../components/buttons.dart';
 import '../components/event_tile.dart';
+import '../components/loading_list_tiles.dart';
 
 class EventsPage extends StatefulWidget {
   const EventsPage({super.key});
@@ -35,19 +36,44 @@ class _EventsPageState extends State<EventsPage> {
   Widget build(BuildContext context) {
     return Stack(
       children: [
-        ListView.separated(
-          itemCount: 4,
-          itemBuilder: (context, index) {
-            return const EventTile(
-              title: 'Event Title',
-              organisation: 'Organisation',
-              location: 'Location',
-            );
-          },
-          separatorBuilder: (context, index) {
-            return const SizedBox(height: 10);
-          },
-        ),
+        StreamBuilder(
+            stream: FirebaseFirestore.instance.collection('Events').snapshots(),
+            builder: (context, snapshot) {
+              if (!snapshot.hasData) {
+                return const Center(
+                  child: Text('No Job Events Yet'),
+                );
+              }
+
+              if (snapshot.hasError) {
+                return Center(
+                  child: Text('Error Loading Data: ${snapshot.error}'),
+                );
+              }
+              if (snapshot.connectionState == ConnectionState.waiting) {
+                return const LoadingListTiles();
+              }
+
+              final docs = snapshot.data!.docs;
+              List<Map<String, dynamic>> eventList = [];
+              for (var doc in docs) {
+                eventList.add(doc.data());
+              }
+
+              return ListView.separated(
+                itemCount: 4,
+                itemBuilder: (context, index) {
+                  return const EventTile(
+                    title: 'Event Title',
+                    organisation: 'Organisation',
+                    location: 'Location',
+                  );
+                },
+                separatorBuilder: (context, index) {
+                  return const SizedBox(height: 10);
+                },
+              );
+            }),
         Positioned(
           bottom: 20,
           right: 20,
@@ -58,14 +84,14 @@ class _EventsPageState extends State<EventsPage> {
                 isScrollControlled: true,
                 useSafeArea: true,
                 shape: RoundedRectangleBorder(
-                    borderRadius: BorderRadius.circular(5)),
+                  borderRadius: BorderRadius.circular(5),
+                ),
                 context: context,
                 builder: (context) {
                   return Padding(
                     padding: const EdgeInsets.all(5.0),
                     child: Center(
-                      child: 
-                      ListView(
+                      child: ListView(
                         children: [
                           Text(
                             'Add New Job Opportunity',
@@ -257,20 +283,25 @@ class _EventsPageState extends State<EventsPage> {
                                 'details': descriptionController.text.trim(),
                               };
 
-                              print('Event added: $jobDetails');
                               Navigator.pop(context);
                               // store job event in firestore
-                              // await FirebaseFirestore.instance
-                              //     .collection('Events')
-                              //     .doc()
-                              //     .set(jobDetails);
+                              try {
+                                await FirebaseFirestore.instance
+                                    .collection('Events')
+                                    .doc()
+                                    .set(jobDetails);
+                              } catch (e) {
+                                ScaffoldMessenger.of(context)
+                                    .showSnackBar(SnackBar(
+                                  content: Text('Error Adding Event: ${e.toString()}'),
+                                ));
+                              }
                             },
                             btnText: 'Add Event',
                             isPrimary: true,
                           )
                         ],
                       ),
-                    
                     ),
                   );
                 },

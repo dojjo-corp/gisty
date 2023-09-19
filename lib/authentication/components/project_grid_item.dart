@@ -1,24 +1,18 @@
+import 'package:cloud_firestore/cloud_firestore.dart';
+import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
+import 'package:gt_daily/authentication/pages/project_details.dart';
 
 class ProjectGridItem extends StatefulWidget {
-  final String title, year, student, description, category;
-  const ProjectGridItem({
-    super.key,
-    required this.title,
-    required this.year,
-    required this.student,
-    required this.description,
-    required this.category,
-  });
+  final Map<String, dynamic> projectData;
+  const ProjectGridItem({super.key, required this.projectData});
 
   @override
   State<ProjectGridItem> createState() => _ProjectGridItemState();
 }
 
 class _ProjectGridItemState extends State<ProjectGridItem> {
-  bool _isLiked = false;
-
   Color setProjectColor(String category) {
     switch (category.toLowerCase()) {
       case 'web':
@@ -27,7 +21,7 @@ class _ProjectGridItemState extends State<ProjectGridItem> {
         return const Color.fromARGB(255, 234, 206, 64);
       case 'data':
         return const Color.fromARGB(255, 188, 137, 197);
-        case 'hardware':
+      case 'hardware':
         return const Color.fromARGB(255, 6, 134, 4);
       default:
         return Colors.blue;
@@ -36,7 +30,17 @@ class _ProjectGridItemState extends State<ProjectGridItem> {
 
   @override
   Widget build(BuildContext context) {
-    final projectColor = setProjectColor(widget.category);
+    final String pid = widget.projectData['pid'];
+    final String title = widget.projectData['title'];
+    final String year = widget.projectData['year'];
+    final String student = widget.projectData['student-name'];
+    final String description = widget.projectData['description'];
+    final String category = widget.projectData['category'];
+    final projectColor = setProjectColor(category); 
+
+    String userEmail = FirebaseAuth.instance.currentUser!.email!;
+    bool isLiked = widget.projectData['saved']
+        .contains(userEmail);
     final likedIcon = Icon(
       Icons.bookmark_added,
       color: projectColor,
@@ -74,26 +78,28 @@ class _ProjectGridItemState extends State<ProjectGridItem> {
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
                     Text(
-                      widget.title,
+                      title,
                       style: GoogleFonts.montserrat(
-                          fontWeight: FontWeight.bold, fontSize: 25, color: projectColor),
+                          fontWeight: FontWeight.bold,
+                          fontSize: 25,
+                          color: projectColor),
                     ),
                     Row(
                       children: [
                         Text(
-                          widget.student,
+                          student,
                           style: GoogleFonts.montserrat(
                             color: Colors.grey[700],
                           ),
                         ),
                         const SizedBox(width: 10),
-                        Text(widget.year,
+                        Text(year,
                             style:
                                 GoogleFonts.montserrat(color: Colors.grey[700]))
                       ],
                     ),
                     Text(
-                      widget.description,
+                      description,
                       style: const TextStyle(
                         overflow: TextOverflow.ellipsis,
                       ),
@@ -107,7 +113,12 @@ class _ProjectGridItemState extends State<ProjectGridItem> {
                   children: [
                     ElevatedButton(
                       onPressed: () {
-                        print('Read more on project');
+                        Navigator.of(context).push(
+                          MaterialPageRoute(
+                            builder: (context) =>
+                                ProjectDetails(projectData: widget.projectData),
+                          ),
+                        );
                       },
                       style: ElevatedButton.styleFrom(
                         backgroundColor: projectColor,
@@ -122,10 +133,16 @@ class _ProjectGridItemState extends State<ProjectGridItem> {
                     IconButton(
                       onPressed: () async {
                         setState(() {
-                          _isLiked = !_isLiked;
+                          isLiked = !isLiked;
                         });
+                        isLiked?
+                        await FirebaseFirestore.instance.collection('All Projects').doc(pid).update({
+                          'saved': FieldValue.arrayUnion([userEmail])
+                        }):await FirebaseFirestore.instance.collection('All Projects').doc(pid).update({
+                          'saved': FieldValue.arrayRemove([userEmail])
+                        }) ;
                       },
-                      icon: _isLiked ? likedIcon : notLikedIcon,
+                      icon: isLiked ? likedIcon : notLikedIcon,
                     )
                   ],
                 )

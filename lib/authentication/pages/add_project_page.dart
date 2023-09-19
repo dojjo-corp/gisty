@@ -1,8 +1,16 @@
+import 'dart:io';
+
+import 'package:firebase_storage/firebase_storage.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 import 'package:google_fonts/google_fonts.dart';
+import 'package:gt_daily/authentication/repository/firestore_repo.dart';
+import 'package:file_picker/file_picker.dart';
+import 'package:path/path.dart';
 
 import '../components/buttons.dart';
 import '../components/custom_back_button.dart';
+import '../models/project_model.dart';
 
 class NewProjectPage extends StatefulWidget {
   const NewProjectPage({super.key});
@@ -17,11 +25,131 @@ class _NewProjectPageState extends State<NewProjectPage> {
   final studentController = TextEditingController();
   final supervisorController = TextEditingController();
   final descriptionController = TextEditingController();
-  String selectedCategory = 'Web';
-  final List<String> categories = ['Web', 'Mobile', 'Data', 'Hardware'];
+  final projectDocumentFileNameController = TextEditingController();
+  String selectedCategory = 'Project Category';
+  final List<String> categories = [
+    'Project Category',
+    'Web',
+    'Mobile',
+    'Data',
+    'Hardware'
+  ];
+
+  // to be ued in file upload method
+  String absolutePathToDocument = '';
 
   @override
   Widget build(BuildContext context) {
+    Future<void> uploadPDF(File file) async {
+      try {
+        String fileName = basename(file.path);
+        Reference storageReference =
+            FirebaseStorage.instance.ref().child('Project Documents/$fileName');
+        await storageReference.putFile(file);
+        // ignore: use_build_context_synchronously
+        ScaffoldMessenger.of(context).showSnackBar(
+          const SnackBar(
+            content: Text('PDF Uploaded Successfully!'),
+          ),
+        );
+      } catch (e) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(
+            content: Text('Error Uploading PDf: ${e.toString()}'),
+          ),
+        );
+      }
+    }
+
+    void addProjectToDatabase() async {
+      if (selectedCategory == 'Project Category') {
+        return showDialog<void>(
+          context: context,
+          barrierDismissible: false, // user must tap button!
+          builder: (BuildContext context) {
+            return AlertDialog(
+              title: const Text('Caution'),
+              content: Text('Choose A Valid Project Category!'),
+              actions: <Widget>[
+                TextButton(
+                  child: const Text('Okay'),
+                  onPressed: () {
+                    Navigator.of(context).pop();
+                  },
+                ),
+              ],
+            );
+          },
+        );
+      }
+      if (projectDocumentFileNameController.text.isEmpty){
+        return showDialog<void>(
+          context: context,
+          barrierDismissible: false, // user must tap button!
+          builder: (BuildContext context) {
+            return AlertDialog(
+              title: const Text('Caution'),
+              content: Text('Choose A Project Document!'),
+              actions: <Widget>[
+                TextButton(
+                  child: const Text('Okay'),
+                  onPressed: () {
+                    Navigator.of(context).pop();
+                  },
+                ),
+              ],
+            );
+          },
+        );
+      }
+      final projectObj = ProjectModel(
+        title: projectTitleController.text.trim(),
+        year: yearController.text.trim(),
+        studentName: studentController.text.trim(),
+        description: descriptionController.text.trim(),
+        category: selectedCategory,
+        supervisorName: supervisorController.text.trim(),
+        projectDocumentFileName: projectDocumentFileNameController.text,
+      );
+
+      // store job event in firestore
+      try {
+        await uploadPDF(File(absolutePathToDocument));
+        await FirestoreRepo()
+            .addProjectToDatabase(projectData: projectObj.toMap());
+        // ignore: use_build_context_synchronously
+        ScaffoldMessenger.of(context).showSnackBar(
+          const SnackBar(
+            content: Text('Project Added Successfully!'),
+          ),
+        );
+        // ignore: use_build_context_synchronously
+        Navigator.pop(context);
+      } catch (e) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(
+            content: Text('Error Adding Project: ${e.toString()}'),
+          ),
+        );
+      }
+    }
+
+    Future<void> choosePDFFile() async {
+      FilePickerResult? result = await FilePicker.platform.pickFiles(
+        type: FileType.custom,
+        allowedExtensions: ['pdf'],
+      );
+      if (result != null) {
+        final path = result.files.single.path!;
+        setState(() {
+          absolutePathToDocument = path;
+          projectDocumentFileNameController.text = basename(path);
+        });
+      } else {
+        // User canceled the file picker
+      }
+    }
+
     return SafeArea(
       child: Scaffold(
         body: Stack(
@@ -86,25 +214,66 @@ class _NewProjectPageState extends State<NewProjectPage> {
                       ),
                       const SizedBox(height: 10),
                       // COMPANY NAME TEXT FIELD
-                      TextFormField(
-                        controller: yearController,
-                        decoration: InputDecoration(
-                          filled: true,
-                          fillColor: Colors.white,
-                          border: OutlineInputBorder(
-                            borderSide: BorderSide.none,
-                            borderRadius: BorderRadius.circular(12),
+                      Row(
+                        children: [
+                          Expanded(
+                            child: TextFormField(
+                              controller: yearController,
+                              keyboardType: TextInputType.datetime,
+                              decoration: InputDecoration(
+                                filled: true,
+                                fillColor: Colors.white,
+                                border: OutlineInputBorder(
+                                  borderSide: BorderSide.none,
+                                  borderRadius: BorderRadius.circular(12),
+                                ),
+                                prefixIcon:
+                                    const Icon(Icons.calendar_month_rounded),
+                                hintText: 'Year',
+                                labelText: 'Year',
+                              ),
+                              inputFormatters: [
+                                FilteringTextInputFormatter.allow(
+                                  RegExp(r'[0-9]'),
+                                ), // Allow only numbers
+                                LengthLimitingTextInputFormatter(4)
+                              ],
+                              validator: (value) {
+                                if (value!.isEmpty) {
+                                  return 'Field can\'t be empty!';
+                                }
+                                return null;
+                              },
+                            ),
                           ),
-                          prefixIcon: const Icon(Icons.calendar_month_rounded),
-                          hintText: 'Year',
-                          labelText: 'Year',
-                        ),
-                        validator: (value) {
-                          if (value!.isEmpty) {
-                            return 'Field can\'t be empty!';
-                          }
-                          return null;
-                        },
+                          const SizedBox(width: 10),
+                          Expanded(
+                            child: DropdownButtonFormField(
+                              decoration: InputDecoration(
+                                filled: true,
+                                fillColor: Colors.white,
+                                border: OutlineInputBorder(
+                                    borderSide: BorderSide.none,
+                                    borderRadius: BorderRadius.circular(12)),
+                              ),
+                              value: selectedCategory,
+                              items: categories
+                                  .map(
+                                    (String category) =>
+                                        DropdownMenuItem<String>(
+                                      value: category,
+                                      child: Text(category),
+                                    ),
+                                  )
+                                  .toList(),
+                              onChanged: (value) {
+                                setState(() {
+                                  selectedCategory = value!;
+                                });
+                              },
+                            ),
+                          )
+                        ],
                       ),
 
                       const SizedBox(height: 10),
@@ -131,47 +300,59 @@ class _NewProjectPageState extends State<NewProjectPage> {
                         },
                       ),
                       const SizedBox(height: 10),
-                      const Text('Project Category'),
-                      DropdownButtonFormField(
+                      TextFormField(
+                        controller: descriptionController,
                         decoration: InputDecoration(
                           filled: true,
                           fillColor: Colors.white,
                           border: OutlineInputBorder(
-                              borderSide: BorderSide.none,
-                              borderRadius: BorderRadius.circular(12)),
+                            borderSide: BorderSide.none,
+                            borderRadius: BorderRadius.circular(12),
+                          ),
+                          prefixIcon: const Icon(Icons.edit_note_rounded),
+                          hintText: 'Short Description',
+                          labelText: 'Short Description',
                         ),
-                        value: selectedCategory,
-                        items: categories
-                            .map(
-                              (String category) => DropdownMenuItem<String>(
-                                value: category,
-                                child: Text(category),
-                              ),
-                            )
-                            .toList(),
-                        onChanged: (value) {
-                          setState(() {
-                            selectedCategory = value!;
-                          });
+                        maxLines: 3,
+                        minLines: 1,
+                        validator: (value) {
+                          if (value!.isEmpty) {
+                            return 'Field can\'t be empty!';
+                          }
+                          return null;
+                        },
+                      ),
+                      const SizedBox(height: 10),
+                      TextFormField(
+                        controller: projectDocumentFileNameController,
+                        decoration: InputDecoration(
+                          filled: true,
+                          fillColor: Colors.white,
+                          border: OutlineInputBorder(
+                            borderSide: BorderSide.none,
+                            borderRadius: BorderRadius.circular(12),
+                          ),
+                          prefixIcon: const Icon(Icons.file_present_rounded),
+                          hintText: 'Project Document File Name',
+                          enabled: false,
+                        ),
+                        validator: (value) {
+                          if (value!.isEmpty) {
+                            return 'Field can\'t be empty!';
+                          }
+                          return null;
                         },
                       ),
 
                       const SizedBox(height: 10),
                       MyButton(
-                        onPressed: () async {},
-                        btnText: 'Upload Project Document',
+                        onPressed: choosePDFFile,
+                        btnText: 'Choose Project Document',
                         isPrimary: false,
                       ),
                       const SizedBox(height: 20),
                       MyButton(
-                        onPressed: () async {
-                          Navigator.pop(context);
-                          // store job event in firestore
-                          // await FirebaseFirestore.instance
-                          //     .collection('Events')
-                          //     .doc()
-                          //     .set(jobDetails);
-                        },
+                        onPressed: addProjectToDatabase,
                         btnText: 'Add Project',
                         isPrimary: true,
                       )
