@@ -113,7 +113,7 @@ class FirestoreRepo {
   Future<void> addJobsOrIntershipEvents(
       Map<String, dynamic> eventDetails) async {
     try {
-      await store.collection('events').doc().set(eventDetails);
+      await store.collection('All Events').doc(eventDetails['id']).set(eventDetails);
     } catch (e) {
       rethrow;
     }

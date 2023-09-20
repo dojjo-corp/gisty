@@ -3,12 +3,16 @@ import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:google_nav_bar/google_nav_bar.dart';
+import 'package:gt_daily/authentication/pages/notifications_page.dart';
+import 'package:gt_daily/authentication/pages/supervised_projects.dart';
+import 'package:provider/provider.dart';
 
 import '../authentication/components/drawer.dart';
 import '../authentication/pages/account_page.dart';
 import '../authentication/pages/dsahboard.dart';
 import '../authentication/pages/events_page.dart';
 import '../authentication/pages/search_page.dart';
+import '../authentication/providers/user_provider.dart';
 
 // ignore: must_be_immutable
 class MyHomePage extends StatefulWidget {
@@ -21,6 +25,24 @@ class MyHomePage extends StatefulWidget {
 }
 
 class _MyHomePageState extends State<MyHomePage> {
+  bool _dataLoaded = false;
+
+  @override
+  void initState() {
+    super.initState();
+    // Fetch user data when the app is launched
+    _fetchUserData().then((_) {
+      setState(() {
+        _dataLoaded = true;
+      });
+    });
+  }
+
+  Future<void> _fetchUserData() async {
+    final userProvider = Provider.of<UserProvider>(context, listen: false);
+    await userProvider.setAllUsers();
+  }
+
   final List<Widget> _pages = [
     const Dashboard(),
     const SearchPage(),
@@ -36,6 +58,16 @@ class _MyHomePageState extends State<MyHomePage> {
 
   @override
   Widget build(BuildContext context) {
+    if (!_dataLoaded) {
+      return Container(
+        height: MediaQuery.of(context).size.height,
+        width: MediaQuery.of(context).size.width,
+        color: Colors.white70,
+        child: const Center(
+          child: CircularProgressIndicator(),
+        ),
+      );
+    }
     void changePageIndex(int index) => setState(
           () {
             widget.pageIndex = index;
@@ -51,6 +83,37 @@ class _MyHomePageState extends State<MyHomePage> {
           ),
           centerTitle: true,
           backgroundColor: Colors.transparent,
+          actions: [
+            Provider.of<UserProvider>(context).userType.toLowerCase() ==
+                    'university professional'
+                ? IconButton(
+                    onPressed: () {
+                      Navigator.push(
+                          context,
+                          MaterialPageRoute(
+                            builder: (context) => const SupervisedProjects(),
+                          ));
+                    },
+                    icon: Icon(
+                      Icons.school_rounded,
+                      color: Theme.of(context).primaryColor,
+                    ),
+                  )
+                : const Text(''),
+            IconButton(
+              onPressed: () {
+                Navigator.push(
+                    context,
+                    MaterialPageRoute(
+                      builder: (context) => const NotificationsPage(),
+                    ));
+              },
+              icon: Icon(
+                Icons.notifications_active,
+                color: Theme.of(context).primaryColor,
+              ),
+            )
+          ],
         ),
         drawer: const MyDrawer(),
         bottomNavigationBar: Container(

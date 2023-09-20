@@ -2,7 +2,9 @@ import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:gt_daily/authentication/pages/login.dart';
+import 'package:gt_daily/authentication/providers/user_provider.dart';
 import 'package:gt_daily/global/homepage.dart';
+import 'package:provider/provider.dart';
 
 class MyDrawer extends StatelessWidget {
   const MyDrawer({super.key});
@@ -10,6 +12,8 @@ class MyDrawer extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final currentUser = FirebaseAuth.instance.currentUser!;
+    final userType = context.watch<UserProvider>().userType;
+
     return Drawer(
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
@@ -18,13 +22,15 @@ class MyDrawer extends StatelessWidget {
           Column(
             children: [
               UserAccountsDrawerHeader(
-                currentAccountPicture: Image.asset('assets/GCTU-Logo-600x600.png'),
+                currentAccountPicture:
+                    Image.asset('assets/GCTU-Logo-600x600.png'),
                 accountName: Text(
                   currentUser.displayName ?? 'user name',
                   style: GoogleFonts.poppins(
                     fontWeight: FontWeight.w600,
                   ),
-                ),currentAccountPictureSize: const Size(90, 90),
+                ),
+                currentAccountPictureSize: const Size(90, 90),
                 accountEmail: Text(
                   currentUser.email ?? 'user email',
                   style: GoogleFonts.poppins(),
@@ -33,23 +39,25 @@ class MyDrawer extends StatelessWidget {
                   color: Theme.of(context).primaryColor,
                 ),
               ),
-              GestureDetector(
-                onTap: () {
-                  // Navigate to project archive
-                  Navigator.popAndPushNamed(context, '/add-project');
-                },
-                child: ListTile(
-                  leading: Icon(
-                    Icons.add,
-                    color: Theme.of(context).primaryColor,
-                  ),
-                  title: Text(
-                    'Add Project',
-                    style: GoogleFonts.poppins(
-                        color: Theme.of(context).primaryColor),
-                  ),
-                ),
-              ),
+              userType != 'student'
+                  ? GestureDetector(
+                      onTap: () {
+                        // Navigate to project archive
+                        Navigator.popAndPushNamed(context, '/add-project');
+                      },
+                      child: ListTile(
+                        leading: Icon(
+                          Icons.add,
+                          color: Theme.of(context).primaryColor,
+                        ),
+                        title: Text(
+                          'Add Project',
+                          style: GoogleFonts.poppins(
+                              color: Theme.of(context).primaryColor),
+                        ),
+                      ),
+                    )
+                  : const Text(''),
               GestureDetector(
                 onTap: () {
                   // Navigate to project archive
@@ -95,6 +103,7 @@ class MyDrawer extends StatelessWidget {
               GestureDetector(
                 onTap: () {
                   // Navigate to About us
+                  Navigator.pushNamed(context, '/about-us');
                 },
                 child: ListTile(
                   leading: Icon(
@@ -111,6 +120,7 @@ class MyDrawer extends StatelessWidget {
               GestureDetector(
                 onTap: () {
                   // Navigate to Contact page
+                  Navigator.pushNamed(context, '/contact-us');
                 },
                 child: ListTile(
                   leading: Icon(

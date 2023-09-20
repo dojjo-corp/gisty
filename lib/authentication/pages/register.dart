@@ -1,6 +1,9 @@
 import 'dart:developer';
 // import 'dart:js_interop';
 
+import 'package:cloud_firestore/cloud_firestore.dart';
+import 'package:firebase_auth/firebase_auth.dart';
+import 'package:firebase_messaging/firebase_messaging.dart';
 import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:gt_daily/authentication/components/buttons.dart';
@@ -58,10 +61,12 @@ class _RegisterPageState extends State<RegisterPage> {
 
         // make firestore entry
         if (userCredential != null) {
+          final userId = FirebaseAuth.instance.currentUser!.uid;
+          final fcmToken = await FirebaseMessaging.instance.getToken();
           switch (selectedUserType.toLowerCase()) {
             case 'student':
               await firestoreRepo.createStudentDoc(
-                uid: idController.text,
+                uid: userId,
                 fullName: nameController.text,
                 userName: userNameController.text,
                 email: emailController.text,
@@ -69,7 +74,7 @@ class _RegisterPageState extends State<RegisterPage> {
               break;
             case 'industry professional':
               await firestoreRepo.createIndustryProfessionalDoc(
-                uid: idController.text,
+                uid: userId,
                 fullName: nameController.text,
                 userName: userNameController.text,
                 email: emailController.text,
@@ -77,7 +82,7 @@ class _RegisterPageState extends State<RegisterPage> {
               break;
             case 'university professional':
               await firestoreRepo.createUniversityProfessionalDoc(
-                uid: idController.text,
+                uid: userId,
                 fullName: nameController.text,
                 userName: userNameController.text,
                 email: emailController.text,
@@ -86,7 +91,12 @@ class _RegisterPageState extends State<RegisterPage> {
             default:
               log('Invalid user type');
           }
+          await FirebaseFirestore.instance
+              .collection('users')
+              .doc(userCredential.user!.uid)
+              .update({'fcm-token': fcmToken});
           await user?.updateDisplayName(nameController.text.split(' ')[0]);
+          // ignore: use_build_context_synchronously
           Navigator.of(context).pushReplacement(
             MaterialPageRoute(
               builder: (context) => MyHomePage(pageIndex: 0),

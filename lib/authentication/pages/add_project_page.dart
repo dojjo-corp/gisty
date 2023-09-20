@@ -20,10 +20,12 @@ class NewProjectPage extends StatefulWidget {
 }
 
 class _NewProjectPageState extends State<NewProjectPage> {
+  bool _isLoading = false;
   final projectTitleController = TextEditingController();
   final yearController = TextEditingController();
   final studentController = TextEditingController();
   final supervisorController = TextEditingController();
+  final supervisorEmailController = TextEditingController();
   final descriptionController = TextEditingController();
   final projectDocumentFileNameController = TextEditingController();
   String selectedCategory = 'Project Category';
@@ -82,7 +84,7 @@ class _NewProjectPageState extends State<NewProjectPage> {
           },
         );
       }
-      if (projectDocumentFileNameController.text.isEmpty){
+      if (projectDocumentFileNameController.text.isEmpty) {
         return showDialog<void>(
           context: context,
           barrierDismissible: false, // user must tap button!
@@ -109,11 +111,15 @@ class _NewProjectPageState extends State<NewProjectPage> {
         description: descriptionController.text.trim(),
         category: selectedCategory,
         supervisorName: supervisorController.text.trim(),
+        supervisorEmail: supervisorEmailController.text,
         projectDocumentFileName: projectDocumentFileNameController.text,
       );
 
       // store job event in firestore
       try {
+        setState(() {
+          _isLoading = true;
+        });
         await uploadPDF(File(absolutePathToDocument));
         await FirestoreRepo()
             .addProjectToDatabase(projectData: projectObj.toMap());
@@ -131,6 +137,10 @@ class _NewProjectPageState extends State<NewProjectPage> {
             content: Text('Error Adding Project: ${e.toString()}'),
           ),
         );
+      } finally {
+        setState(() {
+          _isLoading = false;
+        });
       }
     }
 
@@ -155,8 +165,8 @@ class _NewProjectPageState extends State<NewProjectPage> {
         body: Stack(
           children: [
             Padding(
-              padding:
-                  const EdgeInsets.symmetric(horizontal: 15.0, vertical: 10),
+              padding: const EdgeInsets.only(
+                  right: 15.0, left: 15, top: 80, bottom: 10),
               child: SingleChildScrollView(
                 child: SizedBox(
                   height: MediaQuery.of(context).size.height,
@@ -300,6 +310,28 @@ class _NewProjectPageState extends State<NewProjectPage> {
                         },
                       ),
                       const SizedBox(height: 10),
+                      // LOCATION TEXT FIELD
+                      TextFormField(
+                        controller: supervisorEmailController,
+                        decoration: InputDecoration(
+                          filled: true,
+                          fillColor: Colors.white,
+                          border: OutlineInputBorder(
+                            borderSide: BorderSide.none,
+                            borderRadius: BorderRadius.circular(12),
+                          ),
+                          prefixIcon: const Icon(Icons.mail),
+                          hintText: 'Supervisor Email',
+                          labelText: 'Supervisor Email',
+                        ),
+                        validator: (value) {
+                          if (value!.isEmpty) {
+                            return 'Field can\'t be empty!';
+                          }
+                          return null;
+                        },
+                      ),
+                      const SizedBox(height: 10),
                       TextFormField(
                         controller: descriptionController,
                         decoration: InputDecoration(
@@ -364,6 +396,8 @@ class _NewProjectPageState extends State<NewProjectPage> {
             const Positioned(top: 20, left: 20, child: MyBackButton())
           ],
         ),
+        floatingActionButton:
+            _isLoading ? const LinearProgressIndicator() : null,
       ),
     );
   }

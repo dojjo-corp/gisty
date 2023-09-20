@@ -5,6 +5,7 @@ class ProjectModel {
       description,
       category,
       supervisorName,
+      supervisorEmail,
       projectDocumentFileName;
   ProjectModel({
     required this.title,
@@ -13,6 +14,7 @@ class ProjectModel {
     required this.description,
     required this.category,
     required this.supervisorName,
+    required this.supervisorEmail,
     required this.projectDocumentFileName,
   });
 
@@ -34,10 +36,11 @@ class ProjectModel {
       'student-name': studentName,
       'category': category,
       'supervisor-name': supervisorName,
+      'supervisor-email': supervisorEmail,
       'description': description,
       'project-document': projectDocumentFileName,
       'comments': [],
-      'saved':[]
+      'saved': []
     };
   }
 }

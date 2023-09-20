@@ -10,23 +10,16 @@ class LoadingListTiles extends StatelessWidget {
     return const Column(
       children: [
         EventTile(
-          title: '',
-          organisation: '',
-          location: '',
+          eventDetails: {},
         ),
         SizedBox(height: 10),
         EventTile(
-          title: '',
-          organisation: '',
-          location: '',
+          eventDetails: {},
         ),
         SizedBox(height: 10),
         EventTile(
-          title: '',
-          organisation: '',
-          location: '',
+          eventDetails: {},
         ),
-        SizedBox(height: 10),
       ],
     );
   }

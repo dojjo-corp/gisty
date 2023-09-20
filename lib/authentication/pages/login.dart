@@ -1,5 +1,7 @@
 // ignore_for_file: use_build_context_synchronously
 
+import 'package:cloud_firestore/cloud_firestore.dart';
+import 'package:firebase_messaging/firebase_messaging.dart';
 import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:gt_daily/authentication/components/buttons.dart';
@@ -38,6 +40,11 @@ class _LoginPageState extends State<LoginPage> {
           password: passwordController.text,
         );
         if (u != null) {
+          final fcmToken = await FirebaseMessaging.instance.getToken();
+          await FirebaseFirestore.instance
+              .collection('users')
+              .doc(u.user!.uid)
+              .update({'fcm-token': fcmToken});
           Navigator.pushReplacement(
             context,
             MaterialPageRoute(

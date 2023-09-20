@@ -3,6 +3,10 @@
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
+import 'package:gt_daily/authentication/components/buttons.dart';
+import 'package:provider/provider.dart';
+
+import '../providers/user_provider.dart';
 
 class UserAccountPage extends StatefulWidget {
   const UserAccountPage({super.key});
@@ -16,6 +20,14 @@ class _UserAccountPageState extends State<UserAccountPage> {
 
   @override
   Widget build(BuildContext context) {
+    final allUsers = Provider.of<UserProvider>(context, listen: false).allUsers;
+    Map<String, dynamic> currentUserMap = {};
+    for (var user in allUsers) {
+      if (user['email'] == currentUser.email) {
+        currentUserMap = user;
+      }
+    }
+
     return Column(
       children: [
         Icon(
@@ -31,7 +43,7 @@ class _UserAccountPageState extends State<UserAccountPage> {
             'Name',
             style: GoogleFonts.poppins(color: Colors.grey),
           ),
-          subtitle: Text(currentUser.displayName!),
+          subtitle: Text(currentUserMap['fullname']),
         ),
         ListTile(
           leading:
@@ -40,7 +52,7 @@ class _UserAccountPageState extends State<UserAccountPage> {
             'Email',
             style: GoogleFonts.poppins(color: Colors.grey),
           ),
-          subtitle: Text(currentUser.email!),
+          subtitle: Text(currentUserMap['email']),
         ),
         ListTile(
           leading:
@@ -49,7 +61,23 @@ class _UserAccountPageState extends State<UserAccountPage> {
             'Contact',
             style: GoogleFonts.poppins(color: Colors.grey),
           ),
-          subtitle: Text(currentUser.phoneNumber ?? 'No phone number yet'),
+          subtitle: Text(currentUserMap['contact']),
+        ),
+        const SizedBox(height: 20),
+        MyButton(
+          onPressed: () {
+            Navigator.pushNamed(context, '/edit-profile');
+          },
+          btnText: 'Edit Profile',
+          isPrimary: true,
+        ),
+        const SizedBox(height: 10),
+        MyButton(
+          onPressed: () {
+            Navigator.pushNamed(context, '/reset-password');
+          },
+          btnText: 'Reset Password',
+          isPrimary: false,
         )
       ],
     );

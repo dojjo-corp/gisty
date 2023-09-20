@@ -1,6 +1,7 @@
 import 'dart:io';
 
 import 'package:cloud_firestore/cloud_firestore.dart';
+import 'package:firebase_auth/firebase_auth.dart';
 import 'package:firebase_storage/firebase_storage.dart';
 import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
@@ -23,14 +24,15 @@ class _ProjectDetailsState extends State<ProjectDetails> {
   final storage = FirebaseStorage.instance;
   final store = FirebaseFirestore.instance;
   final commentController = TextEditingController();
-  bool _isDownloading = false;
+  final _key = GlobalKey<FormFieldState>();
+  bool _isLoading = false;
 
   void downloadProjectDoc() async {
     final docFileName = widget.projectData['project-document'];
     final downloadFileRef =
         storage.ref().child('Project Documents/$docFileName');
     setState(() {
-      _isDownloading = true;
+      _isLoading = true;
     });
     try {
       final Directory? tempDir = await getDownloadsDirectory();
@@ -40,7 +42,7 @@ class _ProjectDetailsState extends State<ProjectDetails> {
       ScaffoldMessenger.of(context).showSnackBar(
         SnackBar(
           content: Text('File downloaded to: ${tempDir?.path}/'),
-          action: SnackBarAction(label: 'Open', onPressed: () async{}),
+          action: SnackBarAction(label: 'Open', onPressed: () async {}),
         ),
       );
     } catch (e) {
@@ -51,7 +53,7 @@ class _ProjectDetailsState extends State<ProjectDetails> {
       );
     } finally {
       setState(() {
-        _isDownloading = false;
+        _isLoading = false;
       });
     }
   }
@@ -67,16 +69,28 @@ class _ProjectDetailsState extends State<ProjectDetails> {
   }
 
   void sendComment() async {
-    try {
-      await store.collection('All Projects').doc('projectId').set({
-        'comments': FieldValue.arrayUnion([commentController])
-      });
-    } catch (e) {
-      ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(
-          content: Text('Error sending comment: ${e.toString()}'),
-        ),
-      );
+    if (commentController.text.isNotEmpty) {
+      try {
+        _key.currentState!.save();
+        final commentData = {
+          'commenter': FirebaseAuth.instance.currentUser!.email!,
+          'comment-text': commentController.text,
+          'timestamp': Timestamp.now(),
+        };
+        await store
+            .collection('All Projects')
+            .doc(widget.projectData['pid'])
+            .update({
+          'comments': FieldValue.arrayUnion([commentData])
+        });
+        commentController.clear();
+      } catch (e) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(
+            content: Text('Error sending comment: ${e.toString()}'),
+          ),
+        );
+      }
     }
   }
 
@@ -152,39 +166,38 @@ class _ProjectDetailsState extends State<ProjectDetails> {
                         fontWeight: FontWeight.bold,
                       ),
                     ),
-                    const Column(
-                      children: [
-                        CommentTile(
-                            commenter: 'Martinson',
-                            commentText:
-                                'Reprehenderit sunt mollit consectetur exercitation laboris cillum commodo proident sunt quis aute.'),
-                        Divider(indent: 16),
-                        CommentTile(
-                            commenter: 'Martinson',
-                            commentText:
-                                'Reprehenderit sunt mollit consectetur exercitation laboris cillum commodo proident sunt quis aute.'),
-                        Divider(indent: 16),
-                        CommentTile(
-                            commenter: 'Martinson',
-                            commentText:
-                                'Reprehenderit sunt mollit consectetur exercitation laboris cillum commodo proident sunt quis aute.'),
-                        Divider(indent: 16),
-                        CommentTile(
-                            commenter: 'Martinson',
-                            commentText:
-                                'Reprehenderit sunt mollit consectetur exercitation laboris cillum commodo proident sunt quis aute.'),
-                        Divider(indent: 16),
-                        CommentTile(
-                            commenter: 'Martinson',
-                            commentText:
-                                'Reprehenderit sunt mollit consectetur exercitation laboris cillum commodo proident sunt quis aute.'),
-                        Divider(indent: 16),
-                        CommentTile(
-                            commenter: 'Martinson',
-                            commentText:
-                                'Reprehenderit sunt mollit consectetur exercitation laboris cillum commodo proident sunt quis aute.'),
-                      ],
-                    ),
+                    StreamBuilder(
+                        stream: FirebaseFirestore.instance
+                            .collection('All Projects')
+                            .doc(widget.projectData['pid'])
+                            .snapshots(),
+                        builder: (context, snapshot) {
+                          if (!snapshot.hasData) {
+                            return const Center(
+                              child: Text(
+                                  'Be The First To Comment On This Project!'),
+                            );
+                          }
+
+                          if (snapshot.hasError) {
+                            return Center(
+                              child: Text(
+                                  'Error loading comments: ${snapshot.error}'),
+                            );
+                          }
+
+                          final comments =
+                              snapshot.data!.data()!['comments'] as List;
+                          return Column(
+                            children: comments
+                                .map((e) => CommentTile(
+                                      commenter: e['commenter'],
+                                      commentText: e['comment-text'],
+                                      timestamp: e['timestamp'],
+                                    ))
+                                .toList(),
+                          );
+                        }),
                   ],
                 ),
               ),
@@ -205,6 +218,8 @@ class _ProjectDetailsState extends State<ProjectDetails> {
                     children: [
                       Expanded(
                         child: TextFormField(
+                          key: _key,
+                          controller: commentController,
                           decoration: const InputDecoration(
                             filled: true,
                             fillColor: Colors.white60,
@@ -213,6 +228,9 @@ class _ProjectDetailsState extends State<ProjectDetails> {
                             hintText: 'Comment',
                           ),
                           maxLines: 2,
+                          onChanged: (value) {
+                            if (value.isNotEmpty) {}
+                          },
                         ),
                       ),
                       IconButton(
@@ -226,7 +244,7 @@ class _ProjectDetailsState extends State<ProjectDetails> {
           ],
         ),
         floatingActionButton:
-            _isDownloading ? const LinearProgressIndicator() : null,
+            _isLoading ? const LinearProgressIndicator() : null,
       ),
     );
   }

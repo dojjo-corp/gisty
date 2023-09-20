@@ -3,6 +3,8 @@ import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:gt_daily/authentication/models/project_model.dart';
+import 'package:gt_daily/authentication/providers/projects_provider.dart';
+import 'package:provider/provider.dart';
 
 import '../components/project_grid_item.dart';
 
@@ -35,6 +37,8 @@ class _DashboardState extends State<Dashboard>
 
   @override
   Widget build(BuildContext context) {
+    final projectProvider =
+        Provider.of<ProjectProvider>(context, listen: false);
     return Stack(
       children: [
         Column(
@@ -83,6 +87,7 @@ class _DashboardState extends State<Dashboard>
                     }
 
                     final docs = snapshot.data!.docs;
+                    Map<String, Map<String, dynamic>> allProjects = {};
                     List<Map<String, dynamic>> webProjects = [];
                     List<Map<String, dynamic>> mobileProjects = [];
                     List<Map<String, dynamic>> dataProjects = [];
@@ -90,6 +95,7 @@ class _DashboardState extends State<Dashboard>
                     for (var doc in docs) {
                       final category = doc.data()['category'].toLowerCase();
                       final data = doc.data();
+                      allProjects[doc.id] = doc.data();
                       if (category == 'web') {
                         webProjects.add(data);
                       } else if (category == 'mobile') {
@@ -100,7 +106,8 @@ class _DashboardState extends State<Dashboard>
                         hardwareProjects.add(data);
                       }
                     }
-                    
+                    // load and store all projects in provider
+                    projectProvider.setAllProjects(allProjects);
 
                     return TabBarView(
                       controller: _tabController,
