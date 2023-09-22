@@ -6,7 +6,7 @@ import 'package:gt_daily/authentication/models/project_model.dart';
 import 'package:gt_daily/authentication/providers/projects_provider.dart';
 import 'package:provider/provider.dart';
 
-import '../components/project_grid_item.dart';
+import '../../components/project_grid_item.dart';
 
 class Dashboard extends StatefulWidget {
   const Dashboard({super.key});

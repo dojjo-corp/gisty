@@ -1,6 +1,6 @@
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
-import 'package:gt_daily/authentication/pages/login.dart';
+import 'package:gt_daily/authentication/pages/user%20authentication/login.dart';
 
 import '../../global/homepage.dart';
 

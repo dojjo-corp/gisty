@@ -4,6 +4,8 @@ import 'dart:io';
 import 'package:firebase_storage/firebase_storage.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_pdfview/flutter_pdfview.dart';
+import 'package:google_fonts/google_fonts.dart';
+import 'package:gt_daily/authentication/components/custom_back_button.dart';
 import 'package:path_provider/path_provider.dart';
 
 class PDFViewPage extends StatefulWidget {
@@ -44,16 +46,38 @@ class _PDFViewPageState extends State<PDFViewPage> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      appBar: AppBar(
-        title: const Text('PDF Viewer from Firebase'),
-      ),
       body: localPDFPath.isNotEmpty
-          ? PDFView(
-              filePath: localPDFPath,
-              enableSwipe: true,
-              // swipeHorizontal: true,
-              autoSpacing: false,
-              pageFling: false,
+          ? Stack(
+              children: [
+                Padding(
+                  padding: const EdgeInsets.only(
+                      top: 100, bottom: 10, right: 20, left: 20),
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      Text(
+                        'PDF Viewer',
+                        style: GoogleFonts.poppins(
+                            fontSize: 40, fontWeight: FontWeight.bold),
+                      ),
+                      Expanded(
+                        child: PDFView(
+                          filePath: localPDFPath,
+                          enableSwipe: true,
+                          // swipeHorizontal: true,
+                          autoSpacing: false,
+                          pageFling: false,
+                        ),
+                      ),
+                    ],
+                  ),
+                ),
+                const Positioned(
+                  top: 40,
+                  left: 5,
+                  child: MyBackButton(),
+                )
+              ],
             )
           : const Center(
               child: CircularProgressIndicator(),

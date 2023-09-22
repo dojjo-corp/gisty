@@ -2,7 +2,7 @@ import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
-import 'package:gt_daily/authentication/pages/project_details.dart';
+import 'package:gt_daily/authentication/pages/projects/project_details.dart';
 
 class ProjectGridItem extends StatefulWidget {
   final Map<String, dynamic> projectData;

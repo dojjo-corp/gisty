@@ -2,10 +2,10 @@ import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:gt_daily/authentication/components/custom_back_button.dart';
-import 'package:gt_daily/authentication/pages/project_details.dart';
+import 'package:gt_daily/authentication/pages/projects/project_details.dart';
 import 'package:provider/provider.dart';
 
-import '../providers/projects_provider.dart';
+import '../../providers/projects_provider.dart';
 
 class SupervisedProjects extends StatelessWidget {
   const SupervisedProjects({super.key});
@@ -26,7 +26,7 @@ class SupervisedProjects extends StatelessWidget {
         children: [
           Padding(
             padding:
-                const EdgeInsets.only(top: 90, bottom: 10, right: 15, left: 15),
+                const EdgeInsets.only(top: 90, bottom: 10, right: 20, left: 20),
             child: SizedBox(
               height: MediaQuery.of(context).size.height,
               child: SingleChildScrollView(
@@ -42,6 +42,16 @@ class SupervisedProjects extends StatelessWidget {
                     Column(
                       children: supervisedProjects
                           .map((e) => GestureDetector(
+                                onTap: () {
+                                  Navigator.push(
+                                    context,
+                                    MaterialPageRoute(
+                                      builder: (context) => ProjectDetails(
+                                        projectData: e,
+                                      ),
+                                    ),
+                                  );
+                                },
                                 child: Column(
                                   children: [
                                     ListTile(

@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
 
-import '../pages/event_details_page.dart';
+import '../pages/events/event_details_page.dart';
 
 class EventTile extends StatelessWidget {
   final Map<String, dynamic> eventDetails;

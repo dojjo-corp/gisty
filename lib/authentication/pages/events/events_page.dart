@@ -4,10 +4,10 @@ import 'package:google_fonts/google_fonts.dart';
 import 'package:gt_daily/authentication/repository/firestore_repo.dart';
 import 'package:provider/provider.dart';
 
-import '../components/buttons.dart';
-import '../components/event_tile.dart';
-import '../components/loading_list_tiles.dart';
-import '../providers/user_provider.dart';
+import '../../components/buttons.dart';
+import '../../components/event_tile.dart';
+import '../../components/loading_list_tiles.dart';
+import '../../providers/user_provider.dart';
 
 class EventsPage extends StatefulWidget {
   const EventsPage({super.key});

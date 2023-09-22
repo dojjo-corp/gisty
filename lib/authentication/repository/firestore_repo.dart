@@ -69,8 +69,8 @@ class FirestoreRepo {
   }) async {
     try {
       await store.collection('users').doc(uid).set({
-        'full-name': fullName,
-        'user-name': userName,
+        'fullname': fullName,
+        'username': userName,
         'email': email,
         'user-type': 'Industry Professional',
         'contact': contact,
@@ -82,6 +82,15 @@ class FirestoreRepo {
       rethrow;
     }
   }
+
+  Future<void> deleteUserRecords() async {
+    try {
+      await store.collection('users').doc(currentUser!.uid).delete();
+    } catch (e) {
+      rethrow;
+    }
+  }
+  
 
   Future<void> loadAllProjects() async {
     try {
@@ -113,7 +122,10 @@ class FirestoreRepo {
   Future<void> addJobsOrIntershipEvents(
       Map<String, dynamic> eventDetails) async {
     try {
-      await store.collection('All Events').doc(eventDetails['id']).set(eventDetails);
+      await store
+          .collection('All Events')
+          .doc(eventDetails['id'])
+          .set(eventDetails);
     } catch (e) {
       rethrow;
     }
@@ -142,6 +154,37 @@ class FirestoreRepo {
   Future<void> downloadProject(String projectId) async {
     try {
       // download from firebase cloud store
+    } catch (e) {
+      rethrow;
+    }
+  }
+
+  // MESSAGING METHODS
+  // create chat room
+  Future<String> createChatRoom(receiverEmail) async {
+    String roomId = '';
+    final ids = [currentUser!.email, receiverEmail];
+    ids.sort();
+    roomId = ids.join();
+    try {
+      await store.collection('Chat Rooms').doc(roomId).set({'room-id': roomId, 'messages':[]});
+      return roomId;
+    } catch (e) {
+      rethrow;
+    }
+  }
+
+  // send messages
+  Future<void> sendMessage(String messageText, String roomId) async {
+    final messageData = {
+      'text': messageText,
+      'sender': currentUser!.email,
+      'time': Timestamp.now(),
+    };
+    try {
+      await store.collection('Chat Rooms').doc(roomId).update({
+        'messages': FieldValue.arrayUnion([messageData])
+      });
     } catch (e) {
       rethrow;
     }

@@ -4,13 +4,13 @@ import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:google_nav_bar/google_nav_bar.dart';
 import 'package:gt_daily/authentication/pages/notifications_page.dart';
-import 'package:gt_daily/authentication/pages/supervised_projects.dart';
+import 'package:gt_daily/authentication/pages/projects/supervised_projects.dart';
 import 'package:provider/provider.dart';
 
 import '../authentication/components/drawer.dart';
-import '../authentication/pages/account_page.dart';
-import '../authentication/pages/dsahboard.dart';
-import '../authentication/pages/events_page.dart';
+import '../authentication/pages/user account/account_page.dart';
+import '../authentication/pages/events/events_page.dart';
+import '../authentication/pages/projects/dashboard.dart';
 import '../authentication/pages/search_page.dart';
 import '../authentication/providers/user_provider.dart';
 
@@ -98,6 +98,7 @@ class _MyHomePageState extends State<MyHomePage> {
                       Icons.school_rounded,
                       color: Theme.of(context).primaryColor,
                     ),
+                    tooltip: 'Projects You\'ve Supervised',
                   )
                 : const Text(''),
             IconButton(
@@ -112,6 +113,7 @@ class _MyHomePageState extends State<MyHomePage> {
                 Icons.notifications_active,
                 color: Theme.of(context).primaryColor,
               ),
+              tooltip: 'Notifications',
             )
           ],
         ),

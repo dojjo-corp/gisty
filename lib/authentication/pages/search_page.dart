@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
-import 'package:gt_daily/authentication/pages/project_details.dart';
+import 'package:gt_daily/authentication/pages/projects/project_details.dart';
 import 'package:gt_daily/authentication/providers/projects_provider.dart';
 import 'package:provider/provider.dart';
 
@@ -30,10 +30,17 @@ class _SearchPageState extends State<SearchPage> {
         Provider.of<ProjectProvider>(context, listen: false);
 
     List<Map<String, dynamic>> getSearchResults(String searchTerm) {
+      // always start with a clean (emppty) set
+      setState(() {
+            searchResults.clear();
+          });
       final allProjects = projectProvider.allProjects.values;
 
       for (var map in allProjects.toList()) {
-        if (map['title'].toString().toLowerCase().contains(searchTerm.toLowerCase())) {
+        if (map['title']
+            .toString()
+            .toLowerCase()
+            .contains(searchTerm.toLowerCase())) {
           setState(() {
             searchResults.add(map);
           });
@@ -85,12 +92,17 @@ class _SearchPageState extends State<SearchPage> {
                         onTap: () {
                           goToProjectDetails(projectData);
                         },
-                        child: ListTile(
-                          shape: RoundedRectangleBorder(
-                              borderRadius: BorderRadius.circular(12)),
-                          tileColor: Colors.white70,
-                          title: Text(projectData['title']),
-                          subtitle: Text(projectData['student-name']),
+                        child: Column(
+                          children: [
+                            ListTile(
+                              shape: RoundedRectangleBorder(
+                                  borderRadius: BorderRadius.circular(12)),
+                              tileColor: Colors.white70,
+                              title: Text(projectData['title']),
+                              subtitle: Text(projectData['student-name']),
+                            ),
+                            const SizedBox(height: 10)
+                          ],
                         ),
                       ))
                   .toList()),

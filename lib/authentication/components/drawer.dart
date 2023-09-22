@@ -1,7 +1,7 @@
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
-import 'package:gt_daily/authentication/pages/login.dart';
+import 'package:gt_daily/authentication/pages/user%20authentication/login.dart';
 import 'package:gt_daily/authentication/providers/user_provider.dart';
 import 'package:gt_daily/global/homepage.dart';
 import 'package:provider/provider.dart';
@@ -39,7 +39,7 @@ class MyDrawer extends StatelessWidget {
                   color: Theme.of(context).primaryColor,
                 ),
               ),
-              userType != 'student'
+              userType == 'university professional'
                   ? GestureDetector(
                       onTap: () {
                         // Navigate to project archive

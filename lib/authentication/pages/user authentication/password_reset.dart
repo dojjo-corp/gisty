@@ -23,7 +23,8 @@ class _PasswordResetPageState extends State<PasswordResetPage> {
       body: Stack(
         children: [
           Padding(
-            padding: const EdgeInsets.symmetric(vertical: 80.0, horizontal: 15),
+            padding: const EdgeInsets.only(
+                top: 100, bottom: 10, right: 20, left: 20),
             child: SizedBox(
               height: MediaQuery.of(context).size.height,
               child: ListView(
@@ -79,8 +80,8 @@ class _PasswordResetPageState extends State<PasswordResetPage> {
             ),
           ),
           const Positioned(
-            top: 20,
-            left: 10,
+            top: 40,
+            left: 5,
             child: MyBackButton(),
           )
         ],

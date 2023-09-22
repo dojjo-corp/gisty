@@ -4,7 +4,7 @@ import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:gt_daily/authentication/components/buttons.dart';
 
-import '../components/custom_back_button.dart';
+import '../../components/custom_back_button.dart';
 
 class EditAccount extends StatefulWidget {
   const EditAccount({super.key});
@@ -30,7 +30,7 @@ class _EditAccountState extends State<EditAccount> {
         children: [
           Padding(
             padding:
-                const EdgeInsets.only(top: 80, left: 15, right: 15, bottom: 10),
+                const EdgeInsets.only(top: 100, left: 15, right: 15, bottom: 10),
             child: SizedBox(
               height: MediaQuery.of(context).size.height,
               child: Form(
@@ -188,7 +188,7 @@ class _EditAccountState extends State<EditAccount> {
               ),
             ),
           ),
-          const Positioned(top: 20, left: 10, child: MyBackButton())
+          const Positioned(top: 40, left: 5, child: MyBackButton())
         ],
       ),
       floatingActionButton: _isLoading ? const LinearProgressIndicator() : null,
