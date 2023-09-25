@@ -101,20 +101,6 @@ class _MyHomePageState extends State<MyHomePage> {
                     tooltip: 'Projects You\'ve Supervised',
                   )
                 : const Text(''),
-            IconButton(
-              onPressed: () {
-                Navigator.push(
-                    context,
-                    MaterialPageRoute(
-                      builder: (context) => const NotificationsPage(),
-                    ));
-              },
-              icon: Icon(
-                Icons.notifications_active,
-                color: Theme.of(context).primaryColor,
-              ),
-              tooltip: 'Notifications',
-            )
           ],
         ),
         drawer: const MyDrawer(),

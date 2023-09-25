@@ -7,9 +7,10 @@ class RoundProfile extends StatelessWidget {
     required this.onTap,
     required this.image,
     required this.userName,
+    required this.role,
   });
   final VoidCallback onTap;
-  final String image, userName;
+  final String image, userName, role;
 
   @override
   Widget build(BuildContext context) {
@@ -25,7 +26,10 @@ class RoundProfile extends StatelessWidget {
               child: image.isNotEmpty
                   ? Image.asset(image)
                   : Icon(
-                      Icons.person_2,
+                    // change icon for different user roles
+                      role.toLowerCase().contains('university')
+                          ? Icons.school_rounded
+                          : Icons.work_rounded,
                       size: 30,
                       color: Colors.yellow[800],
                     ),

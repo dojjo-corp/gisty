@@ -1,4 +1,5 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
+import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:gt_daily/authentication/components/round_profile.dart';
@@ -11,7 +12,9 @@ import '../../providers/user_provider.dart';
 import 'chat_page.dart';
 
 class ChatListPage extends StatelessWidget {
-  const ChatListPage({super.key});
+  ChatListPage({super.key});
+
+  final currentUser = FirebaseAuth.instance.currentUser;
 
   String getRoomId(String receiverEmail) {
     String roomId = '';
@@ -24,7 +27,7 @@ class ChatListPage extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final allUsers = Provider.of<UserProvider>(context).allUsers;
-    final repo = FirestoreRepo();
+    debugPrint('This is the room id: ${getRoomId(allUsers[0]['email'])}');
 
     return Scaffold(
       body: Stack(
@@ -42,31 +45,42 @@ class ChatListPage extends StatelessWidget {
                       'Available Professionals',
                       style: GoogleFonts.poppins(fontWeight: FontWeight.w600),
                     ),
+                    // Display All Reigstered Professionals (Except Current User)
                     Container(
-                      decoration: const BoxDecoration(color: Colors.white54),
+                      decoration: BoxDecoration(
+                        color: Colors.white54,
+                        borderRadius: BorderRadius.circular(5),
+                      ),
                       padding: const EdgeInsets.all(15),
                       width: MediaQuery.of(context).size.width,
                       height: 110,
                       child: ListView(
                         scrollDirection: Axis.horizontal,
-                        children: allUsers
-                            .map(
-                              (e) => RoundProfile(
-                                  onTap: () {
-                                    Navigator.push(
-                                      context,
-                                      MaterialPageRoute(
-                                        builder: (context) => ChatPage(
-                                          roomId: getRoomId(e['email']),
-                                        ),
+                        children: allUsers.map(
+                          (e) {
+                            if (currentUser!.email != e['email'] &&
+                                e['user-type'].toLowerCase() != 'student') {
+                              return RoundProfile(
+                                onTap: () {
+                                  Navigator.push(
+                                    context,
+                                    MaterialPageRoute(
+                                      builder: (context) => ChatPage(
+                                        receiverEmail: e['email'],
+                                        roomId: getRoomId(e['email']),
                                       ),
-                                    );
-                                  },
-                                  image: '',
-                                  userName: e['fullname']?.split(' ')[0] ??
-                                      e['full-name']?.split(' ')[0]),
-                            )
-                            .toList(),
+                                    ),
+                                  );
+                                },
+                                role: e['user-type'],
+                                image: '',
+                                userName: e['fullname']?.split(' ')[0] ??
+                                    e['full-name']?.split(' ')[0],
+                              );
+                            }
+                            return Container();
+                          },
+                        ).toList(),
                       ),
                     ),
                     Text(
@@ -78,47 +92,62 @@ class ChatListPage extends StatelessWidget {
                     ),
                     const SizedBox(height: 10),
                     StreamBuilder(
-                        stream: FirebaseFirestore.instance
-                            .collection('Chat Rooms')
-                            .snapshots(),
-                        builder: (context, snapshot) {
-                          if (!snapshot.hasData) {
-                            return const Center(
-                              child: Text(
-                                  'Tap On Any Of The Profiles Above To Start A Chat!'),
-                            );
-                          }
-
-                          if (snapshot.hasError) {
-                            return Center(
-                              child: Text(
-                                  'Error Loading Chats: ${snapshot.error}'),
-                            );
-                          }
-
-                          final docs = snapshot.data!.docs;
-                          Map<String, Map<String, dynamic>> roomsData = {};
-                          for (var doc in docs) {
-                            roomsData[doc.id] = doc.data();
-                            if (doc.data()['messages'].isNotEmpty) {
-                              roomsData[doc.id]?['last-text'] =
-                                  doc.data()['messages'].last();
-                            } else {
-                              roomsData[doc.id]
-                                  ?['last-text'] = {'text': 'No Messages Yet!'};
-                            }
-                          }
-
-                          return Column(
-                            children: roomsData.values
-                                .map((value) => RecentChatTile(
-                                      sender: value['room-id']!,
-                                      receiver: '',
-                                      lastTextData: value['last-text']!,
-                                    ))
-                                .toList(),
+                      stream: FirebaseFirestore.instance
+                          .collection('Chat Rooms')
+                          .snapshots(),
+                      builder: (context, snapshot) {
+                        if (!snapshot.hasData) {
+                          return const Center(
+                            child: Text(
+                                'Tap On Any Of The Profiles Above To Start A Chat!'),
                           );
-                        }),
+                        }
+
+                        if (snapshot.hasError) {
+                          return Center(
+                            child:
+                                Text('Error Loading Chats: ${snapshot.error}'),
+                          );
+                        }
+
+                        final docs = snapshot.data!.docs;
+                        Map<String, Map<String, dynamic>> roomsData = {};
+                        for (var doc in docs) {
+                          // Only Display Rooms With Current User's Email
+                          if (doc.id.contains(currentUser!.email!)) {
+                            final data = doc.data();
+                            roomsData[doc.id] = data;
+                            // Check For Last Message Sent In Room
+                            if (data['messages'].isNotEmpty) {
+                              roomsData[doc.id]?['last-text'] =
+                                  data['messages'].last;
+                            } 
+
+                            // retrieve receiver's email from room's [users] property
+                            String receiverEmail = '';
+                            for (var email in data['users']) {
+                              if (email != currentUser!.email) {
+                                receiverEmail = email;
+                              }
+                            }
+                            roomsData[doc.id]!['receiver'] = receiverEmail;
+                          }
+                        }
+
+                        return Column(
+                          children: roomsData.values.map(
+                            (value) {
+                              return value['messages'].isNotEmpty
+                                  ? RecentChatTile(
+                                      receiver: value['receiver']!,
+                                      lastTextData: value['last-text']!,
+                                    )
+                                  : Container();
+                            },
+                          ).toList(),
+                        );
+                      },
+                    ),
                   ],
                 ),
               ),

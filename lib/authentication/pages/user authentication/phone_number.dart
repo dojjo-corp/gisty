@@ -1,3 +1,7 @@
+// ignore_for_file: use_build_context_synchronously
+
+import 'dart:developer';
+
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
@@ -8,44 +12,50 @@ import '../../../global/homepage.dart';
 import '../../components/custom_back_button.dart';
 
 class EnterPhonePage extends StatelessWidget {
-  EnterPhonePage({required this.userId, super.key});
-  final String userId;
+  EnterPhonePage({ super.key});
   final _key = GlobalKey<FormState>();
   final contactController = TextEditingController();
   final auth = FirebaseAuth.instance;
 
   @override
   Widget build(BuildContext context) {
-    void goToVerifyPhone() async {
-      // validate phone number
-      if (_key.currentState!.validate()) {
-        _key.currentState!.save();
-        await FirebaseFirestore.instance
-            .collection('users')
-            .doc(userId)
-            .update({'contact': contactController.text.split(' ').join()});
 
-        // todo: initiate phone number verification process
+    void goToHome() async {
+      log(contactController.text);
+      try {
+        if (_key.currentState!.validate()) {
+          _key.currentState!.save();
+          // update firestore records
+          await FirebaseFirestore.instance
+              .collection('users')
+              .doc(FirebaseAuth.instance.currentUser!.uid)
+              .update({'contact': contactController.text.split(' ').join()});
 
-        // navigate to verification page
-        Navigator.pushNamed(context, '/verify-phone');
+          // todo: initiate phone number verification process
+
+          // navigate to home page
+          Navigator.push(
+            context,
+            MaterialPageRoute(
+              builder: (context) => MyHomePage(pageIndex: 0),
+            ),
+          );
+        }
+      } catch (e) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(
+            content: Text('Error Updating Contact Info: ${e.toString()}'),
+          ),
+        );
       }
-    }
-
-    void goToHome() {
-      Navigator.push(
-        context,
-        MaterialPageRoute(
-          builder: (context) => MyHomePage(pageIndex: 0),
-        ),
-      );
     }
 
     return Scaffold(
       body: Stack(
         children: [
           Padding(
-            padding: const EdgeInsets.only(top: 100, bottom: 10, right: 20, left: 20),
+            padding: const EdgeInsets.only(
+                top: 100, bottom: 10, right: 20, left: 20),
             child: SingleChildScrollView(
               child: SizedBox(
                 height: MediaQuery.of(context).size.height,
@@ -61,6 +71,7 @@ class EnterPhonePage extends StatelessWidget {
                     Form(
                       key: _key,
                       child: TextFormField(
+                        controller: contactController,
                         decoration: InputDecoration(
                           filled: true,
                           fillColor: Colors.white,
@@ -92,13 +103,8 @@ class EnterPhonePage extends StatelessWidget {
                     ),
                     const SizedBox(height: 30),
                     MyButton(
-                        onPressed: goToVerifyPhone,
-                        btnText: 'Verification',
-                        isPrimary: true),
-                    const SizedBox(height: 10),
-                    MyButton(
                       onPressed: goToHome,
-                      btnText: 'Later',
+                      btnText: 'Done',
                       isPrimary: false,
                     )
                   ],

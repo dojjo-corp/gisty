@@ -144,7 +144,7 @@ class _UserAccountPageState extends State<UserAccountPage> {
             'Delete Account',
             style: GoogleFonts.poppins(color: Colors.red),
           ),
-        )
+        ),
       ],
     );
   }

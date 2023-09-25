@@ -6,6 +6,9 @@ import 'package:gt_daily/authentication/providers/user_provider.dart';
 import 'package:gt_daily/global/homepage.dart';
 import 'package:provider/provider.dart';
 
+import '../pages/messaging/chat_list_page.dart';
+import '../pages/projects/project_archive.dart';
+
 class MyDrawer extends StatelessWidget {
   const MyDrawer({super.key});
 
@@ -61,10 +64,10 @@ class MyDrawer extends StatelessWidget {
               GestureDetector(
                 onTap: () {
                   // Navigate to project archive
-                  Navigator.pushReplacement(
+                  Navigator.push(
                       context,
                       MaterialPageRoute(
-                        builder: (context) => MyHomePage(pageIndex: 0),
+                        builder: (context) => const ProjectArchive(),
                       ));
                 },
                 child: ListTile(
@@ -74,6 +77,23 @@ class MyDrawer extends StatelessWidget {
                   ),
                   title: Text(
                     'Project Archive',
+                    style: GoogleFonts.poppins(
+                        color: Theme.of(context).primaryColor),
+                  ),
+                ),
+              ),
+              GestureDetector(
+                onTap: () {
+                  // Navigate to Contact page
+                  Navigator.pushNamed(context, '/saved-projects');
+                },
+                child: ListTile(
+                  leading: Icon(
+                    Icons.bookmark,
+                    color: Theme.of(context).primaryColor,
+                  ),
+                  title: Text(
+                    'Saved Projects',
                     style: GoogleFonts.poppins(
                         color: Theme.of(context).primaryColor),
                   ),
@@ -100,6 +120,29 @@ class MyDrawer extends StatelessWidget {
                   ),
                 ),
               ),
+              userType != 'student'
+                  ?
+              GestureDetector(
+                onTap: () {
+                  // Navigate to internship page
+                  Navigator.push(
+                      context,
+                      MaterialPageRoute(
+                        builder: (context) =>  ChatListPage(),
+                      ));
+                },
+                child: ListTile(
+                  leading: Icon(
+                    Icons.message_rounded,
+                    color: Theme.of(context).primaryColor,
+                  ),
+                  title: Text(
+                    'Messages',
+                    style: GoogleFonts.poppins(
+                        color: Theme.of(context).primaryColor),
+                  ),
+                ),
+              ):Container(),
               GestureDetector(
                 onTap: () {
                   // Navigate to About us

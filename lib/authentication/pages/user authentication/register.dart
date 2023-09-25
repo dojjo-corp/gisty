@@ -7,10 +7,10 @@ import 'package:firebase_messaging/firebase_messaging.dart';
 import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:gt_daily/authentication/components/buttons.dart';
+import 'package:gt_daily/authentication/pages/user%20authentication/phone_number.dart';
 import 'package:gt_daily/authentication/repository/authentication_repo.dart';
 import 'package:gt_daily/authentication/repository/firestore_repo.dart';
 
-import '../../../global/homepage.dart';
 import '../../components/custom_back_button.dart';
 
 class RegisterPage extends StatefulWidget {
@@ -99,7 +99,7 @@ class _RegisterPageState extends State<RegisterPage> {
           // ignore: use_build_context_synchronously
           Navigator.of(context).pushReplacement(
             MaterialPageRoute(
-              builder: (context) => MyHomePage(pageIndex: 0),
+              builder: (context) => EnterPhonePage(),
             ),
           );
         }

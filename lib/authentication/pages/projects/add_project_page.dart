@@ -7,10 +7,12 @@ import 'package:google_fonts/google_fonts.dart';
 import 'package:gt_daily/authentication/repository/firestore_repo.dart';
 import 'package:file_picker/file_picker.dart';
 import 'package:path/path.dart';
+import 'package:provider/provider.dart';
 
 import '../../components/buttons.dart';
 import '../../components/custom_back_button.dart';
 import '../../models/project_model.dart';
+import '../../providers/projects_provider.dart';
 
 class NewProjectPage extends StatefulWidget {
   const NewProjectPage({super.key});
@@ -29,19 +31,18 @@ class _NewProjectPageState extends State<NewProjectPage> {
   final descriptionController = TextEditingController();
   final projectDocumentFileNameController = TextEditingController();
   String selectedCategory = 'Project Category';
-  final List<String> categories = [
-    'Project Category',
-    'Web',
-    'Mobile',
-    'Data',
-    'Hardware'
-  ];
 
   // to be ued in file upload method
   String absolutePathToDocument = '';
 
   @override
   Widget build(BuildContext context) {
+    final projectCategories =
+        context.watch<ProjectProvider>().categoryMap.keys.toList();
+
+    final List<String> categories = ['Project Category'];
+    categories.addAll(projectCategories);
+
     Future<void> uploadPDF(File file) async {
       try {
         String fileName = basename(file.path);
@@ -64,6 +65,7 @@ class _NewProjectPageState extends State<NewProjectPage> {
     }
 
     void addProjectToDatabase() async {
+      print(selectedCategory);
       if (selectedCategory == 'Project Category') {
         return showDialog<void>(
           context: context,
@@ -166,9 +168,9 @@ class _NewProjectPageState extends State<NewProjectPage> {
           Padding(
             padding: const EdgeInsets.only(
                 right: 15.0, left: 15, top: 100, bottom: 10),
-            child: SingleChildScrollView(
-              child: SizedBox(
-                height: MediaQuery.of(context).size.height,
+            child: SizedBox(
+              height: MediaQuery.of(context).size.height,
+              child: SingleChildScrollView(
                 child: Column(
                   mainAxisAlignment: MainAxisAlignment.center,
                   crossAxisAlignment: CrossAxisAlignment.start,
@@ -223,66 +225,58 @@ class _NewProjectPageState extends State<NewProjectPage> {
                     ),
                     const SizedBox(height: 10),
                     // COMPANY NAME TEXT FIELD
-                    Row(
-                      children: [
-                        Expanded(
-                          child: TextFormField(
-                            controller: yearController,
-                            keyboardType: TextInputType.datetime,
-                            decoration: InputDecoration(
-                              filled: true,
-                              fillColor: Colors.white,
-                              border: OutlineInputBorder(
-                                borderSide: BorderSide.none,
-                                borderRadius: BorderRadius.circular(12),
-                              ),
-                              prefixIcon:
-                                  const Icon(Icons.calendar_month_rounded),
-                              hintText: 'Year',
-                              labelText: 'Year',
-                            ),
-                            inputFormatters: [
-                              FilteringTextInputFormatter.allow(
-                                RegExp(r'[0-9]'),
-                              ), // Allow only numbers
-                              LengthLimitingTextInputFormatter(4)
-                            ],
-                            validator: (value) {
-                              if (value!.isEmpty) {
-                                return 'Field can\'t be empty!';
-                              }
-                              return null;
-                            },
-                          ),
+                    TextFormField(
+                      controller: yearController,
+                      keyboardType: TextInputType.datetime,
+                      decoration: InputDecoration(
+                        filled: true,
+                        fillColor: Colors.white,
+                        border: OutlineInputBorder(
+                          borderSide: BorderSide.none,
+                          borderRadius: BorderRadius.circular(12),
                         ),
-                        const SizedBox(width: 10),
-                        Expanded(
-                          child: DropdownButtonFormField(
-                            decoration: InputDecoration(
-                              filled: true,
-                              fillColor: Colors.white,
-                              border: OutlineInputBorder(
-                                  borderSide: BorderSide.none,
-                                  borderRadius: BorderRadius.circular(12)),
-                            ),
-                            value: selectedCategory,
-                            items: categories
-                                .map(
-                                  (String category) =>
-                                      DropdownMenuItem<String>(
-                                    value: category,
-                                    child: Text(category),
-                                  ),
-                                )
-                                .toList(),
-                            onChanged: (value) {
-                              setState(() {
-                                selectedCategory = value!;
-                              });
-                            },
-                          ),
-                        )
+                        prefixIcon: const Icon(Icons.calendar_month_rounded),
+                        hintText: 'Year',
+                        labelText: 'Year',
+                      ),
+                      inputFormatters: [
+                        FilteringTextInputFormatter.allow(
+                          RegExp(r'[0-9]'),
+                        ), // Allow only numbers
+                        LengthLimitingTextInputFormatter(4)
                       ],
+                      validator: (value) {
+                        if (value!.isEmpty) {
+                          return 'Field can\'t be empty!';
+                        }
+                        return null;
+                      },
+                    ),
+                    const SizedBox(height: 10),
+                    DropdownButtonFormField(
+                      decoration: InputDecoration(
+                        filled: true,
+                        fillColor: Colors.white,
+                        border: OutlineInputBorder(
+                            borderSide: BorderSide.none,
+                            borderRadius: BorderRadius.circular(12)),
+                      ),
+                      value: selectedCategory,
+                      items: categories
+                          .map(
+                            (String category) => DropdownMenuItem<String>(
+                              value: category,
+                              child: Text(category),
+                            ),
+                          )
+                          .toList(),
+                      onChanged: (value) {
+                        setState(() {
+                          selectedCategory = value!;
+                        });
+                        print(value);
+                        print(selectedCategory);
+                      },
                     ),
 
                     const SizedBox(height: 10),
@@ -298,8 +292,8 @@ class _NewProjectPageState extends State<NewProjectPage> {
                         ),
                         prefixIcon:
                             const Icon(Icons.perm_contact_calendar_rounded),
-                        hintText: 'Supervisor',
-                        labelText: 'Supervisor',
+                        hintText: 'Supervisor Name',
+                        labelText: 'Supervisor Name',
                       ),
                       validator: (value) {
                         if (value!.isEmpty) {
@@ -321,7 +315,7 @@ class _NewProjectPageState extends State<NewProjectPage> {
                         ),
                         prefixIcon: const Icon(Icons.mail),
                         hintText: 'Supervisor Email',
-                        labelText: 'Supervisor Email',
+                        labelText: 'Supervisor Email (should be registered)',
                       ),
                       validator: (value) {
                         if (value!.isEmpty) {
@@ -395,8 +389,7 @@ class _NewProjectPageState extends State<NewProjectPage> {
           const Positioned(top: 40, left: 5, child: MyBackButton())
         ],
       ),
-      floatingActionButton:
-          _isLoading ? const LinearProgressIndicator() : null,
+      floatingActionButton: _isLoading ? const LinearProgressIndicator() : null,
     );
   }
 }

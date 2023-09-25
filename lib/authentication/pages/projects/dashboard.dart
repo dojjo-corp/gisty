@@ -2,7 +2,7 @@ import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
-import 'package:gt_daily/authentication/models/project_model.dart';
+import 'package:gt_daily/authentication/components/dashboard_card.dart';
 import 'package:gt_daily/authentication/providers/projects_provider.dart';
 import 'package:provider/provider.dart';
 
@@ -15,22 +15,7 @@ class Dashboard extends StatefulWidget {
   State<Dashboard> createState() => _DashboardState();
 }
 
-class _DashboardState extends State<Dashboard>
-    with SingleTickerProviderStateMixin {
-  late TabController _tabController;
-
-  @override
-  void initState() {
-    super.initState();
-    _tabController = TabController(length: 4, vsync: this);
-  }
-
-  @override
-  void dispose() {
-    _tabController.dispose();
-    super.dispose();
-  }
-
+class _DashboardState extends State<Dashboard> {
   Widget noProjectToDisplay() => const Center(
         child: Text('No Project To Display!'),
       );
@@ -39,37 +24,35 @@ class _DashboardState extends State<Dashboard>
   Widget build(BuildContext context) {
     final projectProvider =
         Provider.of<ProjectProvider>(context, listen: false);
+    final projectCategories =
+        context.watch<ProjectProvider>().categoryMap.keys.toList();
+
     return Stack(
       children: [
-        Column(
-          children: [
-            Row(
+        SizedBox(
+          height: MediaQuery.of(context).size.height,
+          child: SingleChildScrollView(
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
               children: [
-                Text(
-                  'Hello, ',
-                  style: GoogleFonts.poppins(fontSize: 25),
+                Row(
+                  children: [
+                    Text(
+                      'Hello, ',
+                      style: GoogleFonts.poppins(fontSize: 25),
+                    ),
+                    Text(
+                      FirebaseAuth.instance.currentUser!.displayName!,
+                      style: GoogleFonts.montserrat(
+                          fontWeight: FontWeight.bold, fontSize: 25),
+                    ),
+                  ],
                 ),
-                Text(
-                  FirebaseAuth.instance.currentUser!.displayName!,
-                  style: GoogleFonts.montserrat(
-                      fontWeight: FontWeight.bold, fontSize: 25),
-                ),
-              ],
-            ),
-            const SizedBox(height: 20),
-            TabBar(
-              controller: _tabController,
-              tabs: const [
-                Tab(text: 'Web'),
-                Tab(text: 'Mobile'),
-                Tab(text: 'Data'),
-                Tab(text: 'Hardware')
-              ],
-            ),
-            Flexible(
-              child: StreamBuilder(
+                const SizedBox(height: 20),
+                StreamBuilder(
                   stream: FirebaseFirestore.instance
                       .collection('All Projects')
+                      .orderBy('time-added', descending: true)
                       .snapshots(),
                   builder: (context, snapshot) {
                     if (!snapshot.hasData) {
@@ -87,6 +70,7 @@ class _DashboardState extends State<Dashboard>
                     }
 
                     final docs = snapshot.data!.docs;
+                    final latestProject = docs[0];
                     Map<String, Map<String, dynamic>> allProjects = {};
                     List<Map<String, dynamic>> webProjects = [];
                     List<Map<String, dynamic>> mobileProjects = [];
@@ -97,70 +81,54 @@ class _DashboardState extends State<Dashboard>
                       final data = doc.data();
                       allProjects[doc.id] = doc.data();
                       if (category == 'web') {
+                        if (webProjects.isNotEmpty) {
+                          continue;
+                        }
                         webProjects.add(data);
                       } else if (category == 'mobile') {
+                        if (webProjects.isNotEmpty) {
+                          continue;
+                        }
                         mobileProjects.add(data);
                       } else if (category == 'data') {
+                        if (webProjects.isNotEmpty) {
+                          continue;
+                        }
                         dataProjects.add(data);
                       } else if (category == 'hardware') {
+                        if (webProjects.isNotEmpty) {
+                          continue;
+                        }
                         hardwareProjects.add(data);
                       }
                     }
                     // load and store all projects in provider
                     projectProvider.setAllProjects(allProjects);
 
-                    return TabBarView(
-                      controller: _tabController,
+                    return Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
                       children: [
-                        // WEB CATEGORY OF PROJECTS
-                        webProjects.isNotEmpty
-                            ? ListView.separated(
-                                itemBuilder: (context, index) {
-                                  return ProjectGridItem(
-                                      projectData: webProjects[index]);
-                                },
-                                separatorBuilder: (context, index) =>
-                                    const SizedBox(height: 10),
-                                itemCount: webProjects.length)
-                            : noProjectToDisplay(),
-                        // MOBILE CATEGORY OF PROJECTS
-                        mobileProjects.isNotEmpty
-                            ? ListView.separated(
-                                itemBuilder: (context, index) {
-                                  return ProjectGridItem(
-                                      projectData: mobileProjects[index]);
-                                },
-                                separatorBuilder: (context, index) =>
-                                    const SizedBox(height: 10),
-                                itemCount: webProjects.length)
-                            : noProjectToDisplay(),
-                        // DATA CATEGORY OF PROJECTS
-                        dataProjects.isNotEmpty
-                            ? ListView.separated(
-                                itemBuilder: (context, index) {
-                                  return ProjectGridItem(
-                                      projectData: dataProjects[index]);
-                                },
-                                separatorBuilder: (context, index) =>
-                                    const SizedBox(height: 10),
-                                itemCount: webProjects.length)
-                            : noProjectToDisplay(),
-                        // HARDWARE CATEGORY OF PROJECTS
-                        hardwareProjects.isNotEmpty
-                            ? ListView.separated(
-                                itemBuilder: (context, index) {
-                                  return ProjectGridItem(
-                                      projectData: hardwareProjects[index]);
-                                },
-                                separatorBuilder: (context, index) =>
-                                    const SizedBox(height: 10),
-                                itemCount: webProjects.length)
-                            : noProjectToDisplay(),
+                        const Text('Check The Latest Project!'),
+                        ProjectGridItem(
+                            projectData: latestProject.data(), showLiked: true),
                       ],
                     );
-                  }),
+                  },
+                ),
+                const SizedBox(height: 10),
+                const Text('Project Categories'),
+                Column(
+                  children: projectCategories
+                      .map((category) => DashboardCard(
+                            name: category,
+                            number: 0,
+                            iconData: Icons.handshake_rounded,
+                          ))
+                      .toList(),
+                ),
+              ],
             ),
-          ],
+          ),
         ),
       ],
     );

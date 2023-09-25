@@ -3,8 +3,6 @@ import 'dart:developer';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 
-final currentUser = FirebaseAuth.instance.currentUser;
-
 class FirestoreRepo {
   FirestoreRepo();
   final store = FirebaseFirestore.instance;
@@ -85,12 +83,14 @@ class FirestoreRepo {
 
   Future<void> deleteUserRecords() async {
     try {
-      await store.collection('users').doc(currentUser!.uid).delete();
+      await store
+          .collection('users')
+          .doc(FirebaseAuth.instance.currentUser!.uid)
+          .delete();
     } catch (e) {
       rethrow;
     }
   }
-  
 
   Future<void> loadAllProjects() async {
     try {
@@ -143,7 +143,7 @@ class FirestoreRepo {
 
   Future<void> saveProject(String projectId) async {
     try {
-      await store.doc(currentUser!.uid).set({
+      await store.doc(FirebaseAuth.instance.currentUser!.uid).set({
         'saved-projects': FieldValue.arrayUnion([projectId])
       });
     } catch (e) {
@@ -163,11 +163,15 @@ class FirestoreRepo {
   // create chat room
   Future<String> createChatRoom(receiverEmail) async {
     String roomId = '';
-    final ids = [currentUser!.email, receiverEmail];
+    final ids = [FirebaseAuth.instance.currentUser!.email, receiverEmail];
     ids.sort();
     roomId = ids.join();
     try {
-      await store.collection('Chat Rooms').doc(roomId).set({'room-id': roomId, 'messages':[]});
+      await store.collection('Chat Rooms').doc(roomId).set({
+        'room-id': roomId,
+        'messages': FieldValue.arrayUnion([]),
+        'users': [receiverEmail, FirebaseAuth.instance.currentUser!.email]
+      }, SetOptions(merge: true));
       return roomId;
     } catch (e) {
       rethrow;
@@ -178,7 +182,7 @@ class FirestoreRepo {
   Future<void> sendMessage(String messageText, String roomId) async {
     final messageData = {
       'text': messageText,
-      'sender': currentUser!.email,
+      'sender': FirebaseAuth.instance.currentUser!.email,
       'time': Timestamp.now(),
     };
     try {

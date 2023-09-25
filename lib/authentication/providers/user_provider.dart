@@ -6,7 +6,7 @@ class UserProvider extends ChangeNotifier {
   UserProvider();
   List<Map<String, dynamic>> _allUsers = [];
   List<Map<String, dynamic>> get allUsers => _allUsers;
-  
+
   String get userType {
     String userType = '';
     for (var user in _allUsers) {
@@ -15,6 +15,15 @@ class UserProvider extends ChangeNotifier {
       }
     }
     return userType;
+  }
+
+  Map<String, dynamic>? getUserDataFromEmail(String email) {
+    for (var user in _allUsers) {
+      if (user['email'] == email) {
+        return user;
+      }
+    }
+    return null;
   }
 
   Future<void> setAllUsers() async {

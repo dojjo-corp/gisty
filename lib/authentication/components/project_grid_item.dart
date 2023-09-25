@@ -6,7 +6,9 @@ import 'package:gt_daily/authentication/pages/projects/project_details.dart';
 
 class ProjectGridItem extends StatefulWidget {
   final Map<String, dynamic> projectData;
-  const ProjectGridItem({super.key, required this.projectData});
+  final bool showLiked;
+  const ProjectGridItem(
+      {super.key, required this.projectData, required this.showLiked});
 
   @override
   State<ProjectGridItem> createState() => _ProjectGridItemState();
@@ -36,16 +38,64 @@ class _ProjectGridItemState extends State<ProjectGridItem> {
     final String student = widget.projectData['student-name'];
     final String description = widget.projectData['description'];
     final String category = widget.projectData['category'];
-    final projectColor = setProjectColor(category); 
+    final projectColor = setProjectColor(category);
 
     String userEmail = FirebaseAuth.instance.currentUser!.email!;
-    bool isLiked = widget.projectData['saved']
-        .contains(userEmail);
+    bool isLiked = widget.projectData['saved'].contains(userEmail);
     final likedIcon = Icon(
       Icons.bookmark_added,
       color: projectColor,
     );
     const notLikedIcon = Icon(Icons.bookmark_add_outlined);
+
+    // add project to saved projects
+    Future<void> saveProject() async {
+      try {
+        await FirebaseFirestore.instance
+            .collection('All Projects')
+            .doc(pid)
+            .update({
+          'saved': FieldValue.arrayUnion([userEmail])
+        });
+        await FirebaseFirestore.instance
+            .collection('users')
+            .doc(FirebaseAuth.instance.currentUser!.uid)
+            .update({
+          'saved-projects': FieldValue.arrayUnion([pid])
+        });
+      } catch (e) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(
+            content: Text('Error Unsaving Project: ${e.toString()}'),
+          ),
+        );
+      }
+    }
+
+    // remove from saved projects
+    Future<void> unsaveProject() async {
+      try {
+        await FirebaseFirestore.instance
+            .collection('All Projects')
+            .doc(pid)
+            .update({
+          'saved': FieldValue.arrayRemove([userEmail])
+        });
+        await FirebaseFirestore.instance
+            .collection('users')
+            .doc(FirebaseAuth.instance.currentUser!.uid)
+            .update({
+          'saved-projects': FieldValue.arrayRemove([pid])
+        });
+      } catch (e) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(
+            content: Text('Error Unsaving Project: ${e.toString()}'),
+          ),
+        );
+      }
+    }
+
     return Container(
       constraints: const BoxConstraints(
         minWidth: 0,
@@ -53,6 +103,7 @@ class _ProjectGridItemState extends State<ProjectGridItem> {
       ),
       height: 180,
       padding: const EdgeInsets.only(right: 10),
+      margin: const EdgeInsets.only(bottom: 5),
       decoration: BoxDecoration(
         borderRadius: const BorderRadius.horizontal(right: Radius.circular(12)),
         gradient: LinearGradient(colors: [
@@ -130,20 +181,19 @@ class _ProjectGridItemState extends State<ProjectGridItem> {
                       ),
                       child: const Text('Details'),
                     ),
-                    IconButton(
-                      onPressed: () async {
-                        setState(() {
-                          isLiked = !isLiked;
-                        });
-                        isLiked?
-                        await FirebaseFirestore.instance.collection('All Projects').doc(pid).update({
-                          'saved': FieldValue.arrayUnion([userEmail])
-                        }):await FirebaseFirestore.instance.collection('All Projects').doc(pid).update({
-                          'saved': FieldValue.arrayRemove([userEmail])
-                        }) ;
-                      },
-                      icon: isLiked ? likedIcon : notLikedIcon,
-                    )
+                    widget.showLiked
+                        ? IconButton(
+                            onPressed: () async {
+                              setState(() {
+                                isLiked = !isLiked;
+                              });
+                              isLiked
+                                  ? await saveProject()
+                                  : await unsaveProject();
+                            },
+                            icon: isLiked ? likedIcon : notLikedIcon,
+                          )
+                        : Text(''),
                   ],
                 )
               ],

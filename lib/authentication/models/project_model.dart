@@ -1,3 +1,5 @@
+import 'package:cloud_firestore/cloud_firestore.dart';
+
 class ProjectModel {
   String title,
       year,
@@ -40,7 +42,8 @@ class ProjectModel {
       'description': description,
       'project-document': projectDocumentFileName,
       'comments': [],
-      'saved': []
+      'saved': [],
+      'time-added': Timestamp.now()
     };
   }
 }
