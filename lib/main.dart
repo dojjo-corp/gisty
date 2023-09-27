@@ -13,6 +13,7 @@ import 'package:provider/provider.dart';
 
 import 'authentication/gates/auth_gate.dart';
 import 'authentication/pages/messaging/chat_list_page.dart';
+import 'authentication/pages/projects/project_archive.dart';
 import 'authentication/pages/user authentication/password_reset.dart';
 import 'authentication/pages/user authentication/phone_verification.dart';
 import 'authentication/pages/user authentication/register.dart';
@@ -68,6 +69,7 @@ class _MyAppState extends State<MyApp> {
         '/messaging': (context) =>  ChatListPage(),
         '/notifications': (context) => const NotificationsPage(),
         '/saved-projects': (context) => const SavedProjects(),
+        '/archive': (context)=> const ProjectArchive()
       },
     );
   }

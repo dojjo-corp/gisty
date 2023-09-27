@@ -89,22 +89,24 @@ class _OtherUserAccountPageState extends State<OtherUserAccountPage> {
                       subtitle: Text(otherUserMap['user-type']),
                     ),
                     const SizedBox(height: 10),
-                    MyButton(
-                      onPressed: () {
-                        // Navigate to [other-user]'s Chat Page
-                        Navigator.push(
-                          context,
-                          MaterialPageRoute(
-                            builder: (context) => ChatPage(
-                              roomId: getRoomId(otherUserMap['email']),
-                              receiverEmail: otherUserMap['email'],
-                            ),
-                          ),
-                        );
-                      },
-                      btnText: 'Chat With $userFirstName!',
-                      isPrimary: false,
-                    ),
+                    otherUserMap['user-type'] != 'student'
+                        ? MyButton(
+                            onPressed: () {
+                              // Navigate to [other-user]'s Chat Page
+                              Navigator.push(
+                                context,
+                                MaterialPageRoute(
+                                  builder: (context) => ChatPage(
+                                    roomId: getRoomId(otherUserMap['email']),
+                                    receiverEmail: otherUserMap['email'],
+                                  ),
+                                ),
+                              );
+                            },
+                            btnText: 'Chat With $userFirstName!',
+                            isPrimary: false,
+                          )
+                        : Container(),
                     const SizedBox(height: 10),
                   ],
                 ),

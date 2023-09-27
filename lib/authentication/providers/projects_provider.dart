@@ -11,39 +11,39 @@ class ProjectProvider extends ChangeNotifier {
     
     'Web & Mobile Development': {
       'color': const Color.fromARGB(255, 57, 134, 198),
-      'image': ''
+      'image': 'assets/web-mobile-development.png'
     },
     'AI & ML': {
       'color': const Color.fromARGB(255, 234, 206, 64),
-      'image': ''
+      'image': 'assets/ai.png'
     },
     'Cyber Security & Network Security': {
       'color': const Color.fromARGB(255, 188, 137, 197),
-      'image': ''
+      'image': 'assets/cyber.png'
     },
     'Data Science & Analytics': {
       'color': const Color.fromARGB(255, 6, 134, 4),
-      'image': ''
+      'image': 'assets/data.png'
     },
     'Desktop Development': {
       'color': const Color.fromARGB(255, 4, 134, 95),
-      'image': ''
+      'image': 'assets/desktop.png'
     },
     'IoT': {
       'color': const Color.fromARGB(255, 134, 4, 65),
-      'image': ''
+      'image': 'assets/iot.png'
     },
     'Robotics & Automation': {
       'color': const Color.fromARGB(255, 134, 69, 4),
-      'image': ''
+      'image': 'assets/robotics.png'
     },
     'Research Works': {
       'color': const Color.fromARGB(255, 4, 134, 95),
-      'image': ''
+      'image': 'assets/research.png'
     },
     'Embedded Systems': {
       'color': const Color.fromARGB(255, 234, 206, 64),
-      'image': ''
+      'image': 'assets/embedded-systems.png'
     },
   };
   

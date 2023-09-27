@@ -1,5 +1,3 @@
-import 'dart:developer';
-
 import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:gt_daily/authentication/components/custom_back_button.dart';
@@ -22,9 +20,7 @@ class ProjectArchive extends StatelessWidget {
   Widget build(BuildContext context) {
     final categories =
         context.read<ProjectProvider>().categoryMap.keys.toList();
-        for (var i in categories){
-          log(i);
-        }
+    final categoryMap = context.read<ProjectProvider>().categoryMap;
     return Scaffold(
       body: Stack(
         children: [
@@ -38,7 +34,7 @@ class ProjectArchive extends StatelessWidget {
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
                     Text(
-                      'Project Categories',
+                      'Project Archive',
                       style: GoogleFonts.poppins(
                           fontSize: 40, fontWeight: FontWeight.bold),
                     ),
@@ -48,14 +44,14 @@ class ProjectArchive extends StatelessWidget {
                       style: GoogleFonts.montserrat(color: Colors.grey[700]),
                     ),
                     Column(
-                    children: categories
-                        .map((category) => DashboardCard(
+                      children: categories
+                          .map((category) => DashboardCard(
                               name: category,
                               number: 0,
-                              iconData: Icons.handshake_rounded,
-                            ))
-                        .toList(),
-                  ),
+                              bottomMargin: 5,
+                              imagePath: categoryMap[category]['image']))
+                          .toList(),
+                    ),
                   ],
                 ),
               ),

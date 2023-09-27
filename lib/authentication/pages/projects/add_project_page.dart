@@ -1,3 +1,4 @@
+import 'dart:developer';
 import 'dart:io';
 
 import 'package:firebase_storage/firebase_storage.dart';
@@ -6,6 +7,7 @@ import 'package:flutter/services.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:gt_daily/authentication/repository/firestore_repo.dart';
 import 'package:file_picker/file_picker.dart';
+// ignore: depend_on_referenced_packages
 import 'package:path/path.dart';
 import 'package:provider/provider.dart';
 
@@ -65,7 +67,7 @@ class _NewProjectPageState extends State<NewProjectPage> {
     }
 
     void addProjectToDatabase() async {
-      print(selectedCategory);
+      log(selectedCategory);
       if (selectedCategory == 'Project Category') {
         return showDialog<void>(
           context: context,
@@ -73,7 +75,7 @@ class _NewProjectPageState extends State<NewProjectPage> {
           builder: (BuildContext context) {
             return AlertDialog(
               title: const Text('Caution'),
-              content: Text('Choose A Valid Project Category!'),
+              content: const Text('Choose A Valid Project Category!'),
               actions: <Widget>[
                 TextButton(
                   child: const Text('Okay'),
@@ -93,7 +95,7 @@ class _NewProjectPageState extends State<NewProjectPage> {
           builder: (BuildContext context) {
             return AlertDialog(
               title: const Text('Caution'),
-              content: Text('Choose A Project Document!'),
+              content: const Text('Choose A Project Document!'),
               actions: <Widget>[
                 TextButton(
                   child: const Text('Okay'),
@@ -274,8 +276,8 @@ class _NewProjectPageState extends State<NewProjectPage> {
                         setState(() {
                           selectedCategory = value!;
                         });
-                        print(value);
-                        print(selectedCategory);
+                        log(value!);
+                        log(selectedCategory);
                       },
                     ),
 

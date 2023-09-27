@@ -3,6 +3,9 @@ import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:gt_daily/authentication/pages/projects/project_details.dart';
+import 'package:provider/provider.dart';
+
+import '../providers/projects_provider.dart';
 
 class ProjectGridItem extends StatefulWidget {
   final Map<String, dynamic> projectData;
@@ -15,30 +18,16 @@ class ProjectGridItem extends StatefulWidget {
 }
 
 class _ProjectGridItemState extends State<ProjectGridItem> {
-  Color setProjectColor(String category) {
-    switch (category.toLowerCase()) {
-      case 'web':
-        return const Color.fromARGB(255, 57, 134, 198);
-      case 'mobile':
-        return const Color.fromARGB(255, 234, 206, 64);
-      case 'data':
-        return const Color.fromARGB(255, 188, 137, 197);
-      case 'hardware':
-        return const Color.fromARGB(255, 6, 134, 4);
-      default:
-        return Colors.blue;
-    }
-  }
-
   @override
   Widget build(BuildContext context) {
+    final categoryMap = context.read<ProjectProvider>().categoryMap;
     final String pid = widget.projectData['pid'];
     final String title = widget.projectData['title'];
     final String year = widget.projectData['year'];
     final String student = widget.projectData['student-name'];
     final String description = widget.projectData['description'];
     final String category = widget.projectData['category'];
-    final projectColor = setProjectColor(category);
+    final projectColor = categoryMap[category]['color'];
 
     String userEmail = FirebaseAuth.instance.currentUser!.email!;
     bool isLiked = widget.projectData['saved'].contains(userEmail);
@@ -124,7 +113,11 @@ class _ProjectGridItemState extends State<ProjectGridItem> {
               crossAxisAlignment: CrossAxisAlignment.start,
               mainAxisAlignment: MainAxisAlignment.spaceAround,
               children: [
-                const Icon(Icons.portrait_rounded),
+                SizedBox(
+                  height: 30,
+                  width: 30,
+                  child: Image.asset(categoryMap[category]['image']),
+                ),
                 Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
@@ -151,9 +144,8 @@ class _ProjectGridItemState extends State<ProjectGridItem> {
                     ),
                     Text(
                       description,
-                      style: const TextStyle(
-                        overflow: TextOverflow.ellipsis,
-                      ),
+                      style: GoogleFonts.montserrat(fontWeight:FontWeight.w500),
+                      overflow: TextOverflow.ellipsis,
                       maxLines: 2,
                       softWrap: true,
                     )
@@ -193,7 +185,7 @@ class _ProjectGridItemState extends State<ProjectGridItem> {
                             },
                             icon: isLiked ? likedIcon : notLikedIcon,
                           )
-                        : Text(''),
+                        : const Text(''),
                   ],
                 )
               ],

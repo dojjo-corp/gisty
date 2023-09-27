@@ -187,7 +187,8 @@ class FirestoreRepo {
     };
     try {
       await store.collection('Chat Rooms').doc(roomId).update({
-        'messages': FieldValue.arrayUnion([messageData])
+        'messages': FieldValue.arrayUnion([messageData]),
+        'last-text': messageData
       });
     } catch (e) {
       rethrow;

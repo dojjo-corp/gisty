@@ -71,7 +71,8 @@ class _LoginPageState extends State<LoginPage> {
       body: Stack(
         children: [
           Padding(
-            padding: const EdgeInsets.only(top: 100, bottom: 10, right: 20, left: 20),
+            padding: const EdgeInsets.only(
+                top: 100, bottom: 10, right: 20, left: 20),
             child: SingleChildScrollView(
               child: SizedBox(
                 height: MediaQuery.of(context).size.height,
@@ -144,8 +145,7 @@ class _LoginPageState extends State<LoginPage> {
                                   child: _obscureText
                                       ? const Icon(Icons.visibility_rounded,
                                           color: Colors.grey)
-                                      : const Icon(
-                                          Icons.visibility_off_rounded,
+                                      : const Icon(Icons.visibility_off_rounded,
                                           color: Colors.grey),
                                 ),
                               ),
@@ -175,9 +175,14 @@ class _LoginPageState extends State<LoginPage> {
                       Row(
                         mainAxisAlignment: MainAxisAlignment.end,
                         children: [
-                          Text(
-                            'Forgot password?',
-                            style: TextStyle(color: Colors.grey[800]),
+                          GestureDetector(
+                            onTap: () {
+                              Navigator.pushNamed(context, '/reset-password');
+                            },
+                            child: Text(
+                              'Forgot password?',
+                              style: TextStyle(color: Colors.grey[800]),
+                            ),
                           )
                         ],
                       ),

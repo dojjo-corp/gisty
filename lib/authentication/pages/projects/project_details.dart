@@ -9,8 +9,10 @@ import 'package:gt_daily/authentication/components/buttons.dart';
 import 'package:gt_daily/authentication/components/custom_back_button.dart';
 import 'package:gt_daily/authentication/pages/projects/pdf_view_page.dart';
 import 'package:path_provider/path_provider.dart';
+import 'package:provider/provider.dart';
 
 import '../../components/comment_tile.dart';
+import '../../providers/projects_provider.dart';
 
 class ProjectDetails extends StatefulWidget {
   final Map<String, dynamic> projectData;
@@ -96,6 +98,7 @@ class _ProjectDetailsState extends State<ProjectDetails> {
 
   @override
   Widget build(BuildContext context) {
+    final categoryMap = context.read<ProjectProvider>().categoryMap;
     return Scaffold(
       body: Stack(
         children: [
@@ -112,20 +115,29 @@ class _ProjectDetailsState extends State<ProjectDetails> {
                         fontSize: 40, fontWeight: FontWeight.bold),
                   ),
                   const SizedBox(height: 30),
-                  Column(
-                    crossAxisAlignment: CrossAxisAlignment.start,
+                  Row(
                     children: [
-                      Text(
-                        widget.projectData['student-name'],
-                        style: GoogleFonts.montserrat(
-                          fontSize: 20,
-                          fontWeight: FontWeight.w600,
-                        ),
+                      Image.asset(
+                        categoryMap[widget.projectData['category']]['image'],
+                        height: 45,
                       ),
-                      Text(
-                        widget.projectData['category'],
-                        style: GoogleFonts.montserrat(
-                            fontSize: 16, color: Colors.grey),
+                      const SizedBox(width: 5),
+                      Column(
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        children: [
+                          Text(
+                            widget.projectData['student-name'],
+                            style: GoogleFonts.montserrat(
+                              fontSize: 20,
+                              fontWeight: FontWeight.w600,
+                            ),
+                          ),
+                          Text(
+                            widget.projectData['category'],
+                            style: GoogleFonts.montserrat(
+                                fontSize: 16, color: Colors.grey),
+                          ),
+                        ],
                       ),
                     ],
                   ),
@@ -227,8 +239,8 @@ class _ProjectDetailsState extends State<ProjectDetails> {
                           hintText: 'Comment',
                         ),
                         maxLines: 2,
-                        validator: (value){
-                          if (value!.isEmpty){
+                        validator: (value) {
+                          if (value!.isEmpty) {
                             return 'Field cannot be empty!';
                           }
                           return null;

@@ -6,14 +6,14 @@ import '../pages/projects/all_projects_in_a_category.dart';
 import '../providers/projects_provider.dart';
 
 class DashboardCard extends StatelessWidget {
-  final String name;
-  final int number;
-  final IconData iconData;
+  final String name, imagePath;
+  final double number, bottomMargin;
   const DashboardCard({
     super.key,
     required this.name,
     required this.number,
-    required this.iconData,
+    required this.imagePath,
+    required this.bottomMargin,
   });
 
   @override
@@ -30,7 +30,7 @@ class DashboardCard extends StatelessWidget {
         onTap: goToPage,
         child: Container(
           width: double.infinity,
-          margin: const EdgeInsets.only(bottom: 10),
+          margin:   EdgeInsets.only(right: 5, bottom: bottomMargin),
           padding: const EdgeInsets.all(10),
           decoration: BoxDecoration(
             borderRadius: BorderRadius.circular(12),
@@ -43,16 +43,23 @@ class DashboardCard extends StatelessWidget {
           ),
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.start,
-            mainAxisAlignment: MainAxisAlignment.center,
+            mainAxisAlignment: MainAxisAlignment.spaceAround,
             children: [
-              Icon(iconData),
+              SizedBox(
+                height: 80,
+                width: 80,
+                child: Image.asset(imagePath),
+              ),
               Text(
                 name,
                 textAlign: TextAlign.center,
                 style: GoogleFonts.montserrat(
-                  // fontWeight: FontWeight.w600,
-                  fontSize: 14,
-                ),
+                    fontWeight: FontWeight.w500,
+                    fontSize: 14,
+                    letterSpacing: 2),
+                softWrap: true,
+                maxLines: 1,
+                overflow: TextOverflow.ellipsis,
               ),
             ],
           ),

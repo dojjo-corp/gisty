@@ -10,6 +10,7 @@ import 'package:provider/provider.dart';
 
 import '../../components/chat_bubble.dart';
 import '../../components/custom_back_button.dart';
+import '../user account/other_user_account_page.dart';
 
 class ChatPage extends StatefulWidget {
   final String roomId, receiverEmail;
@@ -26,6 +27,7 @@ class ChatPage extends StatefulWidget {
 class _ChatPageState extends State<ChatPage> {
   final currentUser = FirebaseAuth.instance.currentUser!;
   final messageController = TextEditingController();
+  final _scrollController = ScrollController();
   bool hasRoom = false;
   final store = FirebaseFirestore.instance;
 
@@ -46,9 +48,6 @@ class _ChatPageState extends State<ChatPage> {
   }
 
   Future<void> sendMessage() async {
-    log('room id: ${widget.roomId}');
-    log('my email: ${currentUser.email}');
-    log('receiver email: ${widget.receiverEmail}');
     try {
       if (messageController.text.isNotEmpty) {
         await FirestoreRepo().sendMessage(
@@ -56,6 +55,7 @@ class _ChatPageState extends State<ChatPage> {
           widget.roomId,
         );
         messageController.clear();
+        _scrollController.jumpTo(_scrollController.position.maxScrollExtent);
       }
     } catch (e) {
       ScaffoldMessenger.of(context).showSnackBar(
@@ -87,81 +87,86 @@ class _ChatPageState extends State<ChatPage> {
         children: [
           Padding(
             padding: const EdgeInsets.only(
-                top: 100, right: 15, bottom: 80, left: 15),
+                top: 115, right: 15, bottom: 80, left: 15),
             child: SizedBox(
               height: MediaQuery.of(context).size.height,
-              child: SingleChildScrollView(
-                child: Column(
-                  children: [
-                    // Do Not Remove This Row!!! I Know It's Empty, But For Your Own Good, Do Not Remove It From The Code!!!
-                    const Row(
-                      mainAxisAlignment: MainAxisAlignment.center,
-                      children: [
-                        Text(''),
-                      ],
-                    ),
-                    StreamBuilder(
-                      stream: FirebaseFirestore.instance
-                          .collection('Chat Rooms')
-                          .doc(widget.roomId)
-                          .snapshots(),
-                      builder: (context, snapshot) {
-                        if (!snapshot.hasData || !snapshot.data!.exists) {
-                          return const Row(
-                            mainAxisAlignment: MainAxisAlignment.center,
-                            children: [
-                              Text('Send A Text Quick!'),
-                            ],
-                          );
-                        }
-                        // iot
-
-                        if (snapshot.hasError) {
-                          return Row(
-                            mainAxisAlignment: MainAxisAlignment.center,
-                            children: [
-                              Center(
-                                child: Text(
-                                    'Error Loading Chat: ${snapshot.error}'),
-                              ),
-                            ],
-                          );
-                        }
-
-                        if (snapshot.connectionState ==
-                            ConnectionState.waiting) {
-                          return const Row(
-                            children: [
-                              Center(
-                                child: Text('Loading...'),
-                              ),
-                            ],
-                          );
-                        }
-
-                        final List messages =
-                            snapshot.data!.data()!['messages'];
-                        return Column(
-                          children: messages.map((e) {
-                            log('${e['sender']}\n${e['text']}');
-                            final alignment = e['sender'] !=
-                                    FirebaseAuth.instance.currentUser!.email
-                                ? Alignment.centerLeft
-                                : Alignment.centerRight;
-                            return Container(
-                              alignment: alignment,
-                              child: ChatBubble(
-                                text: e['text'],
-                                isIncomingText: e['sender'] !=
-                                    FirebaseAuth.instance.currentUser!.email,
-                              ),
+              child: Column(
+                children: [
+                  // Do Not Remove This Row!!! I Know It's Empty, But For Your Own Good, Do Not Remove It From The Code!!!
+                  const Row(
+                    mainAxisAlignment: MainAxisAlignment.center,
+                    children: [
+                      Text(''),
+                    ],
+                  ),
+                  Expanded(
+                    child: SingleChildScrollView(
+                      reverse: true,
+                      child: StreamBuilder(
+                        stream: FirebaseFirestore.instance
+                            .collection('Chat Rooms')
+                            .doc(widget.roomId)
+                            .snapshots(),
+                        builder: (context, snapshot) {
+                          if (!snapshot.hasData || !snapshot.data!.exists) {
+                            return const Row(
+                              mainAxisAlignment: MainAxisAlignment.center,
+                              children: [
+                                Text('Send A Text Quick!'),
+                              ],
                             );
-                          }).toList(),
-                        );
-                      },
+                          }
+                          // iot
+
+                          if (snapshot.hasError) {
+                            return Row(
+                              mainAxisAlignment: MainAxisAlignment.center,
+                              children: [
+                                Center(
+                                  child: Text(
+                                      'Error Loading Chat: ${snapshot.error}'),
+                                ),
+                              ],
+                            );
+                          }
+
+                          if (snapshot.connectionState ==
+                              ConnectionState.waiting) {
+                            return const Row(
+                              children: [
+                                Center(
+                                  child: Text('Loading...'),
+                                ),
+                              ],
+                            );
+                          }
+
+                          final List messages =
+                              snapshot.data!.data()!['messages'];
+                          return Column(
+                            children: messages.map((e) {
+                              log('${e['sender']}\n${e['text']}');
+                              final alignment = e['sender'] !=
+                                      FirebaseAuth
+                                          .instance.currentUser!.email
+                                  ? Alignment.centerLeft
+                                  : Alignment.centerRight;
+                              return Container(
+                                alignment: alignment,
+                                child: ChatBubble(
+                                  text: e['text'],
+                                  isIncomingText: e['sender'] !=
+                                      FirebaseAuth
+                                          .instance.currentUser!.email,
+                                ),
+                              );
+                            }).toList(),
+                          );
+                        },
+                      ),
                     ),
-                  ],
-                ),
+                  ),
+                ],
               ),
             ),
           ),
@@ -170,22 +175,52 @@ class _ChatPageState extends State<ChatPage> {
             left: 5,
             child: MyBackButton(),
           ),
+          // USER ACCOUNT NAME
           Positioned(
-            top: 100,
-            child: Container(
-              color: Colors.grey[200],
-              width: MediaQuery.of(context).size.width,
-              child: Row(
-                mainAxisAlignment: MainAxisAlignment.center,
-                children: [
-                  Text(
-                    receiverData!['fullname'] ?? receiverData['full-name'],
-                    style: GoogleFonts.poppins(fontWeight: FontWeight.bold),
+            top: 90,
+            child: GestureDetector(
+              onTap: () {
+                Navigator.push(
+                  context,
+                  MaterialPageRoute(
+                    builder: (context) => OtherUserAccountPage(
+                      otherUserEmail: receiverData['email'],
+                    ),
                   ),
-                ],
+                );
+              },
+              child: SizedBox(
+                width: MediaQuery.of(context).size.width,
+                child: Row(
+                  mainAxisAlignment: MainAxisAlignment.center,
+                  children: [
+                    Container(
+                      width: MediaQuery.of(context).size.width,
+                      decoration: BoxDecoration(
+                        borderRadius: BorderRadius.circular(100),
+                        color: Colors.grey[100],
+                      ),
+                      padding: const EdgeInsets.symmetric(vertical: 10),
+                      child: Row(
+                        mainAxisAlignment: MainAxisAlignment.center,
+                        children: [
+                          Text(
+                            receiverData!['fullname'],
+                            style: GoogleFonts.poppins(
+                                fontWeight: FontWeight.bold),
+                            softWrap: true,
+                            overflow: TextOverflow.ellipsis,
+                            maxLines: 1,
+                          ),
+                        ],
+                      ),
+                    ),
+                  ],
+                ),
               ),
             ),
           ),
+          // MESSAGE INPUT BOX
           Positioned(
               bottom: 0,
               child: Container(
@@ -205,6 +240,8 @@ class _ChatPageState extends State<ChatPage> {
                             border: InputBorder.none,
                             hintText: 'Message',
                           ),
+                          minLines: 1,
+                          maxLines: 5,
                         ),
                       ),
                       IconButton(

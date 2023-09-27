@@ -3,7 +3,6 @@ import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:gt_daily/authentication/components/round_profile.dart';
-import 'package:gt_daily/authentication/repository/firestore_repo.dart';
 import 'package:provider/provider.dart';
 
 import '../../components/custom_back_button.dart';
@@ -94,6 +93,7 @@ class ChatListPage extends StatelessWidget {
                     StreamBuilder(
                       stream: FirebaseFirestore.instance
                           .collection('Chat Rooms')
+                          .orderBy('last-text.time', descending: true)
                           .snapshots(),
                       builder: (context, snapshot) {
                         if (!snapshot.hasData) {
@@ -121,7 +121,7 @@ class ChatListPage extends StatelessWidget {
                             if (data['messages'].isNotEmpty) {
                               roomsData[doc.id]?['last-text'] =
                                   data['messages'].last;
-                            } 
+                            }
 
                             // retrieve receiver's email from room's [users] property
                             String receiverEmail = '';

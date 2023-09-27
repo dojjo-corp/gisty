@@ -26,8 +26,8 @@ class NotificationsPage extends StatelessWidget {
                       style: GoogleFonts.poppins(
                           fontSize: 40, fontWeight: FontWeight.bold),
                     ),
-                    SizedBox(height: 30),
-                    Text('No Notifications Yet'),
+                    const SizedBox(height: 30),
+                    const Text('No Notifications Yet'),
                   ],
                 ),
               ),

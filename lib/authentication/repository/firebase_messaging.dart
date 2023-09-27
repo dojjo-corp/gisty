@@ -1,4 +1,5 @@
 import 'dart:convert';
+import 'dart:developer';
 
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
@@ -9,9 +10,9 @@ import 'package:flutter_local_notifications/flutter_local_notifications.dart';
 import 'navigation_reo.dart';
 
 Future<void> handleBackgroundMessage(RemoteMessage message) async {
-  print('Notification Title: ${message.notification?.title}');
-  print('Notification Body: ${message.notification?.body}');
-  print('Notification Payload: ${message.data}');
+  log('Notification Title: ${message.notification?.title}');
+  log('Notification Body: ${message.notification?.body}');
+  log('Notification Payload: ${message.data}');
 }
 
 class FireMessaging {
@@ -91,7 +92,7 @@ class FireMessaging {
     _fCMToken = fCMToken;
     debugPrint(_fCMToken);
     messaging.onTokenRefresh.listen((newFcmToken) {
-      // TODO: If necessary send token to application server.
+      //  send token to application server.
       _fCMToken = newFcmToken;
       // Note: This callback is fired at each app startup and whenever a new
       // token is generated.
