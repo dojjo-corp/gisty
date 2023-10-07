@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
-import 'package:gt_daily/authentication/components/custom_back_button.dart';
+
+import 'custom_back_button.dart';
 
 class MyAppBar extends StatelessWidget implements PreferredSizeWidget {
   const MyAppBar({super.key, required this.title});

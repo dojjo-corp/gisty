@@ -6,6 +6,7 @@ import 'package:firebase_auth/firebase_auth.dart';
 import 'package:firebase_messaging/firebase_messaging.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_local_notifications/flutter_local_notifications.dart';
+import 'package:http/http.dart' as http;
 
 import 'navigation_reo.dart';
 
@@ -26,13 +27,13 @@ class FireMessaging {
     'high_importance_channel', // id
     'High Importance Notifications', // title
     description: 'This channel is used for important notifications.',
-    importance: Importance.defaultImportance,
+    importance: Importance.high,
   );
   final _localNotifications = FlutterLocalNotificationsPlugin();
 
   void handleMessage(RemoteMessage? message) {
     if (message == null) return;
-    NavigationService.instance.navigateTo('/notifications');
+    NavigationService.instance.navigateTo('/messaging');
   }
 
   Future initPushNoifications() async {
@@ -76,6 +77,16 @@ class FireMessaging {
     const settings = InitializationSettings(android: android);
     await _localNotifications.initialize(
       settings,
+      onDidReceiveNotificationResponse: (response) async {
+        try {
+          if (response.payload != null) {
+            final message = RemoteMessage.fromMap(
+              jsonDecode(response.payload!),
+            );
+            handleMessage(message);
+          }
+        } catch (e) {}
+      },
     );
 
     final platform = _localNotifications.resolvePlatformSpecificImplementation<
@@ -120,6 +131,43 @@ class FireMessaging {
           .update({
         'notifications': FieldValue.arrayUnion([notificationMap]),
       });
+    }
+  }
+
+  Future<http.Response?> sendPushNotifiation({
+    required String token,
+    required String title,
+    required String body,
+    required String type,
+  }) async {
+    try {
+      return await http.post(
+        Uri.parse('https://fcm.googleapis.com/fcm/send'),
+        headers: {
+          'Content-Type': 'application/json',
+          'Authorization':
+              'key=AAAAfXLHx9k:APA91bHTBtAIcv0OSWJk24mmuShliPB3DDJyjKskkLMpINNCQgf893G1kKCzwKsLxfwTELTpFV6EuIiTkm_Nmwklwj9bENTRwAmyafhJISXnsrpg-HvDT4yh1sM32bJDNKzYxdBHoVb0',
+        },
+        body: jsonEncode({
+          "to": token,
+          "priority": "high", // 'normal
+          "notification": {
+            "android_notification_channel": "high_importance_channel",
+            "title": title,
+            "body": body,
+          },
+          "data": {
+            "click_action": "FLUTTER_NOTIFICATION_CLICK",
+            "status": "done",
+            "type": type,
+            "title": title,
+            "body": body,
+          }
+        }),
+      );
+    } catch (e) {
+      log(e.toString());
+      return null;
     }
   }
 }

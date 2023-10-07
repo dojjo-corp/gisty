@@ -3,6 +3,7 @@ import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:provider/provider.dart';
 
+import '../pages/user account/other_user_account_page.dart';
 import '../providers/user_provider.dart';
 
 class CommentTile extends StatefulWidget {
@@ -22,26 +23,46 @@ class CommentTile extends StatefulWidget {
 class _CommentTileState extends State<CommentTile> {
   @override
   Widget build(BuildContext context) {
-    final userData = context.read<UserProvider>().getUserDataFromEmail(widget.commenter);
+    final userData =
+        context.read<UserProvider>().getUserDataFromEmail(widget.commenter);
     final DateTime fullDate = widget.timestamp.toDate();
     final date = '${fullDate.year}/${fullDate.month}/${fullDate.day}';
-    final time = '${fullDate.hour}:${fullDate.minute}';
-    return ListTile(
-      shape: RoundedRectangleBorder(
-        borderRadius: BorderRadius.circular(12),
-      ),
-      title: Text(
-        userData?['fullname'],
-        style: GoogleFonts.montserrat(fontWeight: FontWeight.w600),
-      ),
-      subtitle: Text(widget.commentText),
-      trailing: Column(
-        crossAxisAlignment: CrossAxisAlignment.end,
-        mainAxisAlignment: MainAxisAlignment.center,
-        children: [
-          Text(date,),
-          Text(time)
-        ],
+    final time = '${fullDate.hour.toString().padLeft(2,'0')}:${fullDate.minute.toString().padLeft(2,'0')}';
+    return Container(
+      margin: const EdgeInsets.only(bottom: 3),
+      child: ListTile(
+        shape: RoundedRectangleBorder(
+          borderRadius: BorderRadius.circular(12),
+          side: BorderSide(color: Colors.grey[100]!),
+        ),
+        tileColor: Colors.grey[300],
+        title: GestureDetector(
+          onTap: () {
+            Navigator.push(
+              context,
+              MaterialPageRoute(
+                builder: (context) => OtherUserAccountPage(
+                  otherUserEmail: widget.commenter,
+                ),
+              ),
+            );
+          },
+          child: Text(
+            userData?['fullname'],
+            style: GoogleFonts.montserrat(fontWeight: FontWeight.w600),
+          ),
+        ),
+        subtitle: Text(widget.commentText),
+        trailing: Column(
+          crossAxisAlignment: CrossAxisAlignment.end,
+          mainAxisAlignment: MainAxisAlignment.center,
+          children: [
+            Text(
+              date,
+            ),
+            Text(time)
+          ],
+        ),
       ),
     );
   }

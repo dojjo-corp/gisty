@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
-import 'package:gt_daily/authentication/components/custom_back_button.dart';
+
+import '../components/custom_back_button.dart';
 
 class ContactUsPage extends StatelessWidget {
   const ContactUsPage({super.key});

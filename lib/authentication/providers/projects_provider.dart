@@ -1,4 +1,4 @@
-// ignore_for_file: prefer_final_fields
+// ignore_for_file: prefer_final_fields, no_leading_underscores_for_local_identifiers
 
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
@@ -8,7 +8,6 @@ class ProjectProvider extends ChangeNotifier {
   ProjectProvider();
 
   final Map<String, dynamic> categoryMap = {
-    
     'Web & Mobile Development': {
       'color': const Color.fromARGB(255, 57, 134, 198),
       'image': 'assets/web-mobile-development.png'
@@ -46,7 +45,6 @@ class ProjectProvider extends ChangeNotifier {
       'image': 'assets/embedded-systems.png'
     },
   };
-  
 
   Map<String, Map<String, dynamic>> _allProjects = {};
   Map<String, Map<String, dynamic>> get allProjects => _allProjects;
@@ -87,117 +85,21 @@ class ProjectProvider extends ChangeNotifier {
     });
   }
 
-  // GET VARIOUS CATEGORIES OF PROJECTS
-  // WEB
-  Map<String, Map<String, dynamic>> _webProjects = {};
-  Map<String, Map<String, dynamic>> get webProjects {
-    // iterate through allProjects and get projects with 'web' as their category
-    for (var i = 0; i < _allProjects.keys.length; i++) {
-      final data = _allProjects.values.toList()[i];
-      final id = data['pid'];
-      if (data['category'] == 'web') {
-        _webProjects[id] = data;
-      }
-    }
+  Map<String, double> getProjectAnalyticsData(String pid) {
+    final Map<String, double> _projectAnalyticsData = {};
+    final Map<String, dynamic>? _projectData = _allProjects[pid];
+    final impressions = _projectData?['impressions'];
+    
+    // saves and downloads
+    _projectAnalyticsData['saved'] = _projectData?['saved'].length;
+    _projectAnalyticsData['downloads'] = _projectData?['downloaded-by'].length;
 
-    return _webProjects;
-  }
+    // impressions
+    _projectAnalyticsData['likes'] = impressions['like'].length;
+    _projectAnalyticsData['celebrate'] = impressions['celebrate'].length;
+    _projectAnalyticsData['insightful'] = impressions['insightful'].length;
+    _projectAnalyticsData['support'] = impressions['support'].length;
 
-  // MOBILE
-  Map<String, Map<String, dynamic>> _mobileProjects = {};
-  Map<String, Map<String, dynamic>> get mobileProjects {
-    // iterate through allProjects and get projects with 'web' as their category
-    for (var i = 0; i < _allProjects.keys.length; i++) {
-      final data = _allProjects.values.toList()[i];
-      final id = data['pid'];
-      if (data['category'] == 'mobile') {
-        _mobileProjects[id] = data;
-      }
-    }
-    return _mobileProjects;
-  }
-
-  // DATA
-  Map<String, Map<String, dynamic>> _dataProjects = {};
-  Map<String, Map<String, dynamic>> get dataProjects {
-    // iterate through allProjects and get projects with 'web' as their category
-    for (var i = 0; i < _allProjects.keys.length; i++) {
-      final data = _allProjects.values.toList()[i];
-      final id = data['pid'];
-      if (data['category'] == 'data') {
-        _dataProjects[id] = data;
-      }
-    }
-    return _dataProjects;
-  }
-
-  // AI
-  Map<String, Map<String, dynamic>> _aiProjects = {};
-  Map<String, Map<String, dynamic>> get aiProjects {
-    // iterate through allProjects and get projects with 'web' as their category
-    for (var i = 0; i < _allProjects.keys.length; i++) {
-      final data = _allProjects.values.toList()[i];
-      final id = data['pid'];
-      if (data['category'] == 'ai') {
-        _aiProjects[id] = data;
-      }
-    }
-    return _aiProjects;
-  }
-
-  // BUSINESS
-  Map<String, Map<String, dynamic>> _businessProjects = {};
-  Map<String, Map<String, dynamic>> get businessProjects {
-    // iterate through allProjects and get projects with 'web' as their category
-    for (var i = 0; i < _allProjects.keys.length; i++) {
-      final data = _allProjects.values.toList()[i];
-      final id = data['pid'];
-      if (data['category'] == 'business') {
-        _businessProjects[id] = data;
-      }
-    }
-    return _businessProjects;
-  }
-
-  // ENGINEERING
-  Map<String, Map<String, dynamic>> _engineeringProjects = {};
-  Map<String, Map<String, dynamic>> get engineeringProjects {
-    // iterate through allProjects and get projects with 'web' as their category
-    for (var i = 0; i < _allProjects.keys.length; i++) {
-      final data = _allProjects.values.toList()[i];
-      final id = data['pid'];
-      if (data['category'] == 'engineering') {
-        _engineeringProjects[id] = data;
-      }
-    }
-    return _engineeringProjects;
-  }
-
-  // RESEARCH
-  Map<String, Map<String, dynamic>> _researchProjects = {};
-  Map<String, Map<String, dynamic>> get researchProjects {
-    // iterate through allProjects and get projects with 'web' as their category
-    for (var i = 0; i < _allProjects.keys.length; i++) {
-      final data = _allProjects.values.toList()[i];
-      final id = data['pid'];
-      if (data['category'] == 'research') {
-        _researchProjects[id] = data;
-      }
-    }
-    return _researchProjects;
-  }
-
-  // MANAGEMENT SYSTEM
-  Map<String, Map<String, dynamic>> _managementSystemProjects = {};
-  Map<String, Map<String, dynamic>> get managementSystemProjects {
-    // iterate through allProjects and get projects with 'web' as their category
-    for (var i = 0; i < _allProjects.keys.length; i++) {
-      final data = _allProjects.values.toList()[i];
-      final id = data['pid'];
-      if (data['category'] == 'management system') {
-        _managementSystemProjects[id] = data;
-      }
-    }
-    return _managementSystemProjects;
+    return _projectAnalyticsData;
   }
 }

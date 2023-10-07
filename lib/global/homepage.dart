@@ -1,4 +1,7 @@
 // ignore: unused_import
+import 'dart:developer';
+
+import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
@@ -99,7 +102,58 @@ class _MyHomePageState extends State<MyHomePage> {
                     ),
                     tooltip: 'Projects You\'ve Supervised',
                   )
-                : const Text(''),
+                : Container(),
+            StreamBuilder(
+              stream: FirebaseFirestore.instance
+                  .collection('Notifications')
+                  .doc(FirebaseAuth.instance.currentUser?.email)
+                  .snapshots(),
+              builder: (context, snapshot) {
+                if (!snapshot.hasData || snapshot.hasError) {
+                  return IconButton(
+                    onPressed: () {
+                      Navigator.pushNamed(context, '/notifications');
+                    },
+                    icon: const Icon(Icons.notifications_rounded),
+                  );
+                }
+
+                final docSnapshot = snapshot.data!;
+                final docData = docSnapshot.data();
+                if (docData == null) {
+                  return IconButton(
+                    onPressed: () {
+                      Navigator.pushNamed(context, '/notifications');
+                    },
+                    icon: const Icon(Icons.notifications_rounded),
+                  );
+                }
+
+                final myNotifications = docData['my-notifications'] as List;
+                final unreadNum = myNotifications
+                    .where((element) => !element['read'])
+                    .toList()
+                    .length;
+                    log(unreadNum.toString());
+
+                return unreadNum < 1
+                    ? IconButton(
+                        onPressed: () {
+                          Navigator.pushNamed(context, '/notifications');
+                        },
+                        icon: const Icon(Icons.notifications_rounded),
+                      )
+                    : IconButton(
+                        onPressed: () {
+                          Navigator.pushNamed(context, '/notifications');
+                        },
+                        icon: Icon(
+                          Icons.notifications_active_rounded,
+                          color: Theme.of(context).primaryColor,
+                        ),
+                      );
+              },
+            )
           ],
         ),
         drawer: const MyDrawer(),
@@ -147,7 +201,6 @@ class _MyHomePageState extends State<MyHomePage> {
           padding: const EdgeInsets.symmetric(horizontal: 15.0),
           child: _pages[widget.pageIndex],
         ),
-        resizeToAvoidBottomInset: true,
       ),
     );
   }

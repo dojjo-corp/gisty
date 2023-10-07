@@ -1,13 +1,13 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
-import 'package:gt_daily/authentication/repository/firestore_repo.dart';
 import 'package:provider/provider.dart';
 
 import '../../components/buttons.dart';
 import '../../components/event_tile.dart';
 import '../../components/loading_list_tiles.dart';
 import '../../providers/user_provider.dart';
+import '../../repository/firestore_repo.dart';
 
 class EventsPage extends StatefulWidget {
   const EventsPage({super.key});

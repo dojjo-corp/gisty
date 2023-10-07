@@ -5,8 +5,9 @@ import 'package:firebase_storage/firebase_storage.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_pdfview/flutter_pdfview.dart';
 import 'package:google_fonts/google_fonts.dart';
-import 'package:gt_daily/authentication/components/custom_back_button.dart';
 import 'package:path_provider/path_provider.dart';
+
+import '../../components/custom_back_button.dart';
 
 class PDFViewPage extends StatefulWidget {
   final String pdfPath;
@@ -51,14 +52,17 @@ class _PDFViewPageState extends State<PDFViewPage> {
               children: [
                 Padding(
                   padding: const EdgeInsets.only(
-                      top: 100, bottom: 10, right: 20, left: 20),
+                      top: 100, bottom: 10, right: 15, left: 15),
                   child: Column(
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
                       Text(
-                        'PDF Viewer',
+                        pdfUrl,
                         style: GoogleFonts.poppins(
-                            fontSize: 40, fontWeight: FontWeight.bold),
+                            fontSize: 30, fontWeight: FontWeight.bold),
+                        softWrap: true,
+                        overflow: TextOverflow.ellipsis,
+                        maxLines: 1,
                       ),
                       Expanded(
                         child: PDFView(

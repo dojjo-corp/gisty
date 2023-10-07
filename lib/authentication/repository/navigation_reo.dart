@@ -1,8 +1,7 @@
 import 'package:flutter/material.dart';
 
 class NavigationService {
-  final GlobalKey<NavigatorState> navigatorKey =
-      GlobalKey<NavigatorState>();
+  final GlobalKey<NavigatorState> navigatorKey = GlobalKey<NavigatorState>();
 
   static NavigationService? _instance;
 
@@ -11,10 +10,10 @@ class NavigationService {
     return _instance!;
   }
 
-  NavigatorState get navigator => navigatorKey.currentState!;
+  NavigatorState? get navigator => navigatorKey.currentState;
 
   // Custom method for navigating to a named route.
-  Future<dynamic> navigateTo(String routeName, {dynamic arguments}) {
-    return navigator.pushNamed(routeName, arguments: arguments);
+  Future<dynamic>? navigateTo(String routeName, {dynamic arguments}) {
+    return navigator?.pushNamed(routeName, arguments: arguments);
   }
 }

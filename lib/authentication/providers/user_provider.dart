@@ -6,6 +6,7 @@ class UserProvider extends ChangeNotifier {
   UserProvider();
   List<Map<String, dynamic>> _allUsers = [];
   List<Map<String, dynamic>> get allUsers => _allUsers;
+  final User? currentUser = FirebaseAuth.instance.currentUser;
 
   String get userType {
     String userType = '';

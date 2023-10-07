@@ -324,9 +324,9 @@ class _RegisterPageState extends State<RegisterPage> {
                           const Text('Already Have An Account?'),
                           GestureDetector(
                             onTap: () =>
-                                Navigator.of(context).pushNamed('/login'),
+                                Navigator.of(context).popAndPushNamed('/login'),
                             child: Text(
-                              'Sign In',
+                              ' Sign In',
                               style: GoogleFonts.poppins(
                                 fontWeight: FontWeight.bold,
                               ),

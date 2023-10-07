@@ -4,11 +4,11 @@ import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_messaging/firebase_messaging.dart';
 import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
-import 'package:gt_daily/authentication/components/buttons.dart';
-import 'package:gt_daily/authentication/repository/authentication_repo.dart';
 
 import '../../../global/homepage.dart';
+import '../../components/buttons.dart';
 import '../../components/custom_back_button.dart';
+import '../../repository/authentication_repo.dart';
 
 class LoginPage extends StatefulWidget {
   const LoginPage({super.key});
@@ -199,9 +199,9 @@ class _LoginPageState extends State<LoginPage> {
                           const Text('Create New Account?'),
                           GestureDetector(
                             onTap: () =>
-                                Navigator.of(context).pushNamed('/register'),
+                                Navigator.of(context).popAndPushNamed('/register'),
                             child: Text(
-                              'Register',
+                              ' Register',
                               style: GoogleFonts.poppins(
                                 fontWeight: FontWeight.bold,
                               ),

@@ -1,11 +1,11 @@
 import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
-import 'package:gt_daily/authentication/components/custom_back_button.dart';
-import 'package:gt_daily/authentication/providers/projects_provider.dart';
-import 'package:gt_daily/authentication/repository/navigation_reo.dart';
 import 'package:provider/provider.dart';
 
+import '../../components/custom_back_button.dart';
 import '../../components/dashboard_card.dart';
+import '../../providers/projects_provider.dart';
+import '../../repository/navigation_reo.dart';
 
 class ProjectArchive extends StatelessWidget {
   const ProjectArchive({super.key});

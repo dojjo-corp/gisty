@@ -1,8 +1,8 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
-import 'package:gt_daily/authentication/components/project_grid_item.dart';
 import '../../components/custom_back_button.dart';
+import '../../components/project_grid_item.dart';
 
 class AllProjectsInACategory extends StatelessWidget {
   final String title;

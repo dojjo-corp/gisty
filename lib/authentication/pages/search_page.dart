@@ -1,12 +1,12 @@
 import 'package:flutter/material.dart';
-import 'package:google_fonts/google_fonts.dart';
 import 'package:gt_daily/authentication/pages/projects/project_details.dart';
 import 'package:gt_daily/authentication/pages/user%20account/other_user_account_page.dart';
-import 'package:gt_daily/authentication/providers/projects_provider.dart';
-import 'package:gt_daily/authentication/providers/user_provider.dart';
+import 'package:google_fonts/google_fonts.dart';
 import 'package:provider/provider.dart';
 
 import '../components/search_tile.dart';
+import '../providers/projects_provider.dart';
+import '../providers/user_provider.dart';
 
 class SearchPage extends StatefulWidget {
   const SearchPage({super.key});
@@ -24,7 +24,7 @@ class _SearchPageState extends State<SearchPage> {
     Navigator.push(
       context,
       MaterialPageRoute(
-        builder: (_) => ProjectDetails(projectData: projectData),
+        builder: (_) => ProjectDetails(projectData: projectData, goToComment: false,), 
       ),
     );
   }

@@ -1,10 +1,10 @@
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
-import 'package:google_fonts/google_fonts.dart';
-import 'package:gt_daily/authentication/components/custom_back_button.dart';
 import 'package:gt_daily/authentication/pages/projects/project_details.dart';
+import 'package:google_fonts/google_fonts.dart';
 import 'package:provider/provider.dart';
 
+import '../../components/custom_back_button.dart';
 import '../../providers/projects_provider.dart';
 
 class SupervisedProjects extends StatelessWidget {
@@ -48,6 +48,7 @@ class SupervisedProjects extends StatelessWidget {
                                     MaterialPageRoute(
                                       builder: (context) => ProjectDetails(
                                         projectData: e,
+                                        goToComment: false,
                                       ),
                                     ),
                                   );

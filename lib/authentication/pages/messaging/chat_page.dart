@@ -4,12 +4,13 @@ import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
-import 'package:gt_daily/authentication/providers/user_provider.dart';
-import 'package:gt_daily/authentication/repository/firestore_repo.dart';
 import 'package:provider/provider.dart';
 
 import '../../components/chat_bubble.dart';
 import '../../components/custom_back_button.dart';
+import '../../providers/user_provider.dart';
+import '../../repository/firebase_messaging.dart';
+import '../../repository/firestore_repo.dart';
 import '../user account/other_user_account_page.dart';
 
 class ChatPage extends StatefulWidget {
@@ -24,16 +25,19 @@ class ChatPage extends StatefulWidget {
   State<ChatPage> createState() => _ChatPageState();
 }
 
-class _ChatPageState extends State<ChatPage> {
-  final currentUser = FirebaseAuth.instance.currentUser!;
+class _ChatPageState extends State<ChatPage> with WidgetsBindingObserver {
   final messageController = TextEditingController();
-  final _scrollController = ScrollController();
   bool hasRoom = false;
+  bool isOnline = false;
+  bool isConnected = false;
   final store = FirebaseFirestore.instance;
+  final repo = FirestoreRepo();
 
   @override
   void initState() {
     super.initState();
+    WidgetsBinding.instance.addObserver(this);
+
     createChatRoom().then((value) {
       WidgetsBinding.instance.addPostFrameCallback((_) {
         setState(() {
@@ -43,33 +47,17 @@ class _ChatPageState extends State<ChatPage> {
     });
   }
 
-  Future<void> createChatRoom() async {
-    FirestoreRepo().createChatRoom(widget.receiverEmail);
-  }
-
-  Future<void> sendMessage() async {
-    try {
-      if (messageController.text.isNotEmpty) {
-        await FirestoreRepo().sendMessage(
-          messageController.text,
-          widget.roomId,
-        );
-        messageController.clear();
-        _scrollController.jumpTo(_scrollController.position.maxScrollExtent);
-      }
-    } catch (e) {
-      ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(
-          content: Text('Error Sending Message: ${e.toString()}'),
-        ),
-      );
-    }
+  @override
+  void dispose() {
+    WidgetsBinding.instance.removeObserver(this);
+    super.dispose();
   }
 
   @override
   Widget build(BuildContext context) {
     final receiverData =
         context.read<UserProvider>().getUserDataFromEmail(widget.receiverEmail);
+    final fcmToken = receiverData?['fcm-token'];
 
     if (!hasRoom) {
       return Container(
@@ -83,20 +71,25 @@ class _ChatPageState extends State<ChatPage> {
     }
 
     return Scaffold(
+      appBar: AppBar(
+        flexibleSpace: customAppBar(),
+        automaticallyImplyLeading: false,
+        elevation: 0,
+      ),
       body: Stack(
         children: [
           Padding(
-            padding: const EdgeInsets.only(
-                top: 115, right: 15, bottom: 80, left: 15),
+            padding:
+                const EdgeInsets.only(top: 15, right: 15, bottom: 55, left: 15),
             child: SizedBox(
               height: MediaQuery.of(context).size.height,
               child: Column(
                 children: [
                   // Do Not Remove This Row!!! I Know It's Empty, But For Your Own Good, Do Not Remove It From The Code!!!
-                  const Row(
+                   Row(
                     mainAxisAlignment: MainAxisAlignment.center,
                     children: [
-                      Text(''),
+                      Container(),
                     ],
                   ),
                   Expanded(
@@ -145,19 +138,17 @@ class _ChatPageState extends State<ChatPage> {
                               snapshot.data!.data()!['messages'];
                           return Column(
                             children: messages.map((e) {
-                              log('${e['sender']}\n${e['text']}');
                               final alignment = e['sender'] !=
-                                      FirebaseAuth
-                                          .instance.currentUser!.email
+                                      FirebaseAuth.instance.currentUser!.email
                                   ? Alignment.centerLeft
                                   : Alignment.centerRight;
                               return Container(
                                 alignment: alignment,
                                 child: ChatBubble(
+                                  timeSent: e['time'].toDate(),
                                   text: e['text'],
                                   isIncomingText: e['sender'] !=
-                                      FirebaseAuth
-                                          .instance.currentUser!.email,
+                                      FirebaseAuth.instance.currentUser!.email,
                                 ),
                               );
                             }).toList(),
@@ -170,65 +161,22 @@ class _ChatPageState extends State<ChatPage> {
               ),
             ),
           ),
-          const Positioned(
-            top: 40,
-            left: 5,
-            child: MyBackButton(),
-          ),
-          // USER ACCOUNT NAME
-          Positioned(
-            top: 90,
-            child: GestureDetector(
-              onTap: () {
-                Navigator.push(
-                  context,
-                  MaterialPageRoute(
-                    builder: (context) => OtherUserAccountPage(
-                      otherUserEmail: receiverData['email'],
-                    ),
-                  ),
-                );
-              },
-              child: SizedBox(
-                width: MediaQuery.of(context).size.width,
-                child: Row(
-                  mainAxisAlignment: MainAxisAlignment.center,
-                  children: [
-                    Container(
-                      width: MediaQuery.of(context).size.width,
-                      decoration: BoxDecoration(
-                        borderRadius: BorderRadius.circular(100),
-                        color: Colors.grey[100],
-                      ),
-                      padding: const EdgeInsets.symmetric(vertical: 10),
-                      child: Row(
-                        mainAxisAlignment: MainAxisAlignment.center,
-                        children: [
-                          Text(
-                            receiverData!['fullname'],
-                            style: GoogleFonts.poppins(
-                                fontWeight: FontWeight.bold),
-                            softWrap: true,
-                            overflow: TextOverflow.ellipsis,
-                            maxLines: 1,
-                          ),
-                        ],
-                      ),
-                    ),
-                  ],
-                ),
-              ),
-            ),
-          ),
+          // const Positioned(
+          //   top: 40,
+          //   left: 5,
+          //   child: MyBackButton(),
+          // ),
           // MESSAGE INPUT BOX
           Positioned(
               bottom: 0,
               child: Container(
                 width: MediaQuery.of(context).size.width,
                 decoration: BoxDecoration(
-                    color: Colors.grey[100],
-                    borderRadius:
-                        const BorderRadius.vertical(top: Radius.circular(20))),
+                  color: Colors.grey.withOpacity(0.5),
+                  borderRadius: const BorderRadius.vertical(
+                    top: Radius.circular(10),
+                  ),
+                ),
                 child: Padding(
                   padding: const EdgeInsets.symmetric(horizontal: 10.0),
                   child: Row(
@@ -245,7 +193,9 @@ class _ChatPageState extends State<ChatPage> {
                         ),
                       ),
                       IconButton(
-                          onPressed: sendMessage,
+                          onPressed: () async {
+                            await sendMessage(fcmToken);
+                          },
                           icon: Icon(Icons.arrow_circle_right_rounded,
                               color: Theme.of(context).primaryColor, size: 35))
                     ],
@@ -254,6 +204,161 @@ class _ChatPageState extends State<ChatPage> {
               ))
         ],
       ),
+    );
+  }
+
+
+  // CUSTOM METHODS
+
+  Widget customAppBar() {
+    final receiverData =
+        context.read<UserProvider>().getUserDataFromEmail(widget.receiverEmail);
+    return Padding(
+      padding: const EdgeInsets.only(left: 8.0, right: 8.0, top: 20),
+      child: Row(children: [
+        GestureDetector(
+          onTap: () {
+            Navigator.pop(context);
+          },
+          child: Row(
+            children: [
+              Icon(
+                Icons.arrow_back_ios_rounded,
+                color: Colors.grey[600],
+              ),
+              CircleAvatar(
+                child: Icon(Icons.person),
+              ),
+            ],
+          ),
+        ),
+        const SizedBox(
+          width: 10,
+        ),
+        Expanded(
+          child: GestureDetector(
+            onTap: () {
+              Navigator.push(
+                context,
+                MaterialPageRoute(
+                  builder: (context) => OtherUserAccountPage(
+                    otherUserEmail: receiverData['email'],
+                  ),
+                ),
+              );
+            },
+            child: Container(
+              decoration: const BoxDecoration(
+                color: Colors.transparent,
+              ),
+              padding: const EdgeInsets.symmetric(vertical: 5),
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                mainAxisAlignment: MainAxisAlignment.center,
+                children: [
+                  Text(
+                    receiverData!['fullname'],
+                    style: GoogleFonts.poppins(fontWeight: FontWeight.bold),
+                    softWrap: true,
+                    overflow: TextOverflow.ellipsis,
+                    maxLines: 1,
+                  ),
+                  StreamBuilder(
+                    stream: FirebaseFirestore.instance
+                        .collection('users')
+                        .doc(FirebaseAuth.instance.currentUser!.uid)
+                        .snapshots(),
+                    builder: (context, snapshot) {
+                      if (!snapshot.hasData) {
+                        return const Text('Loading...');
+                      }
+
+                      if (snapshot.hasError) {
+                        return const Text('Connecting...');
+                      }
+
+                      return Text(
+                        snapshot.data!.data()!['new'].toString(),
+                        style: GoogleFonts.montserrat(
+                            color: Colors.grey, fontSize: 12),
+                      );
+                    },
+                  )
+                ],
+              ),
+            ),
+          ),
+        ),
+        IconButton(
+          onPressed: showChatOptions,
+          icon: const Icon(Icons.more_vert),
+        ),
+      ],),
+    );
+  }
+
+  Future<void> createChatRoom() async {
+    FirestoreRepo().createChatRoom(widget.receiverEmail);
+  }
+
+  Future<void> sendMessage(String token) async {
+    try {
+      if (messageController.text.isNotEmpty) {
+        String text = messageController.text;
+        String senderFullName =
+            getUserFullname(FirebaseAuth.instance.currentUser!.email!);
+        messageController.clear();
+        // sned to firstore
+        await repo.sendMessage(
+          text,
+          widget.roomId,
+        );
+        await repo.sendNotificationToFirestore(
+          to: widget.receiverEmail,
+          type: 'chat',
+          title: senderFullName,
+          body: text,
+        );
+        // notify receiver's device of message
+        final response = await FireMessaging().sendPushNotifiation(
+          token: token,
+          title: senderFullName,
+          body: text,
+          type: 'chat',
+        );
+        log(response!.statusCode.toString());
+        log(token);
+      }
+    } catch (e) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(
+          content: Text('Error Sending Message: ${e.toString()}'),
+        ),
+      );
+    }
+  }
+
+  String getUserFullname(String email) {
+    return context
+        .read<UserProvider>()
+        .getUserDataFromEmail(email)?['fullname'];
+  }
+
+  showChatOptions() {
+    showMenu<Widget>(
+      context: context,
+      position: RelativeRect.fromDirectional(
+          textDirection: TextDirection.ltr,
+          start: MediaQuery.of(context).size.width * 0.5,
+          top: 50,
+          end: 40,
+          bottom: 100),
+      items: [
+        PopupMenuItem(child: Text('Option 1')),
+        PopupMenuItem(child: Text('Option 1')),
+        PopupMenuItem(child: Text('Option 1')),
+        PopupMenuItem(child: Text('Option 1'))
+      ],
     );
   }
 }

@@ -40,8 +40,9 @@ class _RecentChatTileState extends State<RecentChatTile> {
     }
     final lastTextSender = widget.lastTextData?['sender'];
     final DateTime tempTime = widget.lastTextData?['time'].toDate();
-    final date = '${tempTime.day}/${tempTime.month}/${tempTime.year}';
-    final time = '${tempTime.hour}:${tempTime.minute}';
+    final date = '${tempTime.day} ${tempTime.month}, ${tempTime.year}';
+    final time =
+        '${tempTime.hour.toString().padLeft(2, '0')}:${tempTime.minute.toString().padLeft(2, '0')}';
     final lastTextSenderName = context
         .watch<UserProvider>()
         .getUserDataFromEmail(lastTextSender)?['fullname'];
@@ -68,34 +69,30 @@ class _RecentChatTileState extends State<RecentChatTile> {
             tileColor: Colors.white70,
             leading: CircleAvatar(
               child: receiverData['user-type'] == 'student'
-                  ? Icon(Icons.school, color: Colors.yellow[800])
-                  : Icon(
+                  ? const Icon(Icons.school, color: Colors.blue)
+                  : const Icon(
                       Icons.work_rounded,
-                      color: Colors.yellow[800],
+                      color: Colors.blue,
                     ),
             ),
             title: Text(
               receiverData['fullname'],
-              style: GoogleFonts.poppins(
-                  fontWeight: FontWeight.w600, color: Colors.yellow[800]),
+              style: GoogleFonts.poppins(fontWeight: FontWeight.w500),
             ),
             subtitle: Row(
               children: [
-                Flexible(
-                  child: Text(
-                    lastTextSenderName.contains(
-                            FirebaseAuth.instance.currentUser!.displayName)
-                        ? 'You '
-                        : '${lastTextSenderName.split(' ')[0]} ',
-                    style: GoogleFonts.poppins(
-                      fontWeight: FontWeight.w600,
-                      color: Colors.yellow[800]?.withOpacity(0.5),
-                    ),
+                Text(
+                  lastTextSenderName.contains(
+                          FirebaseAuth.instance.currentUser!.displayName)
+                      ? 'You '
+                      : '${lastTextSenderName.split(' ')[0]} ',
+                  style: GoogleFonts.poppins(
+                    color: Colors.blue.withOpacity(0.5),
                   ),
                 ),
-                Flexible(
+                Expanded(
                   child: Text(widget.lastTextData?['text'],
-                      maxLines: 2,
+                      maxLines: 1,
                       softWrap: true,
                       overflow: TextOverflow.ellipsis),
                 ),
@@ -106,13 +103,11 @@ class _RecentChatTileState extends State<RecentChatTile> {
               children: [
                 Text(
                   date,
-                  style: TextStyle(
-                      fontWeight: FontWeight.w600,
-                      color: Colors.yellow[800]?.withOpacity(0.7)),
+                  style: const TextStyle(fontWeight: FontWeight.w600, fontSize: 9),
                 ),
                 Text(
                   time,
-                  style: TextStyle(color: Colors.yellow[800]?.withOpacity(0.7)),
+                  style: const TextStyle(fontSize: 9),
                 )
               ],
             )),

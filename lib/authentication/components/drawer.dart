@@ -1,13 +1,14 @@
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
-import 'package:gt_daily/authentication/pages/user%20authentication/login.dart';
-import 'package:gt_daily/authentication/providers/user_provider.dart';
-import 'package:gt_daily/global/homepage.dart';
 import 'package:provider/provider.dart';
 
+import '../../global/homepage.dart';
+import '../pages/analytics/project_analysis.dart';
 import '../pages/messaging/chat_list_page.dart';
 import '../pages/projects/project_archive.dart';
+import '../pages/user authentication/login.dart';
+import '../providers/user_provider.dart';
 
 class MyDrawer extends StatelessWidget {
   const MyDrawer({super.key});
@@ -42,25 +43,6 @@ class MyDrawer extends StatelessWidget {
                   color: Theme.of(context).primaryColor,
                 ),
               ),
-              userType == 'university professional'
-                  ? GestureDetector(
-                      onTap: () {
-                        // Navigate to project archive
-                        Navigator.popAndPushNamed(context, '/add-project');
-                      },
-                      child: ListTile(
-                        leading: Icon(
-                          Icons.add,
-                          color: Theme.of(context).primaryColor,
-                        ),
-                        title: Text(
-                          'Add Project',
-                          style: GoogleFonts.poppins(
-                              color: Theme.of(context).primaryColor),
-                        ),
-                      ),
-                    )
-                  : const Text(''),
               GestureDetector(
                 onTap: () {
                   // Navigate to project archive
@@ -75,10 +57,29 @@ class MyDrawer extends StatelessWidget {
                     Icons.archive_rounded,
                     color: Theme.of(context).primaryColor,
                   ),
-                  title: Text(
+                  title: const Text(
                     'Project Archive',
-                    style: GoogleFonts.poppins(
-                        color: Theme.of(context).primaryColor),
+                  ),
+                ),
+              ),
+              GestureDetector(
+                onTap: () {
+                  Navigator.push(
+                    context,
+                    MaterialPageRoute(
+                      builder: (context) => const AllProjectsAnalytics(
+                        rawData: {},
+                      ),
+                    ),
+                  );
+                },
+                child: ListTile(
+                  leading: Icon(
+                    Icons.data_exploration,
+                    color: Theme.of(context).primaryColor,
+                  ),
+                  title: const Text(
+                    'Analytics',
                   ),
                 ),
               ),
@@ -92,13 +93,32 @@ class MyDrawer extends StatelessWidget {
                     Icons.bookmark,
                     color: Theme.of(context).primaryColor,
                   ),
-                  title: Text(
+                  title: const Text(
                     'Saved Projects',
-                    style: GoogleFonts.poppins(
-                        color: Theme.of(context).primaryColor),
                   ),
                 ),
               ),
+              userType != 'student'
+                  ? GestureDetector(
+                      onTap: () {
+                        // Navigate to internship page
+                        Navigator.push(
+                            context,
+                            MaterialPageRoute(
+                              builder: (context) => ChatListPage(),
+                            ));
+                      },
+                      child: ListTile(
+                        leading: Icon(
+                          Icons.message_rounded,
+                          color: Theme.of(context).primaryColor,
+                        ),
+                        title: const Text(
+                          'Add Job/Internship',
+                        ),
+                      ),
+                    )
+                  : Container(),
               GestureDetector(
                 onTap: () {
                   // Navigate to internship page
@@ -113,36 +133,34 @@ class MyDrawer extends StatelessWidget {
                     Icons.work_rounded,
                     color: Theme.of(context).primaryColor,
                   ),
-                  title: Text(
+                  title: const Text(
                     'View Internships Or Jobs',
-                    style: GoogleFonts.poppins(
-                        color: Theme.of(context).primaryColor),
                   ),
                 ),
               ),
               userType != 'student'
-                  ?
-              GestureDetector(
-                onTap: () {
-                  // Navigate to internship page
-                  Navigator.push(
-                      context,
-                      MaterialPageRoute(
-                        builder: (context) =>  ChatListPage(),
-                      ));
-                },
-                child: ListTile(
-                  leading: Icon(
-                    Icons.message_rounded,
-                    color: Theme.of(context).primaryColor,
-                  ),
-                  title: Text(
-                    'Messages',
-                    style: GoogleFonts.poppins(
-                        color: Theme.of(context).primaryColor),
-                  ),
-                ),
-              ):Container(),
+                  ? GestureDetector(
+                      onTap: () {
+                        // Navigate to internship page
+                        Navigator.push(
+                            context,
+                            MaterialPageRoute(
+                              builder: (context) => ChatListPage(),
+                            ));
+                      },
+                      child: ListTile(
+                        leading: Icon(
+                          Icons.message_rounded,
+                          color: Theme.of(context).primaryColor,
+                        ),
+                        title: const Badge(
+                          child: Text(
+                            'Messages',
+                          ),
+                        ),
+                      ),
+                    )
+                  : Container(),
               GestureDetector(
                 onTap: () {
                   // Navigate to About us
@@ -153,10 +171,8 @@ class MyDrawer extends StatelessWidget {
                     Icons.info_rounded,
                     color: Theme.of(context).primaryColor,
                   ),
-                  title: Text(
+                  title: const Text(
                     'About Us',
-                    style: GoogleFonts.poppins(
-                        color: Theme.of(context).primaryColor),
                   ),
                 ),
               ),
@@ -170,10 +186,8 @@ class MyDrawer extends StatelessWidget {
                     Icons.contact_mail_rounded,
                     color: Theme.of(context).primaryColor,
                   ),
-                  title: Text(
+                  title: const Text(
                     'Contact Us',
-                    style: GoogleFonts.poppins(
-                        color: Theme.of(context).primaryColor),
                   ),
                 ),
               ),

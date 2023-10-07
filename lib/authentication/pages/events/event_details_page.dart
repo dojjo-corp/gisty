@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
-import 'package:gt_daily/authentication/components/custom_back_button.dart';
+
+import '../../components/custom_back_button.dart';
 
 class EventDetailsPage extends StatelessWidget {
   final Map<String, dynamic> eventDetails;

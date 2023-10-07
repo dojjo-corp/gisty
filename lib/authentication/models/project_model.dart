@@ -43,6 +43,13 @@ class ProjectModel {
       'project-document': projectDocumentFileName,
       'comments': [],
       'saved': [],
+      'downloaded-by': [],
+      'impressions': {
+        'like': [],
+        'support': [],
+        'celebrate': [],
+        'insightful': [],
+      },
       'time-added': Timestamp.now()
     };
   }

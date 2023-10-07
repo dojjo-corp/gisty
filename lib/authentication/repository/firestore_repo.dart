@@ -25,6 +25,7 @@ class FirestoreRepo {
         'departmentId': departmentId,
         'download-id': [],
         'saved-projects': [],
+        'online': true,
       });
     } on FirebaseException {
       rethrow;
@@ -39,17 +40,23 @@ class FirestoreRepo {
     String contact = '',
     String departmentId = '',
   }) async {
+    final userData = {
+      'fullname': fullName,
+      'username': userName,
+      'email': email,
+      'user-type': 'University Professional',
+      'contact': contact,
+      'department-id': departmentId,
+      'download-id': [],
+      'saved-projects': [],
+      'online': true,
+    };
+    // ADMIN
+    if (email == '') {
+      userData['admin'] = true;
+    }
     try {
-      await store.collection('users').doc(uid).set({
-        'fullname': fullName,
-        'username': userName,
-        'email': email,
-        'user-type': 'University Professional',
-        'contact': contact,
-        'department-id': departmentId,
-        'download-id': [],
-        'saved-projects': [],
-      });
+      await store.collection('users').doc(uid).set(userData);
     } on FirebaseException {
       rethrow;
     } catch (e) {
@@ -75,6 +82,7 @@ class FirestoreRepo {
         'organisation-id': organisationId,
         'download-id': [],
         'saved-projects': [],
+        'online': true,
       });
     } on FirebaseException {
       rethrow;
@@ -190,6 +198,32 @@ class FirestoreRepo {
         'messages': FieldValue.arrayUnion([messageData]),
         'last-text': messageData
       });
+    } catch (e) {
+      rethrow;
+    }
+  }
+
+  Future<void> sendNotificationToFirestore({
+    required String to,
+    required String type,
+    required String title,
+    required String body,
+  }) async {
+    final String from = FirebaseAuth.instance.currentUser!.email!;
+    final notificationData = {
+      'title': title,
+      'body': body,
+      'from': from,
+      'type': type,
+      'read': false,
+    };
+    try {
+      await store.collection('Notifications').doc(to).set(
+        {
+          'my-notifications': FieldValue.arrayUnion([notificationData])
+        },
+        SetOptions(merge: true),
+      );
     } catch (e) {
       rethrow;
     }

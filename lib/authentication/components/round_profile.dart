@@ -31,12 +31,13 @@ class RoundProfile extends StatelessWidget {
                           ? Icons.school_rounded
                           : Icons.work_rounded,
                       size: 30,
-                      color: Colors.yellow[800],
+                      color: Colors.blue,
                     ),
             ),
             Text(
               userName,
-              style: GoogleFonts.montserrat(fontSize: 12),
+              style: GoogleFonts.montserrat(fontSize: 12,),
+              
             )
           ],
         ),

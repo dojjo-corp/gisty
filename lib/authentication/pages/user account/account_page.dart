@@ -3,11 +3,11 @@
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
-import 'package:gt_daily/authentication/components/buttons.dart';
-import 'package:gt_daily/authentication/repository/firestore_repo.dart';
 import 'package:provider/provider.dart';
 
+import '../../components/buttons.dart';
 import '../../providers/user_provider.dart';
+import '../../repository/firestore_repo.dart';
 import '../user authentication/login.dart';
 
 class UserAccountPage extends StatefulWidget {

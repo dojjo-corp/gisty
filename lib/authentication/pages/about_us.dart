@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
-import 'package:gt_daily/authentication/components/buttons.dart';
-import 'package:gt_daily/authentication/components/custom_back_button.dart';
+
+import '../components/buttons.dart';
+import '../components/custom_back_button.dart';
 
 class AboutUsPage extends StatelessWidget {
   const AboutUsPage({super.key});

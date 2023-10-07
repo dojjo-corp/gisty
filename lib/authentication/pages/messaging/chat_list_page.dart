@@ -2,11 +2,11 @@ import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
-import 'package:gt_daily/authentication/components/round_profile.dart';
 import 'package:provider/provider.dart';
 
 import '../../components/custom_back_button.dart';
 import '../../components/recent_chat_tile.dart';
+import '../../components/round_profile.dart';
 import '../../providers/user_provider.dart';
 import 'chat_page.dart';
 

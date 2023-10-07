@@ -1,10 +1,10 @@
 import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
-import 'package:gt_daily/authentication/providers/projects_provider.dart';
 import 'package:provider/provider.dart';
 
 import '../../components/custom_back_button.dart';
 import '../../components/project_grid_item.dart';
+import '../../providers/projects_provider.dart';
 
 class SavedProjects extends StatefulWidget {
   const SavedProjects({super.key});

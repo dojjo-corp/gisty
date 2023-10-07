@@ -6,9 +6,9 @@ import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
-import 'package:gt_daily/authentication/components/buttons.dart';
 
 import '../../../global/homepage.dart';
+import '../../components/buttons.dart';
 import '../../components/custom_back_button.dart';
 
 class EnterPhonePage extends StatelessWidget {

@@ -5,7 +5,6 @@ import 'package:firebase_storage/firebase_storage.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:google_fonts/google_fonts.dart';
-import 'package:gt_daily/authentication/repository/firestore_repo.dart';
 import 'package:file_picker/file_picker.dart';
 // ignore: depend_on_referenced_packages
 import 'package:path/path.dart';
@@ -15,6 +14,7 @@ import '../../components/buttons.dart';
 import '../../components/custom_back_button.dart';
 import '../../models/project_model.dart';
 import '../../providers/projects_provider.dart';
+import '../../repository/firestore_repo.dart';
 
 class NewProjectPage extends StatefulWidget {
   const NewProjectPage({super.key});
