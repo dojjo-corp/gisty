@@ -11,7 +11,7 @@ class BarData {
     barData = rawDataMap.values
         .map(
           (value) =>
-              IndividualBar(x: 0, y: value['toY'], barColor: value['color']),
+              IndividualBar(x: value['x'], y: value['toY'], barColor: value['color']),
         )
         .toList();
   }

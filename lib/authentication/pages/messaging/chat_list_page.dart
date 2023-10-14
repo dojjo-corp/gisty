@@ -7,6 +7,7 @@ import 'package:provider/provider.dart';
 import '../../components/custom_back_button.dart';
 import '../../components/recent_chat_tile.dart';
 import '../../components/round_profile.dart';
+import '../../helper_methods.dart/messaging.dart';
 import '../../providers/user_provider.dart';
 import 'chat_page.dart';
 
@@ -14,14 +15,6 @@ class ChatListPage extends StatelessWidget {
   ChatListPage({super.key});
 
   final currentUser = FirebaseAuth.instance.currentUser;
-
-  String getRoomId(String receiverEmail) {
-    String roomId = '';
-    final ids = [currentUser!.email, receiverEmail];
-    ids.sort();
-    roomId = ids.join();
-    return roomId;
-  }
 
   @override
   Widget build(BuildContext context) {
@@ -111,16 +104,21 @@ class ChatListPage extends StatelessWidget {
                         }
 
                         final docs = snapshot.data!.docs;
-                        Map<String, Map<String, dynamic>> roomsData = {};
+                        Map<String, Map<String, dynamic>> allRoomsData = {};
                         for (var doc in docs) {
                           // Only Display Rooms With Current User's Email
                           if (doc.id.contains(currentUser!.email!)) {
                             final data = doc.data();
-                            roomsData[doc.id] = data;
+                            final messages = data['messages'] as List;
+                            allRoomsData[doc.id] = data;
+
                             // Check For Last Message Sent In Room
-                            if (data['messages'].isNotEmpty) {
-                              roomsData[doc.id]?['last-text'] =
-                                  data['messages'].last;
+                            if (messages.isNotEmpty) {
+                              allRoomsData[doc.id]?['last-text'] =
+                                  messages.last['read'];
+                              // get last message's read status
+                              allRoomsData[doc.id]?['last-read'] =
+                                  messages.last['read'];
                             }
 
                             // retrieve receiver's email from room's [users] property
@@ -130,17 +128,22 @@ class ChatListPage extends StatelessWidget {
                                 receiverEmail = email;
                               }
                             }
-                            roomsData[doc.id]!['receiver'] = receiverEmail;
+                            allRoomsData[doc.id]!['receiver'] = receiverEmail;
                           }
                         }
 
                         return Column(
-                          children: roomsData.values.map(
-                            (value) {
-                              return value['messages'].isNotEmpty
+                          children: allRoomsData.values.map(
+                            (singleRoomData) {
+                              return singleRoomData['messages'].isNotEmpty
                                   ? RecentChatTile(
-                                      receiver: value['receiver']!,
-                                      lastTextData: value['last-text']!,
+                                      hasUnreadText: singleRoomData['last-text']
+                                                  ['sender'] ==
+                                              singleRoomData['receiver'] &&
+                                          !singleRoomData['last-read'],
+                                      receiver: singleRoomData['receiver']!,
+                                      lastTextData:
+                                          singleRoomData['last-text']!,
                                     )
                                   : Container();
                             },
@@ -153,7 +156,7 @@ class ChatListPage extends StatelessWidget {
               ),
             ),
           ),
-          const Positioned(top: 40, left: 5, child: MyBackButton())
+          const MyBackButton()
         ],
       ),
     );

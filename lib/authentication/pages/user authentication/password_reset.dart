@@ -80,11 +80,7 @@ class _PasswordResetPageState extends State<PasswordResetPage> {
               ),
             ),
           ),
-          const Positioned(
-            top: 40,
-            left: 5,
-            child: MyBackButton(),
-          )
+          const MyBackButton()
         ],
       ),
       floatingActionButton: _isLoading ? const LinearProgressIndicator() : null,

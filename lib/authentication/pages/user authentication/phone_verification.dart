@@ -4,14 +4,14 @@ import 'package:gt_daily/authentication/components/buttons.dart';
 
 import '../../components/custom_back_button.dart';
 
-class PhoneverificationPage extends StatefulWidget {
-  const PhoneverificationPage({super.key});
+class PhoneVerificationPage extends StatefulWidget {
+  const PhoneVerificationPage({super.key});
 
   @override
-  State<PhoneverificationPage> createState() => _PhoneverificationPageState();
+  State<PhoneVerificationPage> createState() => _PhoneVerificationPageState();
 }
 
-class _PhoneverificationPageState extends State<PhoneverificationPage> {
+class _PhoneVerificationPageState extends State<PhoneVerificationPage> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -100,11 +100,7 @@ class _PhoneverificationPageState extends State<PhoneverificationPage> {
               ),
             ),
           ),
-          const Positioned(
-            top: 40,
-            left: 5,
-            child: MyBackButton(),
-          )
+          const MyBackButton()
         ],
       ),
     );

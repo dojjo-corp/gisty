@@ -13,6 +13,8 @@ class SupervisedProjects extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final allProjects = Provider.of<ProjectProvider>(context).allProjects;
+
+    // get supervised projects for this university professional
     List<Map<String, dynamic>> supervisedProjects = [];
     for (var project in allProjects.values.toList()) {
       if (project['supervisor-email'] ==
@@ -39,6 +41,7 @@ class SupervisedProjects extends StatelessWidget {
                           fontSize: 40, fontWeight: FontWeight.bold),
                     ),
                     const SizedBox(height: 30),
+                    supervisedProjects.isNotEmpty?
                     Column(
                       children: supervisedProjects
                           .map((e) => GestureDetector(
@@ -72,19 +75,15 @@ class SupervisedProjects extends StatelessWidget {
                                     const SizedBox(height: 10)
                                   ],
                                 ),
-                              ))
+                              ),)
                           .toList(),
-                    )
+                    ):const Text('You Have Not Supervised Any Project Yet')
                   ],
                 ),
               ),
             ),
           ),
-          const Positioned(
-            top: 40,
-            left: 10,
-            child: MyBackButton(),
-          )
+          const MyBackButton()
         ],
       ),
     );

@@ -18,13 +18,17 @@ class SearchPage extends StatefulWidget {
 class _SearchPageState extends State<SearchPage> {
   final searchController = TextEditingController();
   Set<Map<String, dynamic>> searchResults = {};
+  Color prefixIconColor = Colors.grey;
 
   // Navigate To Project Details Page
   void goToProjectDetails(Map<String, dynamic> projectData) {
     Navigator.push(
       context,
       MaterialPageRoute(
-        builder: (_) => ProjectDetails(projectData: projectData, goToComment: false,), 
+        builder: (_) => ProjectDetails(
+          projectData: projectData,
+          goToComment: false,
+        ),
       ),
     );
   }
@@ -43,8 +47,10 @@ class _SearchPageState extends State<SearchPage> {
 
   @override
   Widget build(BuildContext context) {
-    final allProjects =
-        Provider.of<ProjectProvider>(context, listen: false).allProjects.values;
+    final allProjects = Provider.of<ProjectProvider>(context, listen: false)
+        .allProjects
+        .values
+        .toList();
     final allUsers = Provider.of<UserProvider>(context, listen: false).allUsers;
 
     List<Map<String, dynamic>> getSearchResults(String searchTerm) {
@@ -54,7 +60,7 @@ class _SearchPageState extends State<SearchPage> {
       });
 
       // PROJECT SEARCH RESULTS
-      for (var map in allProjects.toList()) {
+      for (var map in allProjects) {
         if (map['title'].toLowerCase().contains(searchTerm.toLowerCase())) {
           map['type'] = 'project';
           setState(() {
@@ -88,53 +94,64 @@ class _SearchPageState extends State<SearchPage> {
     return ListView(
       children: [
         const SizedBox(height: 10),
-        Padding(
-          padding: const EdgeInsets.symmetric(horizontal: 20),
-          child: TextField(
-            controller: searchController,
-            decoration: InputDecoration(
-              hintText: 'Search',
-              prefixIcon: const Icon(Icons.search),
-              border: OutlineInputBorder(
-                borderRadius: BorderRadius.circular(10),
-              ),
+        TextField(
+          controller: searchController,
+          decoration: InputDecoration(
+            filled: true,
+            fillColor: Colors.white,
+            border: OutlineInputBorder(
+              borderSide: BorderSide.none,
+              borderRadius: BorderRadius.circular(12),
             ),
-            onChanged: (value) {
-              if (value.isNotEmpty) {
-                getSearchResults(value);
-              } else {
-                clearSearchResults();
-              }
-            },
+            prefixIcon: const Icon(Icons.search_rounded),
+            prefixIconColor: prefixIconColor,
+            hintText: 'Search',
           ),
+          onChanged: (value) {
+            if (value.isNotEmpty) {
+              setState(() {
+                prefixIconColor = Theme.of(context).primaryColor;
+              });
+              getSearchResults(value);
+            } else {
+              setState(() {
+                prefixIconColor = Colors.grey;
+              });
+              clearSearchResults();
+            }
+          },
         ),
         const SizedBox(height: 10),
         searchResults.isNotEmpty
-            ? Text('Results',
+            ? Text(
+                'Results',
                 style: GoogleFonts.poppins(
-                    fontWeight: FontWeight.w600, fontSize: 20))
-            : const Center(child: Text('You Can Search For Users And Projects')),
-        Padding(
-          padding: const EdgeInsets.symmetric(horizontal: 15),
-          child: Column(
-              children: searchResults
-                  .map((searchData) => GestureDetector(
-                        onTap: () {
-                          searchData['type'] == 'project'
-                              ? goToProjectDetails(searchData)
-                              : goToOtherUserAccountPage(searchData['email']);
-                        },
-                        child: Column(
-                          children: [
-                            SearchTile(
-                              searchMap: searchData,
-                              type: searchData['type'],
-                            ),
-                            const SizedBox(height: 10)
-                          ],
-                        ),
-                      ))
-                  .toList()),
+                    fontWeight: FontWeight.w600, fontSize: 20),
+              )
+            : const Center(
+                child: Text('You Can Search For Users And Projects'),
+              ),
+        Column(
+          children: searchResults
+              .map(
+                (searchData) => GestureDetector(
+                  onTap: () {
+                    searchData['type'] == 'project'
+                        ? goToProjectDetails(searchData)
+                        : goToOtherUserAccountPage(searchData['email']);
+                  },
+                  child: Column(
+                    children: [
+                      SearchTile(
+                        searchMap: searchData,
+                        type: searchData['type'],
+                      ),
+                      const SizedBox(height: 3)
+                    ],
+                  ),
+                ),
+              )
+              .toList(),
         ),
       ],
     );

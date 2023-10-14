@@ -96,12 +96,14 @@ class _RegisterPageState extends State<RegisterPage> {
               .doc(userCredential.user!.uid)
               .update({'fcm-token': fcmToken});
           await user?.updateDisplayName(nameController.text.split(' ')[0]);
-          // ignore: use_build_context_synchronously
-          Navigator.of(context).pushReplacement(
-            MaterialPageRoute(
-              builder: (context) => EnterPhonePage(),
-            ),
-          );
+          if (context.mounted) {
+            // ignore: use_build_context_synchronously
+            Navigator.of(context).pushReplacement(
+              MaterialPageRoute(
+                builder: (context) => EnterPhonePage(),
+              ),
+            );
+          }
         }
       } catch (e) {
         ScaffoldMessenger.of(context).showSnackBar(
@@ -340,11 +342,7 @@ class _RegisterPageState extends State<RegisterPage> {
               ),
             ),
           ),
-          const Positioned(
-            top: 40,
-            left: 5,
-            child: MyBackButton(),
-          )
+          const MyBackButton()
         ],
       ),
     );

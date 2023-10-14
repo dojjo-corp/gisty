@@ -7,7 +7,7 @@ import 'package:google_fonts/google_fonts.dart';
 import 'package:provider/provider.dart';
 
 import '../../components/chat_bubble.dart';
-import '../../components/custom_back_button.dart';
+import '../../helper_methods.dart/profile.dart';
 import '../../providers/user_provider.dart';
 import '../../repository/firebase_messaging.dart';
 import '../../repository/firestore_repo.dart';
@@ -71,11 +71,7 @@ class _ChatPageState extends State<ChatPage> with WidgetsBindingObserver {
     }
 
     return Scaffold(
-      appBar: AppBar(
-        flexibleSpace: customAppBar(),
-        automaticallyImplyLeading: false,
-        elevation: 0,
-      ),
+      appBar: customAppBar(),
       body: Stack(
         children: [
           Padding(
@@ -86,7 +82,7 @@ class _ChatPageState extends State<ChatPage> with WidgetsBindingObserver {
               child: Column(
                 children: [
                   // Do Not Remove This Row!!! I Know It's Empty, But For Your Own Good, Do Not Remove It From The Code!!!
-                   Row(
+                  Row(
                     mainAxisAlignment: MainAxisAlignment.center,
                     children: [
                       Container(),
@@ -96,7 +92,7 @@ class _ChatPageState extends State<ChatPage> with WidgetsBindingObserver {
                     child: SingleChildScrollView(
                       reverse: true,
                       child: StreamBuilder(
-                        stream: FirebaseFirestore.instance
+                        stream: store
                             .collection('Chat Rooms')
                             .doc(widget.roomId)
                             .snapshots(),
@@ -138,18 +134,12 @@ class _ChatPageState extends State<ChatPage> with WidgetsBindingObserver {
                               snapshot.data!.data()!['messages'];
                           return Column(
                             children: messages.map((e) {
-                              final alignment = e['sender'] !=
-                                      FirebaseAuth.instance.currentUser!.email
-                                  ? Alignment.centerLeft
-                                  : Alignment.centerRight;
-                              return Container(
-                                alignment: alignment,
-                                child: ChatBubble(
-                                  timeSent: e['time'].toDate(),
-                                  text: e['text'],
-                                  isIncomingText: e['sender'] !=
-                                      FirebaseAuth.instance.currentUser!.email,
-                                ),
+                              return ChatBubble(
+                                isDeleted: e['deleted'] ?? false,
+                                timeSent: e['time'].toDate(),
+                                text: e['text'],
+                                isIncomingText: e['sender'] !=
+                                    FirebaseAuth.instance.currentUser!.email,
                               );
                             }).toList(),
                           );
@@ -161,11 +151,6 @@ class _ChatPageState extends State<ChatPage> with WidgetsBindingObserver {
               ),
             ),
           ),
-          // const Positioned(
-          //   top: 40,
-          //   left: 5,
-          //   child: MyBackButton(),
-          // ),
           // MESSAGE INPUT BOX
           Positioned(
               bottom: 0,
@@ -207,93 +192,110 @@ class _ChatPageState extends State<ChatPage> with WidgetsBindingObserver {
     );
   }
 
-
   // CUSTOM METHODS
 
-  Widget customAppBar() {
+  AppBar customAppBar() {
     final receiverData =
         context.read<UserProvider>().getUserDataFromEmail(widget.receiverEmail);
-    return Padding(
-      padding: const EdgeInsets.only(left: 8.0, right: 8.0, top: 20),
-      child: Row(children: [
-        GestureDetector(
-          onTap: () {
-            Navigator.pop(context);
-          },
-          child: Row(
-            children: [
-              Icon(
-                Icons.arrow_back_ios_rounded,
-                color: Colors.grey[600],
-              ),
-              CircleAvatar(
-                child: Icon(Icons.person),
-              ),
-            ],
-          ),
+    return AppBar(
+      centerTitle: false,
+      leading: GestureDetector(
+        onTap: () {
+          Navigator.pop(context);
+        },
+        child: Icon(
+          Icons.arrow_back_ios_rounded,
+          color: Colors.grey[600],
         ),
-        const SizedBox(
-          width: 10,
-        ),
-        Expanded(
-          child: GestureDetector(
-            onTap: () {
-              Navigator.push(
-                context,
-                MaterialPageRoute(
-                  builder: (context) => OtherUserAccountPage(
-                    otherUserEmail: receiverData['email'],
-                  ),
-                ),
-              );
-            },
-            child: Container(
-              decoration: const BoxDecoration(
-                color: Colors.transparent,
-              ),
-              padding: const EdgeInsets.symmetric(vertical: 5),
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                mainAxisAlignment: MainAxisAlignment.center,
-                children: [
-                  Text(
-                    receiverData!['fullname'],
-                    style: GoogleFonts.poppins(fontWeight: FontWeight.bold),
-                    softWrap: true,
-                    overflow: TextOverflow.ellipsis,
-                    maxLines: 1,
-                  ),
-                  StreamBuilder(
-                    stream: FirebaseFirestore.instance
-                        .collection('users')
-                        .doc(FirebaseAuth.instance.currentUser!.uid)
-                        .snapshots(),
-                    builder: (context, snapshot) {
-                      if (!snapshot.hasData) {
-                        return const Text('Loading...');
-                      }
-
-                      if (snapshot.hasError) {
-                        return const Text('Connecting...');
-                      }
-
-                      return Text(
-                        snapshot.data!.data()!['new'].toString(),
-                        style: GoogleFonts.montserrat(
-                            color: Colors.grey, fontSize: 12),
-                      );
-                    },
-                  )
-                ],
+      ),
+      title: GestureDetector(
+        onTap: () {
+          Navigator.push(
+            context,
+            MaterialPageRoute(
+              builder: (context) => OtherUserAccountPage(
+                otherUserEmail: receiverData['email'],
               ),
             ),
-          ),
+          );
+        },
+        child: Row(
+          children: [
+            // RECEIPIENT'S PROFILE PICTURE (OR ICON, IF IT'S NULL)
+            StreamBuilder(
+              stream: store
+                  .collection('users')
+                  .doc(receiverData!['uid'])
+                  .snapshots(),
+              builder: (context, snapshot) {
+                if (!snapshot.hasData ||
+                    snapshot.connectionState == ConnectionState.waiting) {
+                  return showNoOtherUserProfilePicture(context, 30);
+                }
+
+                final String? profilePicture =
+                    snapshot.data!.data()!['profile-picture'];
+                if (profilePicture != null) {
+                  return showOtherUserProfilePicture(
+                      profilePicture, context, 15);
+                }
+                return showNoOtherUserProfilePicture(context, 30);
+              },
+            ),
+            const SizedBox(width: 5),
+
+            // RECEIPIENT'S NAME
+            Flexible(
+              child: Container(
+                decoration: const BoxDecoration(
+                  color: Colors.transparent,
+                ),
+                padding: const EdgeInsets.symmetric(vertical: 5),
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  mainAxisAlignment: MainAxisAlignment.center,
+                  children: [
+                    Text(
+                      receiverData['fullname'],
+                      style: GoogleFonts.poppins(fontWeight: FontWeight.w600, fontSize: 16),
+                      softWrap: true,
+                      overflow: TextOverflow.ellipsis,
+                      maxLines: 1,
+                    ),
+                    StreamBuilder(
+                      stream: store
+                          .collection('users')
+                          .doc(FirebaseAuth.instance.currentUser!.uid)
+                          .snapshots(),
+                      builder: (context, snapshot) {
+                        if (!snapshot.hasData) {
+                          return const Text('Loading...');
+                        }
+            
+                        if (snapshot.hasError) {
+                          return const Text('Connecting...');
+                        }
+            
+                        return Text(
+                          snapshot.data!.data()!['new'].toString(),
+                          style: GoogleFonts.montserrat(
+                              color: Colors.grey, fontSize: 12),
+                        );
+                      },
+                    )
+                  ],
+                ),
+              ),
+            ),
+          ],
         ),
+      ),
+      actions: [
         IconButton(
           onPressed: showChatOptions,
           icon: const Icon(Icons.more_vert),
         ),
-      ],),
+      ],
     );
   }
 
@@ -354,10 +356,10 @@ class _ChatPageState extends State<ChatPage> with WidgetsBindingObserver {
           end: 40,
           bottom: 100),
       items: [
-        PopupMenuItem(child: Text('Option 1')),
-        PopupMenuItem(child: Text('Option 1')),
-        PopupMenuItem(child: Text('Option 1')),
-        PopupMenuItem(child: Text('Option 1'))
+        const PopupMenuItem(child: Text('Option 1')),
+        const PopupMenuItem(child: Text('Option 1')),
+        const PopupMenuItem(child: Text('Option 1')),
+        const PopupMenuItem(child: Text('Option 1'))
       ],
     );
   }

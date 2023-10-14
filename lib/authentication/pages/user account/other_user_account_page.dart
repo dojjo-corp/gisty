@@ -1,3 +1,4 @@
+import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
@@ -5,6 +6,7 @@ import 'package:provider/provider.dart';
 
 import '../../components/buttons.dart';
 import '../../components/custom_back_button.dart';
+import '../../helper_methods.dart/profile.dart';
 import '../../providers/user_provider.dart';
 import '../messaging/chat_page.dart';
 
@@ -48,11 +50,24 @@ class _OtherUserAccountPageState extends State<OtherUserAccountPage> {
                 child: otherUserMap.isNotEmpty
                     ? Column(
                         children: [
-                          Icon(
-                            Icons.person,
-                            size: 100,
-                            color: Theme.of(context).primaryColor,
+                          StreamBuilder(
+                            stream: FirebaseFirestore.instance
+                                .collection('users')
+                                .doc(otherUserMap['uid'])
+                                .snapshots(),
+                            builder: (context, snapshot) {
+                              if (!snapshot.hasData){
+                                return showNoProfilePicture(context);
+                              }
+                              final String? profilePicture = snapshot.data!.data()?['profile-picture'];
+                              if (profilePicture != null) {
+                                return showOtherUserProfilePicture(profilePicture, context, 75);
+                              }
+                              return showNoOtherUserProfilePicture(context, 150);
+                            },
                           ),
+
+
                           const SizedBox(height: 20),
                           ListTile(
                             leading: Icon(Icons.person_rounded,
@@ -122,28 +137,25 @@ class _OtherUserAccountPageState extends State<OtherUserAccountPage> {
                           Row(
                             children: [
                               Text(widget.otherUserEmail,
-                                  style:
-                                      const TextStyle(fontWeight: FontWeight.bold)),
+                                  style: const TextStyle(
+                                      fontWeight: FontWeight.bold)),
                               const Text(' Does Not Exist In Our Database.'),
                             ],
                           ),
                           const SizedBox(height: 15),
                           MyButton(
-                              btnText: 'Contact  Support Team',
-                              isPrimary: true,
-                              onPressed: () {
-                                Navigator.pushNamed(context, '/contact-us');
-                              })
+                            btnText: 'Contact  Support Team',
+                            isPrimary: true,
+                            onPressed: () {
+                              Navigator.pushNamed(context, '/contact-us');
+                            },
+                          )
                         ],
                       ),
               ),
             ),
           ),
-          const Positioned(
-            top: 40,
-            left: 5,
-            child: MyBackButton(),
-          )
+          const MyBackButton()
         ],
       ),
     );

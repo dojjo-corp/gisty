@@ -4,6 +4,7 @@ import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
 
 import '../../components/custom_back_button.dart';
+import '../../helper_methods.dart/analytics.dart';
 
 class ProjectAnalytics extends StatelessWidget {
   final String pid;
@@ -36,7 +37,8 @@ class ProjectAnalytics extends StatelessWidget {
                     }
 
                     final projectData = snapshot.data!.data()!;
-                    final numComments = projectData['comments'].length.toDouble();
+                    final numComments =
+                        projectData['comments'].length.toDouble();
                     final double numSaved =
                         projectData['saved'].length.toDouble();
                     final double numDownloaded =
@@ -57,8 +59,7 @@ class ProjectAnalytics extends StatelessWidget {
                       {'2': numDownloaded},
                       {'3': numComments},
                     ];
-                    final maxY =
-                        sum([numImpressions, numSaved, numDownloaded]);
+                    final maxY = sum([numImpressions, numSaved, numDownloaded]);
                     return ListView(
                       children: [
                         Text(
@@ -84,8 +85,9 @@ class ProjectAnalytics extends StatelessWidget {
                                             toY: e.values.first,
                                             backDrawRodData:
                                                 BackgroundBarChartRodData(
+                                              show: true,
                                               toY: maxY,
-                                              color: Colors.black,
+                                              color: Colors.grey,
                                             ),
                                             borderRadius:
                                                 BorderRadius.circular(4),
@@ -112,7 +114,8 @@ class ProjectAnalytics extends StatelessWidget {
                                   bottomTitles: AxisTitles(
                                       sideTitles: SideTitles(
                                           showTitles: true,
-                                          getTitlesWidget: getbottomTitles))),
+                                          getTitlesWidget:
+                                              getBottomTitlesForSingleProject))),
                             ),
                           ),
                         ),
@@ -121,15 +124,18 @@ class ProjectAnalytics extends StatelessWidget {
                         const SizedBox(height: 20),
                         Column(
                           children: [
-                            ListTile(
-                              title: const Text('Impressions'),
-                              trailing: Text(
-                                numImpressions.toInt().toString(),
+                            GestureDetector(
+                              onTap: () {},
+                              child: ListTile(
+                                title: const Text('Impressions'),
+                                trailing: Text(
+                                  numImpressions.toInt().toString(),
+                                ),
+                                shape: RoundedRectangleBorder(
+                                  borderRadius: BorderRadius.circular(8),
+                                ),
+                                tileColor: Colors.grey[300],
                               ),
-                              shape: RoundedRectangleBorder(
-                                borderRadius: BorderRadius.circular(8),
-                              ),
-                              tileColor: Colors.grey[300],
                             ),
                             const SizedBox(height: 4),
                             ListTile(
@@ -171,11 +177,7 @@ class ProjectAnalytics extends StatelessWidget {
                   }),
             ),
           ),
-          const Positioned(
-            top: 40,
-            left: 5,
-            child: MyBackButton(),
-          )
+          const MyBackButton()
         ],
       ),
     );
@@ -188,48 +190,4 @@ sum(List<double> list) {
     total += number;
   }
   return total;
-}
-
-Widget getbottomTitles(double value, TitleMeta meta) {
-  const style =
-      TextStyle(color: Colors.grey, fontWeight: FontWeight.bold, fontSize: 14);
-
-  Widget text;
-  String tooltip;
-  switch (value.toInt()) {
-    case 0:
-      text = const Text('I', style: style);
-      tooltip = 'Impressions';
-      break;
-    case 1:
-      text = const Text('S', style: style);
-      tooltip = 'Saves';
-      break;
-    case 2:
-      text = const Text('D', style: style);
-      tooltip = 'Downloads';
-      break;
-      case 3:
-      text = const Text('C', style: style);
-      tooltip = 'Comments';
-      break;
-
-    default:
-      text = const Text('', style: style);
-      tooltip = '';
-  }
-
-  return SideTitleWidget(
-    axisSide: meta.axisSide,
-    child: Tooltip(
-      decoration: BoxDecoration(
-        borderRadius: BorderRadius.circular(8),
-        color: Colors.blueGrey[100],
-      ),
-      message: tooltip,
-      textStyle: TextStyle(color: Colors.grey[700]),
-      triggerMode: TooltipTriggerMode.tap,
-      child: text,
-    ),
-  );
 }

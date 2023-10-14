@@ -2,13 +2,11 @@ import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:gt_daily/authentication/components/custom_back_button.dart';
 
-import 'bar_graph.dart';
+import '../../helper_methods.dart/analytics.dart';
 
 class AllProjectsAnalytics extends StatefulWidget {
-  final Map<String, dynamic> rawData;
   const AllProjectsAnalytics({
     super.key,
-    required this.rawData,
   });
 
   @override
@@ -18,7 +16,6 @@ class AllProjectsAnalytics extends StatefulWidget {
 class _AllProjectsAnalyticsState extends State<AllProjectsAnalytics> {
   @override
   Widget build(BuildContext context) {
-    final data = widget.rawData;
 
     return Scaffold(
       body: Stack(
@@ -40,10 +37,8 @@ class _AllProjectsAnalyticsState extends State<AllProjectsAnalytics> {
                     const SizedBox(height: 20),
                     Center(
                       child: SizedBox(
-                        height: 400,
-                        child: MyBarGraph(
-                          rawDataMap: data,
-                        ),
+                        height: 200,
+                        child: getOverallAnalyticsChart(context),
                       ),
                     ),
                   ],
@@ -51,11 +46,7 @@ class _AllProjectsAnalyticsState extends State<AllProjectsAnalytics> {
               ),
             ),
           ),
-          const Positioned(
-            top: 40,
-            left: 5,
-            child: MyBackButton(),
-          )
+          const MyBackButton()
         ],
       ),
     );

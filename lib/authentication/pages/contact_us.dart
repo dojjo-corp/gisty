@@ -44,11 +44,7 @@ class ContactUsPage extends StatelessWidget {
               ),
             ),
           ),
-          const Positioned(
-            top: 40,
-            left: 10,
-            child: MyBackButton(),
-          )
+          const MyBackButton()
         ],
       ),
     );

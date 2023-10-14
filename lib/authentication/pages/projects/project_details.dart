@@ -442,11 +442,9 @@ class _ProjectDetailsState extends State<ProjectDetails> {
               ),
             ),
           ),
-          const Positioned(
-            top: 40,
-            left: 5,
-            child: MyBackButton(),
-          ),
+          const MyBackButton(),
+
+          // COMMENT TEXT FIELD
           Positioned(
             bottom: 10,
             child: SizedBox(

@@ -10,39 +10,48 @@ class ProjectProvider extends ChangeNotifier {
   final Map<String, dynamic> categoryMap = {
     'Web & Mobile Development': {
       'color': const Color.fromARGB(255, 57, 134, 198),
-      'image': 'assets/web-mobile-development.png'
+      'image': 'assets/web-mobile-development.png',
+      'x': 0
     },
     'AI & ML': {
       'color': const Color.fromARGB(255, 234, 206, 64),
-      'image': 'assets/ai.png'
+      'image': 'assets/ai.png',
+      'x': 1
     },
     'Cyber Security & Network Security': {
       'color': const Color.fromARGB(255, 188, 137, 197),
-      'image': 'assets/cyber.png'
+      'image': 'assets/cyber.png',
+      'x': 2
     },
     'Data Science & Analytics': {
       'color': const Color.fromARGB(255, 6, 134, 4),
-      'image': 'assets/data.png'
+      'image': 'assets/data.png',
+      'x': 3
     },
     'Desktop Development': {
       'color': const Color.fromARGB(255, 4, 134, 95),
-      'image': 'assets/desktop.png'
+      'image': 'assets/desktop.png',
+      'x': 4
     },
     'IoT': {
       'color': const Color.fromARGB(255, 134, 4, 65),
-      'image': 'assets/iot.png'
+      'image': 'assets/iot.png',
+      'x': 5
     },
     'Robotics & Automation': {
       'color': const Color.fromARGB(255, 134, 69, 4),
-      'image': 'assets/robotics.png'
+      'image': 'assets/robotics.png',
+      'x': 6
     },
     'Research Works': {
       'color': const Color.fromARGB(255, 4, 134, 95),
-      'image': 'assets/research.png'
+      'image': 'assets/research.png',
+      'x': 7
     },
     'Embedded Systems': {
       'color': const Color.fromARGB(255, 234, 206, 64),
-      'image': 'assets/embedded-systems.png'
+      'image': 'assets/embedded-systems.png',
+      'x': 8
     },
   };
 
@@ -89,7 +98,7 @@ class ProjectProvider extends ChangeNotifier {
     final Map<String, double> _projectAnalyticsData = {};
     final Map<String, dynamic>? _projectData = _allProjects[pid];
     final impressions = _projectData?['impressions'];
-    
+
     // saves and downloads
     _projectAnalyticsData['saved'] = _projectData?['saved'].length;
     _projectAnalyticsData['downloads'] = _projectData?['downloaded-by'].length;

@@ -8,6 +8,7 @@ import 'package:google_fonts/google_fonts.dart';
 import '../../../global/homepage.dart';
 import '../../components/buttons.dart';
 import '../../components/custom_back_button.dart';
+import '../../components/my_textfield.dart';
 import '../../repository/authentication_repo.dart';
 
 class LoginPage extends StatefulWidget {
@@ -19,11 +20,8 @@ class LoginPage extends StatefulWidget {
 
 class _LoginPageState extends State<LoginPage> {
   final _formKey = GlobalKey<FormState>();
-  Color _prefixIconColorEmail = Colors.grey;
-  Color _prefixIconColorPassword = Colors.grey;
   final emailController = TextEditingController();
   final passwordController = TextEditingController();
-  bool _obscureText = true;
   bool _isLoading = false;
   Widget loginBtnChild = const Text('Login');
 
@@ -87,88 +85,31 @@ class _LoginPageState extends State<LoginPage> {
                       ),
                       const SizedBox(height: 30),
                       const SizedBox(height: 15),
-                      Form(
-                        key: _formKey,
-                        child: Column(
-                          children: [
-                            TextFormField(
-                              controller: emailController,
-                              decoration: InputDecoration(
-                                  filled: true,
-                                  fillColor: Colors.white,
-                                  border: OutlineInputBorder(
-                                    borderSide: BorderSide.none,
-                                    borderRadius: BorderRadius.circular(12),
-                                  ),
-                                  prefixIcon: const Icon(Icons.email_rounded),
-                                  prefixIconColor: _prefixIconColorEmail,
-                                  hintText: 'Enter Your Email'),
-                              onChanged: (value) {
-                                if (emailController.text.isNotEmpty) {
-                                  setState(() {
-                                    _prefixIconColorEmail =
-                                        Theme.of(context).primaryColor;
-                                  });
-                                } else {
-                                  setState(() {
-                                    _prefixIconColorEmail = Colors.grey;
-                                  });
-                                }
-                              },
-                              validator: (value) {
-                                if (value!.isEmpty) {
-                                  return 'Field can\'t be empty!';
-                                }
-                                return null;
-                              },
-                            ),
-                            const SizedBox(height: 15),
-                            TextFormField(
-                              controller: passwordController,
-                              obscureText: _obscureText,
-                              decoration: InputDecoration(
-                                filled: true,
-                                fillColor: Colors.white,
-                                border: OutlineInputBorder(
-                                  borderSide: BorderSide.none,
-                                  borderRadius: BorderRadius.circular(12),
-                                ),
-                                prefixIcon: const Icon(Icons.lock_rounded),
-                                prefixIconColor: _prefixIconColorPassword,
-                                hintText: 'Password',
-                                suffixIcon: GestureDetector(
-                                  onTap: () {
-                                    setState(() {
-                                      _obscureText = !_obscureText;
-                                    });
-                                  },
-                                  child: _obscureText
-                                      ? const Icon(Icons.visibility_rounded,
-                                          color: Colors.grey)
-                                      : const Icon(Icons.visibility_off_rounded,
-                                          color: Colors.grey),
-                                ),
+                      AutofillGroup(
+                        child: Form(
+                          key: _formKey,
+                          child: Column(
+                            children: [
+                              // Email TextField
+                              MyTextField(
+                                autofillHints: const [AutofillHints.email],
+                                controller: emailController,
+                                hintText: 'Email',
+                                iconData: Icons.email_rounded,
+                                isWithIcon: true,
                               ),
-                              onChanged: (value) {
-                                if (passwordController.text.isNotEmpty) {
-                                  setState(() {
-                                    _prefixIconColorPassword =
-                                        Theme.of(context).primaryColor;
-                                  });
-                                } else {
-                                  setState(() {
-                                    _prefixIconColorPassword = Colors.grey;
-                                  });
-                                }
-                              },
-                              validator: (value) {
-                                if (value!.isEmpty) {
-                                  return 'Field can\'t be empty!';
-                                }
-                                return null;
-                              },
-                            ),
-                          ],
+                              const SizedBox(height: 15),
+
+                              // Password TextField
+                              MyTextField(
+                                controller: passwordController,
+                                hintText: 'Password',
+                                iconData: Icons.lock_rounded,
+                                isWithIcon: true,
+                                autofillHints: const [AutofillHints.password],
+                              ),
+                            ],
+                          ),
                         ),
                       ),
                       const SizedBox(height: 15),
@@ -198,8 +139,8 @@ class _LoginPageState extends State<LoginPage> {
                         children: [
                           const Text('Create New Account?'),
                           GestureDetector(
-                            onTap: () =>
-                                Navigator.of(context).popAndPushNamed('/register'),
+                            onTap: () => Navigator.of(context)
+                                .popAndPushNamed('/register'),
                             child: Text(
                               ' Register',
                               style: GoogleFonts.poppins(
@@ -215,7 +156,7 @@ class _LoginPageState extends State<LoginPage> {
               ),
             ),
           ),
-          const Positioned(top: 40, left: 5, child: MyBackButton()),
+          const MyBackButton(),
         ],
       ),
     );

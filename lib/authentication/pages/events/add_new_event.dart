@@ -1,20 +1,21 @@
 import 'package:flutter/material.dart';
-import 'package:gt_daily/authentication/components/multi_line_textfeld.dart';
+import 'package:google_fonts/google_fonts.dart';
+import 'package:gt_daily/authentication/components/custom_back_button.dart';
+import 'package:gt_daily/authentication/components/my_textfield.dart';
 
 import '../../components/buttons.dart';
-import '../../components/custom_back_button.dart';
-import '../../components/my_textfield.dart';
-import '../../components/page_title.dart';
+import '../../components/multi_line_textfeld.dart';
 import '../../repository/firestore_repo.dart';
 
-class AddJobOrInternship extends StatefulWidget {
-  const AddJobOrInternship({super.key});
+class AddNewEventPage extends StatefulWidget {
+  const AddNewEventPage({super.key});
 
   @override
-  State<AddJobOrInternship> createState() => _AddJobOrInternshipState();
+  State<AddNewEventPage> createState() => _AddNewEventPageState();
 }
 
-class _AddJobOrInternshipState extends State<AddJobOrInternship> {
+class _AddNewEventPageState extends State<AddNewEventPage> {
+  // MODAL BOTTOM SHEET STATE VARIABLES
   final jobTitleController = TextEditingController();
   final companyNameController = TextEditingController();
   final locationController = TextEditingController();
@@ -27,59 +28,65 @@ class _AddJobOrInternshipState extends State<AddJobOrInternship> {
     'Part Time',
     'Contract',
   ];
-
-  Color prefixIconColorTitle = Colors.grey;
-  Color prefixIconColorName = Colors.grey;
-  Color prefixIconColorLocation = Colors.grey;
-
-  bool _isLoading = false;
-
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      body: Stack(
-        children: [
-          Padding(
-            padding: const EdgeInsets.only(
-                top: 100.0, left: 15, right: 15, bottom: 15),
+        body: Stack(
+      children: [
+        Padding(
+          padding: const EdgeInsets.only(
+              top: 100.0, left: 15, right: 15, bottom: 10),
+          child: SingleChildScrollView(
             child: SizedBox(
               height: MediaQuery.of(context).size.height,
-              child: SingleChildScrollView(
-                  child: Column(
+              child: Column(
                 children: [
-                  const PageTitle(title: 'Add Job Opportunity'),
-                  MyTextField(
-                    autofillHints: null,
+                  Text(
+                    'Add New Event',
+                    style: GoogleFonts.montserrat(
+                        fontSize: 40, fontWeight: FontWeight.bold),
+                    textAlign: TextAlign.center,
+                  ),
+                  const SizedBox(height: 30),
+
+                  // JOB TITLE TEXT FIELD
+                  MyTextField(autofillHints: null,
                     controller: jobTitleController,
                     hintText: 'Job Title',
                     iconData: Icons.school_rounded,
                     isWithIcon: true,
                   ),
                   const SizedBox(height: 10),
-                  MyTextField(
-                    autofillHints: null,
-                    controller: companyNameController,
-                    hintText: 'Company Name',
-                    iconData: Icons.assured_workload_outlined,
-                    isWithIcon: true,
-                  ),
-                  const SizedBox(height: 10),
-                  MyTextField(
-                    autofillHints: null,
+
+                  // LOCATION TEXTFIELD
+                  MyTextField(autofillHints: null,
                     controller: locationController,
                     hintText: 'Location',
                     iconData: Icons.location_on_rounded,
                     isWithIcon: true,
                   ),
                   const SizedBox(height: 10),
-                  MyTextField(
-                    autofillHints: null,
+
+                  // COMPANY NAME
+                  MyTextField(autofillHints: null,
+                    controller: companyNameController,
+                    hintText: 'Company Name',
+                    iconData: Icons.assured_workload_outlined,
+                    isWithIcon: true,
+                  ),
+
+                  const SizedBox(height: 10),
+
+                  // LOCATION TEXT FIELD
+                  MyTextField(autofillHints: null,
                     controller: contactController,
-                    hintText: 'Contact(s)',
+                    hintText: 'Contact',
                     iconData: Icons.phone_rounded,
                     isWithIcon: true,
                   ),
                   const SizedBox(height: 10),
+
+                  // JOB CATEGORY DROPDOWN MENU
                   DropdownButtonFormField(
                     decoration: InputDecoration(
                       filled: true,
@@ -103,18 +110,18 @@ class _AddJobOrInternshipState extends State<AddJobOrInternship> {
                       });
                     },
                   ),
+
                   const SizedBox(height: 10),
+
+                  // JOB DESCRIPTION TEXTFIELD
                   MultiLineTextField(
                     controller: descriptionController,
                     hintText: 'Description',
-                    maxLines: 5,
+                    maxLines: 6,
                   ),
-                  const SizedBox(height: 20),
+                  const SizedBox(height: 10),
                   MyButton(
                     onPressed: () async {
-                      setState(() {
-                        _isLoading = true;
-                      });
                       List<String> contacts;
                       if (contactController.text.characters.contains(',')) {
                         contacts = contactController.text.trim().split(',');
@@ -126,7 +133,7 @@ class _AddJobOrInternshipState extends State<AddJobOrInternship> {
                       }
                       final id =
                           '$selectedJobType${companyNameController.text}${jobTitleController.text}${descriptionController.text.characters.takeLast(10)}';
-                      final Map<String, dynamic> jobDetails = {
+                      final Map<String, dynamic> eventDetails = {
                         'id': id,
                         'title': jobTitleController.text.trim(),
                         'company-name': companyNameController.text.trim(),
@@ -137,39 +144,30 @@ class _AddJobOrInternshipState extends State<AddJobOrInternship> {
 
                       // store job event in firestore
                       try {
-                        await FirestoreRepo().addJobsOrIntershipEvents(jobDetails);
-                        setState(() {
-                          _isLoading = false;
-                        });
-                        ScaffoldMessenger.of(context)
-                            .showSnackBar(const SnackBar(
-                          content: Text('Job Posted Successfully'),
-                        ));
+                        await FirestoreRepo()
+                            .addJobsOrIntershipEvents(eventDetails);
                         if (context.mounted) {
                           Navigator.pop(context);
                         }
                       } catch (e) {
-                        ScaffoldMessenger.of(context).showSnackBar(SnackBar(
-                          content: Text('Error Adding Event: ${e.toString()}'),
-                        ));
-                      } finally {
-                        setState(() {
-                          _isLoading = false;
-                        });
+                        ScaffoldMessenger.of(context).showSnackBar(
+                          SnackBar(
+                            content:
+                                Text('Error Adding Event: ${e.toString()}'),
+                          ),
+                        );
                       }
                     },
-                    btnText: 'Add Job',
+                    btnText: 'Add Event',
                     isPrimary: true,
                   )
                 ],
-              )),
+              ),
             ),
           ),
-          const MyBackButton()
-        ],
-      ),
-      floatingActionButton:
-          _isLoading ? const CircularProgressIndicator() : Container(),
-    );
+        ),
+        const MyBackButton()
+      ],
+    ));
   }
 }

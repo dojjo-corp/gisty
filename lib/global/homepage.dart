@@ -134,24 +134,31 @@ class _MyHomePageState extends State<MyHomePage> {
                     .where((element) => !element['read'])
                     .toList()
                     .length;
-                    log(unreadNum.toString());
+                log(unreadNum.toString());
 
                 return unreadNum < 1
                     ? IconButton(
                         onPressed: () {
                           Navigator.pushNamed(context, '/notifications');
                         },
-                        icon: const Icon(Icons.notifications_rounded),
-                      )
-                    : IconButton(
-                        onPressed: () {
-                          Navigator.pushNamed(context, '/notifications');
-                        },
                         icon: Icon(
-                          Icons.notifications_active_rounded,
+                          Icons.notifications_rounded,
                           color: Theme.of(context).primaryColor,
                         ),
-                      );
+                      )
+                    : Badge.count(
+                      count: unreadNum,
+                      offset: const Offset(-6,6),
+                      child: IconButton(
+                          onPressed: () {
+                            Navigator.pushNamed(context, '/notifications');
+                          },
+                          icon: Icon(
+                            Icons.notifications_active_rounded,
+                            color: Theme.of(context).primaryColor,
+                          ),
+                        ),
+                    );
               },
             )
           ],

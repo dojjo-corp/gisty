@@ -1,8 +1,8 @@
 import 'package:firebase_core/firebase_core.dart';
-import 'package:firebase_messaging/firebase_messaging.dart';
 import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:gt_daily/authentication/pages/about_us.dart';
+import 'package:gt_daily/authentication/pages/events/add_new_event.dart';
 import 'package:gt_daily/authentication/pages/notifications/notifications_page.dart';
 import 'package:gt_daily/authentication/pages/projects/add_project_page.dart';
 import 'package:gt_daily/authentication/pages/contact_us.dart';
@@ -21,13 +21,9 @@ import 'authentication/pages/user authentication/phone_verification.dart';
 import 'authentication/pages/user authentication/register.dart';
 import 'authentication/pages/projects/supervised_projects.dart';
 import 'authentication/providers/user_provider.dart';
-// import 'authentication/repository/firebase_messaging.dart';
 import 'authentication/repository/firebase_messaging.dart';
 import 'firebase_options.dart';
 
-Future<void> notificationsBackgroudnHandler( RemoteMessage message) async {
-  print('${message.notification?.title}\n${message.notification?.body}');
-}
 Future<void> main() async {
   WidgetsFlutterBinding.ensureInitialized();
   await Firebase.initializeApp(options: DefaultFirebaseOptions.currentPlatform);
@@ -67,7 +63,7 @@ class _MyAppState extends State<MyApp> {
         '/login': (context) => const LoginPage(),
         '/register': (context) => const RegisterPage(),
         '/reset-password': (context) => const PasswordResetPage(),
-        '/verify-phone': (context) => const PhoneverificationPage(),
+        '/verify-phone': (context) => const PhoneVerificationPage(),
         '/home': (context) => MyHomePage(pageIndex: 0),
         '/add-project': (context) => const NewProjectPage(),
         '/edit-profile': (context) => const EditAccount(),
@@ -77,7 +73,8 @@ class _MyAppState extends State<MyApp> {
         '/messaging': (context) =>  ChatListPage(),
         '/notifications': (context) => const NotificationsPage(),
         '/saved-projects': (context) => const SavedProjects(),
-        '/archive': (context)=> const ProjectArchive()
+        '/archive': (context)=> const ProjectArchive(),
+        '/new-event': (context) => const AddNewEventPage(),
       },
     );
   }

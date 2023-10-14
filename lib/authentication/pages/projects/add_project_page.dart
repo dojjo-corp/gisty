@@ -388,7 +388,7 @@ class _NewProjectPageState extends State<NewProjectPage> {
               ),
             ),
           ),
-          const Positioned(top: 40, left: 5, child: MyBackButton())
+          const MyBackButton()
         ],
       ),
       floatingActionButton: _isLoading ? const LinearProgressIndicator() : null,

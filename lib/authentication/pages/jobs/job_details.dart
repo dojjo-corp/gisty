@@ -3,9 +3,9 @@ import 'package:google_fonts/google_fonts.dart';
 
 import '../../components/custom_back_button.dart';
 
-class EventDetailsPage extends StatelessWidget {
-  final Map<String, dynamic> eventDetails;
-  const EventDetailsPage({super.key, required this.eventDetails});
+class JobDetailsPage extends StatelessWidget {
+  final Map<String, dynamic> jobDetails;
+  const JobDetailsPage({super.key, required this.jobDetails});
 
   @override
   Widget build(BuildContext context) {
@@ -21,7 +21,7 @@ class EventDetailsPage extends StatelessWidget {
               child: ListView(
                 children: [
                   Text(
-                    eventDetails['title'],
+                    jobDetails['title'],
                     style: GoogleFonts.poppins(
                         fontSize: 40, fontWeight: FontWeight.bold),
                   ),
@@ -37,7 +37,7 @@ class EventDetailsPage extends StatelessWidget {
                           ),
                           const SizedBox(width: 5),
                           Text(
-                            eventDetails['company-name'],
+                            jobDetails['company-name'],
                             style: GoogleFonts.poppins(
                                 fontWeight: FontWeight.w600, fontSize: 20),
                           ),
@@ -51,7 +51,7 @@ class EventDetailsPage extends StatelessWidget {
                           ),
                           const SizedBox(width: 5),
                           Text(
-                            eventDetails['location'],
+                            jobDetails['location'],
                             style: GoogleFonts.poppins(
                               fontSize: 16,
                               fontWeight: FontWeight.w500,
@@ -69,7 +69,7 @@ class EventDetailsPage extends StatelessWidget {
                           ),
                           const SizedBox(width: 5),
                           Text(
-                            eventDetails['company-contacts'].join('/'),
+                            jobDetails['company-contacts'].join('/'),
                             style: GoogleFonts.poppins(
                               fontSize: 16,
                               fontWeight: FontWeight.w500,
@@ -80,7 +80,7 @@ class EventDetailsPage extends StatelessWidget {
                       ),
                       const SizedBox(height: 25),
                       Text(
-                        eventDetails['details'],
+                        jobDetails['details'],
                         style: GoogleFonts.poppins(
                           height: 2,
                           wordSpacing: 2,

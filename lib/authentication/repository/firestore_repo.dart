@@ -2,6 +2,7 @@ import 'dart:developer';
 
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
+import 'package:firebase_storage/firebase_storage.dart';
 
 class FirestoreRepo {
   FirestoreRepo();
@@ -17,6 +18,7 @@ class FirestoreRepo {
   }) async {
     try {
       await store.collection('users').doc(uid).set({
+        'uid': uid,
         'fullname': fullName,
         'username': userName,
         'email': email,
@@ -41,6 +43,7 @@ class FirestoreRepo {
     String departmentId = '',
   }) async {
     final userData = {
+      'uid': uid,
       'fullname': fullName,
       'username': userName,
       'email': email,
@@ -74,6 +77,7 @@ class FirestoreRepo {
   }) async {
     try {
       await store.collection('users').doc(uid).set({
+        'uid': uid,
         'fullname': fullName,
         'username': userName,
         'email': email,
@@ -91,6 +95,15 @@ class FirestoreRepo {
 
   Future<void> deleteUserRecords() async {
     try {
+      // get user's current profile picture path and delete from firebase storage
+      final userSnapshot = await store
+          .collection('users')
+          .doc(FirebaseAuth.instance.currentUser!.uid)
+          .get();
+      final userProfile = userSnapshot.data()!['profile-picture'];
+
+      // now delete user's firebase document
+      FirebaseStorage.instance.ref(userProfile).delete();
       await store
           .collection('users')
           .doc(FirebaseAuth.instance.currentUser!.uid)
@@ -127,8 +140,15 @@ class FirestoreRepo {
   }
 
   // Add Events (ie. Jobs/Internships) For Both University and Industry Professionals
-  Future<void> addJobsOrIntershipEvents(
-      Map<String, dynamic> eventDetails) async {
+  Future<void> addJobsOrIntershipEvents(Map<String, dynamic> jobDetails) async {
+    try {
+      await store.collection('All Jobs').doc(jobDetails['id']).update(jobDetails);
+    } catch (e) {
+      rethrow;
+    }
+  }
+
+  Future<void> addEvents(Map<String, dynamic> eventDetails) async {
     try {
       await store
           .collection('All Events')
@@ -192,6 +212,7 @@ class FirestoreRepo {
       'text': messageText,
       'sender': FirebaseAuth.instance.currentUser!.email,
       'time': Timestamp.now(),
+      'read': false,
     };
     try {
       await store.collection('Chat Rooms').doc(roomId).update({

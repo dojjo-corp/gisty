@@ -76,11 +76,7 @@ class _PDFViewPageState extends State<PDFViewPage> {
                     ],
                   ),
                 ),
-                const Positioned(
-                  top: 40,
-                  left: 5,
-                  child: MyBackButton(),
-                )
+                const MyBackButton()
               ],
             )
           : const Center(
@@ -90,8 +86,4 @@ class _PDFViewPageState extends State<PDFViewPage> {
   }
 }
 
-void main() {
-  runApp(const MaterialApp(
-    home: PDFViewPage(pdfPath: 'your_pdf_path_in_firebase.pdf'),
-  ));
-}
+

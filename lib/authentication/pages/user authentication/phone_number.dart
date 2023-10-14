@@ -6,21 +6,20 @@ import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
+import 'package:gt_daily/authentication/pages/user%20account/add_profile_picture.dart';
 
-import '../../../global/homepage.dart';
 import '../../components/buttons.dart';
 import '../../components/custom_back_button.dart';
 
 class EnterPhonePage extends StatelessWidget {
-  EnterPhonePage({ super.key});
+  EnterPhonePage({super.key});
   final _key = GlobalKey<FormState>();
   final contactController = TextEditingController();
   final auth = FirebaseAuth.instance;
 
   @override
   Widget build(BuildContext context) {
-
-    void goToHome() async {
+    void goToProfilePicture() async {
       log(contactController.text);
       try {
         if (_key.currentState!.validate()) {
@@ -37,7 +36,7 @@ class EnterPhonePage extends StatelessWidget {
           Navigator.push(
             context,
             MaterialPageRoute(
-              builder: (context) => MyHomePage(pageIndex: 0),
+              builder: (context) => const AddProfileImagePage(isFromRegistration: true,),
             ),
           );
         }
@@ -103,7 +102,7 @@ class EnterPhonePage extends StatelessWidget {
                     ),
                     const SizedBox(height: 30),
                     MyButton(
-                      onPressed: goToHome,
+                      onPressed: goToProfilePicture,
                       btnText: 'Done',
                       isPrimary: false,
                     )
@@ -112,7 +111,7 @@ class EnterPhonePage extends StatelessWidget {
               ),
             ),
           ),
-          const Positioned(top: 40, left: 5, child: MyBackButton()),
+          const MyBackButton(),
         ],
       ),
     );

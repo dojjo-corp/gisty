@@ -30,7 +30,7 @@ class _NotificationsPageState extends State<NotificationsPage> {
         children: [
           Padding(
             padding: const EdgeInsets.only(
-                top: 100, bottom: 10, right: 20, left: 20),
+                top: 100, bottom: 10, right: 15, left: 15),
             child: SizedBox(
               height: MediaQuery.of(context).size.height,
               width: MediaQuery.of(context).size.width,
@@ -44,7 +44,7 @@ class _NotificationsPageState extends State<NotificationsPage> {
                       style: GoogleFonts.poppins(
                           fontSize: 40, fontWeight: FontWeight.bold),
                     ),
-                    const SizedBox(height: 30),
+                    const SizedBox(height: 20),
                     StreamBuilder(
                       stream: FirebaseFirestore.instance
                           .collection('Notifications')
@@ -77,33 +77,43 @@ class _NotificationsPageState extends State<NotificationsPage> {
                         log(jsonEncode(myNotifications));
 
                         return ListView.builder(
+                          reverse: true,
                           shrinkWrap: true,
                           itemCount: myNotifications.length,
                           itemBuilder: (context, index) {
                             String title = myNotifications[index]['title'];
                             String body = myNotifications[index]['body'];
                             bool read = myNotifications[index]['read'];
-                            return GestureDetector(
-                              onTap: () async {
-                                await updateRead(index);
-                                if (mounted) {
-                                  goToChatPage(context);
-                                }
-                              },
-                              child: ListTile(
-                                contentPadding: EdgeInsets.zero,
-                                leading: Icon(Icons.chat,
-                                    color: read
-                                        ? Colors.grey
-                                        : Theme.of(context).primaryColor),
-                                title: Text(
-                                  title,
-                                  style: TextStyle(
-                                      fontWeight: read
-                                          ? FontWeight.normal
-                                          : FontWeight.bold),
+                            return Padding(
+                              padding: const EdgeInsets.only(bottom: 5.0),
+                              child: GestureDetector(
+                                onTap: () async {
+                                  await updateRead(index);
+                                  if (context.mounted) {
+                                    goToChatPage(context);
+                                  }
+                                },
+                                child: ListTile(
+                                  shape: RoundedRectangleBorder(
+                                    borderRadius: BorderRadius.circular(12),
+                                    side: BorderSide(color: Colors.grey[100]!),
+                                  ),
+                                  tileColor: Colors.grey[300],
+                                  contentPadding:
+                                      const EdgeInsets.only(left: 5),
+                                  leading: Icon(Icons.chat,
+                                      color: read
+                                          ? Colors.grey
+                                          : Theme.of(context).primaryColor),
+                                  title: Text(
+                                    title,
+                                    style: TextStyle(
+                                        fontWeight: read
+                                            ? FontWeight.normal
+                                            : FontWeight.bold),
+                                  ),
+                                  subtitle: Text(body),
                                 ),
-                                subtitle: Text(body),
                               ),
                             );
                           },
@@ -115,11 +125,7 @@ class _NotificationsPageState extends State<NotificationsPage> {
               ),
             ),
           ),
-          const Positioned(
-            top: 40,
-            left: 10,
-            child: MyBackButton(),
-          )
+          const MyBackButton()
         ],
       ),
     );

@@ -188,7 +188,7 @@ class _EditAccountState extends State<EditAccount> {
               ),
             ),
           ),
-          const Positioned(top: 40, left: 5, child: MyBackButton())
+          const MyBackButton()
         ],
       ),
       floatingActionButton: _isLoading ? const LinearProgressIndicator() : null,

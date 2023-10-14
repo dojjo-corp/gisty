@@ -57,11 +57,7 @@ class ProjectArchive extends StatelessWidget {
               ),
             ),
           ),
-          const Positioned(
-            top: 40,
-            left: 5,
-            child: MyBackButton(),
-          )
+          const MyBackButton()
         ],
       ),
     );

@@ -1,10 +1,13 @@
+import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
+import 'package:gt_daily/authentication/pages/jobs/jobs_page.dart';
 import 'package:provider/provider.dart';
 
 import '../../global/homepage.dart';
 import '../pages/analytics/project_analysis.dart';
+import '../pages/jobs/add_job_opportunity.dart';
 import '../pages/messaging/chat_list_page.dart';
 import '../pages/projects/project_archive.dart';
 import '../pages/user authentication/login.dart';
@@ -26,23 +29,66 @@ class MyDrawer extends StatelessWidget {
           Column(
             children: [
               UserAccountsDrawerHeader(
-                currentAccountPicture:
-                    Image.asset('assets/GCTU-Logo-600x600.png'),
+                currentAccountPicture: GestureDetector(
+                  onTap: () {
+                    Navigator.push(
+                      context,
+                      MaterialPageRoute(
+                        builder: (context) => MyHomePage(pageIndex: 3),
+                      ),
+                    );
+                  },
+                  child: StreamBuilder(
+                    stream: FirebaseFirestore.instance
+                        .collection('users')
+                        .doc(currentUser.uid)
+                        .snapshots(),
+                    builder: (context, snapshot) {
+                      if (!snapshot.hasData) {
+                        return const CircleAvatar(
+                          child: Icon(Icons.person),
+                        );
+                      }
+
+                      if (snapshot.hasError) {
+                        return const CircleAvatar(
+                          child: Icon(Icons.person),
+                        );
+                      }
+
+                      final String? profilePicture =
+                          snapshot.data!.data()!['profile-picture'];
+                      if (profilePicture != null) {
+                        return CircleAvatar(
+                          foregroundImage: Image.network(profilePicture).image,
+                          onForegroundImageError: (exception, stackTrace) =>
+                              const CircleAvatar(
+                            child: Icon(Icons.person),
+                          ),
+                        );
+                      }
+                      return const CircleAvatar(
+                        child: Icon(Icons.person),
+                      );
+                    },
+                  ),
+                ),
                 accountName: Text(
                   currentUser.displayName ?? 'user name',
                   style: GoogleFonts.poppins(
                     fontWeight: FontWeight.w600,
                   ),
                 ),
-                currentAccountPictureSize: const Size(90, 90),
                 accountEmail: Text(
                   currentUser.email ?? 'user email',
                   style: GoogleFonts.poppins(),
                 ),
                 decoration: BoxDecoration(
-                  color: Theme.of(context).primaryColor,
+                  color: Theme.of(context).primaryColor.withOpacity(0.5),
                 ),
               ),
+
+              // ARCHIVE
               GestureDetector(
                 onTap: () {
                   // Navigate to project archive
@@ -62,14 +108,14 @@ class MyDrawer extends StatelessWidget {
                   ),
                 ),
               ),
+
+              // ALL PROJECTS ANALYTICS
               GestureDetector(
                 onTap: () {
                   Navigator.push(
                     context,
                     MaterialPageRoute(
-                      builder: (context) => const AllProjectsAnalytics(
-                        rawData: {},
-                      ),
+                      builder: (context) => const AllProjectsAnalytics(),
                     ),
                   );
                 },
@@ -105,12 +151,12 @@ class MyDrawer extends StatelessWidget {
                         Navigator.push(
                             context,
                             MaterialPageRoute(
-                              builder: (context) => ChatListPage(),
+                              builder: (context) => const AddJobOrInternship(),
                             ));
                       },
                       child: ListTile(
                         leading: Icon(
-                          Icons.message_rounded,
+                          Icons.assured_workload_rounded,
                           color: Theme.of(context).primaryColor,
                         ),
                         title: const Text(
@@ -122,11 +168,12 @@ class MyDrawer extends StatelessWidget {
               GestureDetector(
                 onTap: () {
                   // Navigate to internship page
-                  Navigator.pushReplacement(
-                      context,
-                      MaterialPageRoute(
-                        builder: (context) => MyHomePage(pageIndex: 2),
-                      ));
+                  Navigator.push(
+                    context,
+                    MaterialPageRoute(
+                      builder: (context) => const AllJobsPage(),
+                    ),
+                  );
                 },
                 child: ListTile(
                   leading: Icon(
@@ -153,11 +200,38 @@ class MyDrawer extends StatelessWidget {
                           Icons.message_rounded,
                           color: Theme.of(context).primaryColor,
                         ),
-                        title: const Badge(
-                          child: Text(
-                            'Messages',
-                          ),
-                        ),
+                        title: StreamBuilder(
+                            stream: FirebaseFirestore.instance
+                                .collection('Chat Rooms')
+                                .orderBy('last-text.time', descending: true)
+                                .snapshots(),
+                            builder: (context, snapshot) {
+                              if (!snapshot.hasData ||
+                                  snapshot.hasError ||
+                                  snapshot.connectionState ==
+                                      ConnectionState.waiting) {
+                                return const Text('Messages');
+                              }
+                              final docs = snapshot.data!.docs;
+                              bool hasUnread = false;
+                              for (final doc in docs) {
+                                final data = doc.data();
+                                if (data['users'].contains(currentUser.email) &&
+                                    data['last-text']['sender'] !=
+                                        currentUser.email &&
+                                    data['last-text']['read'] == false) {
+                                  hasUnread = true;
+                                  break;
+                                }
+                              }
+                              return hasUnread
+                                  ? Badge(
+                                      child: Text(
+                                        'Messages'.toString(),
+                                      ),
+                                    )
+                                  : const Text('Messages');
+                            }),
                       ),
                     )
                   : Container(),
@@ -215,27 +289,6 @@ class MyDrawer extends StatelessWidget {
               ),
             ),
           ),
-          // Padding(
-          //   padding: const EdgeInsets.only(bottom: 10),
-          //   child: ElevatedButton(
-          //     onPressed: () async {
-          //       await FirebaseAuth.instance.signOut();
-          //       if (FirebaseAuth.instance.currentUser == null) {
-          //         // ignore: use_build_context_synchronously
-          //         Navigator.pushNamed(context, '/login');
-          //       }
-          //     },
-          //     style: ElevatedButton.styleFrom(
-          //       backgroundColor: Theme.of(context).primaryColor,
-          //       foregroundColor: Colors.white,
-          //       minimumSize: const Size(double.infinity, 60),
-          //       shape: RoundedRectangleBorder(
-          //         borderRadius: BorderRadius.circular(15),
-          //       ),
-          //     ),
-          //     child: const Text('Sign out'),
-          //   ),
-          // ),
         ],
       ),
     );

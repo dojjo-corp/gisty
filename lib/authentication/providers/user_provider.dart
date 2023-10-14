@@ -11,7 +11,7 @@ class UserProvider extends ChangeNotifier {
   String get userType {
     String userType = '';
     for (var user in _allUsers) {
-      if (user['email'] == FirebaseAuth.instance.currentUser!.email) {
+      if (user['email'] == FirebaseAuth.instance.currentUser?.email) {
         userType = user['user-type'].toLowerCase();
       }
     }

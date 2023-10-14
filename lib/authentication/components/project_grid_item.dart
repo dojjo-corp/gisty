@@ -41,7 +41,7 @@ class _ProjectGridItemState extends State<ProjectGridItem> {
     final String category = widget.projectData['category'];
     final projectColor = categoryMap[category]['color'];
 
-    String userEmail = FirebaseAuth.instance.currentUser!.email!;
+    String? userEmail = FirebaseAuth.instance.currentUser?.email!;
     bool isSaved = widget.projectData['saved'].contains(userEmail);
     final savedIcon = Icon(
       Icons.bookmark_added,
