@@ -3,7 +3,8 @@
 An archive app for final year project works - college students. Primarily stores and showcases the brilliant works of students as a product of their hardwork and dedication in school. 
 GCTU Repo seeks to brige the gap between students and their preferred industry and ease their transition out of school to the outside world.
 
-#### Note: GCTU Repo was designed and created with only android phones in mind.
+#### Note:
+GCTU Repo was designed and created with only android phones in mind.
 
 ## Getting Started
 Ensure you have the required  [Flutter Essentials](https://docs.flutter.dev/get-started/install) to get started with this application (and any other flutter application in extension).
