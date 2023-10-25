@@ -1,16 +1,19 @@
-# gt_daily
+# GCTU Repo
 
-A new Flutter project.
+An archive app for final year project works - college students. Primarily stores and showcases the brilliant works of students as a product of their hardwork and dedication in school. 
+GCTU Repo seeks to brige the gap between students and their preferred industry and ease their transition out of school to the outside world.
+
+#### Note: GCTU Repo was designed and created with only android phones in mind.
 
 ## Getting Started
+Ensure you have the required  [Flutter Essentials](https://docs.flutter.dev/get-started/install) to get started with this application (and any other flutter application in extension).
 
-This project is a starting point for a Flutter application.
+#### Note: Commands used here are linux focused (debian-flavored distros to be precise); most of the flutter commands are universal in that regard though and can be used in any shell environment. Regardless, look up the [Flutter Documentation](https://docs.flutter.dev/) for up-to-date assistance.
 
-A few resources to get you started if this is your first Flutter project:
+### Clone the repository 
+In your terminal (shell environment)
+`git clone "https://github.com/dojjo-corp/gisty" && cd gisty`.
 
-- [Lab: Write your first Flutter app](https://docs.flutter.dev/get-started/codelab)
-- [Cookbook: Useful Flutter samples](https://docs.flutter.dev/cookbook)
-
-For help getting started with Flutter development, view the
-[online documentation](https://docs.flutter.dev/), which offers tutorials,
-samples, guidance on mobile development, and a full API reference.
+### Build the app
+`flutter build apk`
+The release apk will be built and placed in the `build/app/outputs/flutter-apk/` directory. Copy and install it on an android device.
