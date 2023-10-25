@@ -8,12 +8,16 @@ GCTU Repo seeks to brige the gap between students and their preferred industry a
 ## Getting Started
 Ensure you have the required  [Flutter Essentials](https://docs.flutter.dev/get-started/install) to get started with this application (and any other flutter application in extension).
 
-#### Note: Commands used here are linux focused (debian-flavored distros to be precise); most of the flutter commands are universal in that regard though and can be used in any shell environment. Regardless, look up the [Flutter Documentation](https://docs.flutter.dev/) for up-to-date assistance.
+#### Note: 
+Commands used here are linux focused (debian-flavored distros to be precise); most of the flutter commands are universal in that regard though and can be used in any shell environment.
+
+Regardless,for up-to-date assistance, look up the [Flutter Documentation](https://docs.flutter.dev/).
+
 
 ### Clone the repository 
-In your terminal (shell environment)
 `git clone "https://github.com/dojjo-corp/gisty" && cd gisty`.
 
 ### Build the app
 `flutter build apk`
+
 The release apk will be built and placed in the `build/app/outputs/flutter-apk/` directory. Copy and install it on an android device.
