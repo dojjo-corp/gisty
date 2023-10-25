@@ -12,7 +12,7 @@ Ensure you have the required  [Flutter Essentials](https://docs.flutter.dev/get-
 #### Note: 
 Commands used here are linux focused (debian-flavored distros to be precise); most of the flutter commands are universal in that regard though and can be used in any shell environment.
 
-Regardless,for up-to-date assistance, look up the [Flutter Documentation](https://docs.flutter.dev/).
+Regardless, for up-to-date assistance, look up the [Flutter Documentation](https://docs.flutter.dev/).
 
 
 ### Clone the repository 
