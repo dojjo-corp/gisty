@@ -1,9 +1,9 @@
-import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/material.dart';
+import 'package:gt_daily/authentication/helper_methods.dart/global.dart';
 import 'package:provider/provider.dart';
 
-import '../../components/event_tile.dart';
-import '../../components/loading_list_tiles.dart';
+import '../../components/ListTiles/event_tile.dart';
+import '../../components/ListTiles/loading_list_tiles.dart';
 import '../../providers/user_provider.dart';
 
 class EventsPage extends StatefulWidget {
@@ -22,8 +22,7 @@ class _EventsPageState extends State<EventsPage> {
   Widget build(BuildContext context) {
     return Stack(children: [
       StreamBuilder(
-          stream:
-              FirebaseFirestore.instance.collection('All Events').snapshots(),
+          stream: getThrottledStream(collectionPath: 'All Events'),
           builder: (context, snapshot) {
             if (!snapshot.hasData) {
               return const Center(
@@ -63,8 +62,7 @@ class _EventsPageState extends State<EventsPage> {
               bottom: 10,
               right: 10,
               child: FloatingActionButton(
-                backgroundColor:
-                    Theme.of(context).primaryColor.withOpacity(0.5),
+                backgroundColor: const Color.fromARGB(255, 75, 125, 200),
                 onPressed: () {
                   Navigator.pushNamed(context, '/new-event');
                 },

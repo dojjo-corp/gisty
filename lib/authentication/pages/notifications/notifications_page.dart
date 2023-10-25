@@ -1,16 +1,16 @@
 // ignore_for_file: no_leading_underscores_for_local_identifiers
 
-import 'dart:convert';
-import 'dart:developer';
-
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
-import 'package:gt_daily/authentication/pages/events/events_page.dart';
+import 'package:gt_daily/authentication/helper_methods.dart/global.dart';
+import 'package:gt_daily/authentication/pages/jobs/jobs_page.dart';
 import 'package:gt_daily/authentication/pages/messaging/chat_list_page.dart';
+import 'package:gt_daily/authentication/pages/projects/project_details.dart';
 
-import '../../components/custom_back_button.dart';
+import '../../../global/homepage.dart';
+import '../../components/buttons/custom_back_button.dart';
 
 class NotificationsPage extends StatefulWidget {
   const NotificationsPage({super.key});
@@ -35,6 +35,7 @@ class _NotificationsPageState extends State<NotificationsPage> {
               height: MediaQuery.of(context).size.height,
               width: MediaQuery.of(context).size.width,
               child: SingleChildScrollView(
+                // reverse: true,
                 child: Column(
                   mainAxisAlignment: MainAxisAlignment.center,
                   crossAxisAlignment: CrossAxisAlignment.start,
@@ -46,10 +47,10 @@ class _NotificationsPageState extends State<NotificationsPage> {
                     ),
                     const SizedBox(height: 20),
                     StreamBuilder(
-                      stream: FirebaseFirestore.instance
-                          .collection('Notifications')
-                          .doc(FirebaseAuth.instance.currentUser?.email)
-                          .snapshots(),
+                      stream: getThrottledStream(
+                        collectionPath: 'Notifications',
+                        docPath: FirebaseAuth.instance.currentUser?.email,
+                      ),
                       builder: (context, snapshot) {
                         if (!snapshot.hasData || snapshot.hasError) {
                           return const Center(
@@ -73,50 +74,79 @@ class _NotificationsPageState extends State<NotificationsPage> {
 
                         // No Errors And Data Available
                         final myNotifications =
-                            snapshot.data!.data()!['my-notifications'];
-                        log(jsonEncode(myNotifications));
+                            snapshot.data!.data()!['my-notifications'] as List;
 
-                        return ListView.builder(
-                          reverse: true,
-                          shrinkWrap: true,
-                          itemCount: myNotifications.length,
-                          itemBuilder: (context, index) {
-                            String title = myNotifications[index]['title'];
-                            String body = myNotifications[index]['body'];
-                            bool read = myNotifications[index]['read'];
-                            return Padding(
-                              padding: const EdgeInsets.only(bottom: 5.0),
-                              child: GestureDetector(
-                                onTap: () async {
-                                  await updateRead(index);
-                                  if (context.mounted) {
-                                    goToChatPage(context);
-                                  }
-                                },
-                                child: ListTile(
-                                  shape: RoundedRectangleBorder(
-                                    borderRadius: BorderRadius.circular(12),
-                                    side: BorderSide(color: Colors.grey[100]!),
+                        return Column(
+                          children: myNotifications.reversed.map(
+                            (notification) {
+                              int index = myNotifications.indexOf(notification);
+                              String title = notification['title'];
+                              String body = notification['body'];
+                              bool read = notification['read'];
+                              late IconData iconData;
+
+                              // get icon to use based on notification type
+                              final type = notification['type'];
+                              switch (type) {
+                                case 'job':
+                                  iconData = Icons.assured_workload_rounded;
+                                  break;
+                                case 'event':
+                                  iconData = Icons.event_note_rounded;
+                                  break;
+                                case 'project':
+                                  iconData = Icons.school_rounded;
+                                  break;
+                                case 'chat':
+                                  iconData = Icons.message_rounded;
+                                default:
+                                  iconData = Icons.notifications;
+                              }
+
+                              return Padding(
+                                padding: const EdgeInsets.only(bottom: 5.0),
+                                child: GestureDetector(
+                                  onTap: () async {
+                                    await updateRead(index);
+                                    if (context.mounted) {
+                                      // page to navigate to based on notifiation type
+                                      if (type == 'chat') {
+                                        goToChatPage(context);
+                                      } else if (type == 'event') {
+                                        goToEventPage(context);
+                                      } else if (type == 'job') {
+                                        goToJobPage(context);
+                                      } else if (type == 'project') {
+                                        goToProjectPage(context);
+                                      }
+                                    }
+                                  },
+                                  child: ListTile(
+                                    shape: RoundedRectangleBorder(
+                                      borderRadius: BorderRadius.circular(12),
+                                      side:
+                                          BorderSide(color: Colors.grey[100]!),
+                                    ),
+                                    tileColor: Colors.grey[300],
+                                    contentPadding:
+                                        const EdgeInsets.only(left: 5),
+                                    leading: Icon(iconData,
+                                        color: read
+                                            ? Colors.grey
+                                            : Theme.of(context).primaryColor),
+                                    title: Text(
+                                      title,
+                                      style: TextStyle(
+                                          fontWeight: read
+                                              ? FontWeight.normal
+                                              : FontWeight.bold),
+                                    ),
+                                    subtitle: Text(body),
                                   ),
-                                  tileColor: Colors.grey[300],
-                                  contentPadding:
-                                      const EdgeInsets.only(left: 5),
-                                  leading: Icon(Icons.chat,
-                                      color: read
-                                          ? Colors.grey
-                                          : Theme.of(context).primaryColor),
-                                  title: Text(
-                                    title,
-                                    style: TextStyle(
-                                        fontWeight: read
-                                            ? FontWeight.normal
-                                            : FontWeight.bold),
-                                  ),
-                                  subtitle: Text(body),
                                 ),
-                              ),
-                            );
-                          },
+                              );
+                            },
+                          ).toList(),
                         );
                       },
                     )
@@ -144,7 +174,9 @@ class _NotificationsPageState extends State<NotificationsPage> {
     Navigator.push(
       _context,
       MaterialPageRoute(
-        builder: (_context) => const EventsPage(),
+        builder: (_context) => MyHomePage(
+          pageIndex: 2,
+        ),
       ),
     );
   }
@@ -153,7 +185,17 @@ class _NotificationsPageState extends State<NotificationsPage> {
     Navigator.push(
       _context,
       MaterialPageRoute(
-        builder: (_context) => const EventsPage(),
+        builder: (_context) => const AllJobsPage(),
+      ),
+    );
+  }
+
+  void goToProjectPage(BuildContext _context) {
+    Navigator.push(
+      _context,
+      MaterialPageRoute(
+        builder: (_context) =>
+            const ProjectDetails(goToComment: false, projectData: {}),
       ),
     );
   }

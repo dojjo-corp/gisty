@@ -1,4 +1,9 @@
-// ignore_for_file: no_leading_underscores_for_local_identifiers
+// ignore_for_file: no_leading_underscores_for_local_identifiers, use_build_context_synchronously
+
+// import 'dart:developer' as dev;
+
+import 'dart:convert';
+import 'dart:developer';
 
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:fl_chart/fl_chart.dart';
@@ -6,10 +11,7 @@ import 'package:flutter/material.dart';
 import 'package:gt_daily/authentication/providers/projects_provider.dart';
 import 'package:provider/provider.dart';
 
-import '../pages/analytics/bar_graph.dart';
-
-
-// BOTTOM TITLES FOF SINGLE PROJECT ANALYTICS CHART
+// todo BOTTOM TITLES FOF SINGLE PROJECT ANALYTICS CHART
 Widget getBottomTitlesForSingleProject(double value, TitleMeta meta) {
   const style =
       TextStyle(color: Colors.grey, fontWeight: FontWeight.bold, fontSize: 14);
@@ -54,7 +56,7 @@ Widget getBottomTitlesForSingleProject(double value, TitleMeta meta) {
   );
 }
 
-// BOTTOM TITLES FOF ALL PROJECTS ANALYTICS CHART
+// todo BOTTOM TITLES FOR ALL PROJECTS ANALYTICS CHART
 Widget getBottomTitlesForAllProjects(
     BuildContext _context, double value, TitleMeta meta) {
   Widget image;
@@ -119,68 +121,101 @@ Widget getBottomTitlesForAllProjects(
   );
 }
 
+// todo ALL PROJECT ANALYTICS DATA
+Future<Map<String, dynamic>>? getOverallAnalyticsChart(
+    BuildContext _context) async {
+  // take maximum of 15 seconds to load all data from firestore
+  final docs = await FirebaseFirestore.instance
+      .collection('All Projects')
+      .get()
+      .timeout(const Duration(seconds: 15), onTimeout: () {
+    throw 'No internet connection';
+  });
 
-// ALL PROJECT ANALYTICS CHART
-Widget? getOverallAnalyticsChart(BuildContext _context) {
-  return StreamBuilder(
-    stream: FirebaseFirestore.instance.collection('All Projects').snapshots(),
-    builder: (context, snapshot) {
-      if (!snapshot.hasData) {
-        return const SizedBox(height: 50, child: CircularProgressIndicator());
-      }
-      if (snapshot.hasError) {
-        return Text('Error Loading Data: ${snapshot.error}');
-      }
+  // store all projects data in a list
+  final allProjectsData = [];
+  for (var doc in docs.docs) {
+    allProjectsData.add(doc.data());
+  }
 
-      final docs = snapshot.data!.docs;
-      final allProjectsData = [];
-      for (var doc in docs) {
-        allProjectsData.add(doc.data());
-      }
+  // store analytics data for each project category
+  Map<String, dynamic> mapToUse = {};
+  final categoryMap = Provider.of<ProjectProvider>(_context, listen:false).categoryMap;
+  final categoryNames = categoryMap.keys.toList();
+  final categoryData = categoryMap.values.toList();
+  List engagements = []; // for finding category with highest engagement
 
-      Map<String, dynamic> mapToUse = {};
-      final categoryMap = _context.watch<ProjectProvider>().categoryMap;
-      final categoryNames = categoryMap.keys.toList();
-      final categoryData = categoryMap.values.toList();
-      double saved = 0, downloads = 0, comments = 0, impressionsSum = 0;
+  // ignore: unused_local_variable
+  double maxY = 0;
+  int totalProjectsNum = 0;
+  int totalSaves = 0,
+      totalDownloads = 0,
+      totalComments = 0,
+      totalImpressions = 0;
 
-      for (int i = 0; i < categoryNames.length; i++) {
-        // get list of all projects in each category
-        final listForCategory = allProjectsData
-            .where(
-              (element) =>
-                  element['category'].toLowerCase() ==
-                  categoryNames[i].toLowerCase(),
-            )
-            .toList();
+  for (int i = 0; i < categoryNames.length; i++) {
+    double saved = 0, downloads = 0, comments = 0, impressionsSum = 0;
 
-        // get required analytics data for each project under a category
-        for (var item in listForCategory) {
-          // calculate sum of impressions given for project
-          final impressions = item['impressions'].values.toList();
-          impressionsSum += sum(impressions);
-          saved += item['saved'].length;
-          downloads += item['downloaded-by'].length;
-          comments += item['comments'].length;
-        }
+    // get list of all projects in each category
+    final listForCategory = allProjectsData
+        .where(
+          (element) =>
+              element['category'].toLowerCase() ==
+              categoryNames[i].toLowerCase(),
+        )
+        .toList();
 
-        // store analytics data
-        mapToUse[categoryNames[i]] = {
-          'toY': [
-            saved,
-            downloads,
-            comments,
-            impressionsSum,
-          ],
-          'x': i,
-          'color': categoryData[i]['color'],
-        };
-      }
-      return MyBarGraph(
-        rawDataMap: mapToUse,
-      );
-    },
-  );
+    // add up to total number of projects
+    totalProjectsNum += listForCategory.length;
+
+    // get required analytics data for each project under a category
+    for (var item in listForCategory) {
+      // calculate sum of impressions given for project
+      final impressions = item['impressions'].values.toList();
+      impressionsSum += sum(impressions);
+      // sum of saved
+      saved += item['saved'].length;
+      // downloads
+      downloads += item['downloaded-by'].length;
+      // comments
+      comments += item['comments'].length;
+    }
+
+    // sum of total engagement for category
+    final engagementSum = saved + downloads + comments + impressionsSum;
+    totalSaves += saved.toInt();
+    totalDownloads += downloads.toInt();
+    totalComments += comments.toInt();
+    totalImpressions += impressionsSum.toInt();
+
+    // maxY for barchart with individual engagement bars 
+    maxY = getMax([saved, downloads, comments, impressionsSum]);
+
+    engagements.add(engagementSum);
+
+    // store analytics data
+    mapToUse[categoryNames[i]] = {
+      'toY': [
+        saved,
+        downloads,
+        comments,
+        impressionsSum,
+      ],
+      'x': i,
+      'color': categoryData[i]['color'],
+      'user-engagement': engagementSum
+    };
+  }
+  mapToUse['maxY'] = getMax(engagements);
+  mapToUse['maxEngagement'] = getMax(engagements);
+  mapToUse['total-projects'] = totalProjectsNum;
+  mapToUse['total-saves'] = totalSaves;
+  mapToUse['total-downloads'] = totalDownloads;
+  mapToUse['total-comments'] = totalComments;
+  mapToUse['total-impressions'] = totalImpressions;
+
+  log(jsonEncode(mapToUse['maxEngagement']));
+  return mapToUse;
 }
 
 double sum(List values) {
@@ -190,6 +225,17 @@ double sum(List values) {
   }
   return sum;
 }
+
+double getMax(List values) {
+  double max = 0;
+  for (var i = 0; i < values.length; i++) {
+    if (values[i].toDouble() > max) {
+      max = values[i];
+    }
+  }
+  return max;
+}
+  
 
 
 // BOTOM

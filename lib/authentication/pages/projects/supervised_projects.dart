@@ -4,7 +4,7 @@ import 'package:gt_daily/authentication/pages/projects/project_details.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:provider/provider.dart';
 
-import '../../components/custom_back_button.dart';
+import '../../components/buttons/custom_back_button.dart';
 import '../../providers/projects_provider.dart';
 
 class SupervisedProjects extends StatelessWidget {

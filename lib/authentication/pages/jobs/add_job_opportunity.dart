@@ -1,10 +1,14 @@
+import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/material.dart';
-import 'package:gt_daily/authentication/components/multi_line_textfeld.dart';
+import 'package:gt_daily/authentication/components/textfields/multi_line_textfeld.dart';
+import 'package:gt_daily/authentication/helper_methods.dart/global.dart';
 
-import '../../components/buttons.dart';
-import '../../components/custom_back_button.dart';
-import '../../components/my_textfield.dart';
+import '../../components/buttons/buttons.dart';
+import '../../components/buttons/custom_back_button.dart';
+import '../../components/ListTiles/date_tile.dart';
+import '../../components/textfields/simple_textfield.dart';
 import '../../components/page_title.dart';
+import '../../repository/firebase_messaging.dart';
 import '../../repository/firestore_repo.dart';
 
 class AddJobOrInternship extends StatefulWidget {
@@ -20,6 +24,7 @@ class _AddJobOrInternshipState extends State<AddJobOrInternship> {
   final locationController = TextEditingController();
   final descriptionController = TextEditingController();
   final contactController = TextEditingController();
+  final dateController = TextEditingController();
   String selectedJobType = 'Internship';
   final List<String> jobTypes = [
     'Internship',
@@ -48,7 +53,9 @@ class _AddJobOrInternshipState extends State<AddJobOrInternship> {
                   child: Column(
                 children: [
                   const PageTitle(title: 'Add Job Opportunity'),
-                  MyTextField(
+
+                  // JOB TITLE TEXT FIELD
+                  SimpleTextField(
                     autofillHints: null,
                     controller: jobTitleController,
                     hintText: 'Job Title',
@@ -56,7 +63,9 @@ class _AddJobOrInternshipState extends State<AddJobOrInternship> {
                     isWithIcon: true,
                   ),
                   const SizedBox(height: 10),
-                  MyTextField(
+
+                  // COMPANY NAME TEXT FIELD
+                  SimpleTextField(
                     autofillHints: null,
                     controller: companyNameController,
                     hintText: 'Company Name',
@@ -64,7 +73,13 @@ class _AddJobOrInternshipState extends State<AddJobOrInternship> {
                     isWithIcon: true,
                   ),
                   const SizedBox(height: 10),
-                  MyTextField(
+
+                  // DEADLINE TEXT FIELD
+                  const DateTile(),
+                  const SizedBox(height: 10),
+
+                  // LOCATION TEXT FIELD
+                  SimpleTextField(
                     autofillHints: null,
                     controller: locationController,
                     hintText: 'Location',
@@ -72,7 +87,9 @@ class _AddJobOrInternshipState extends State<AddJobOrInternship> {
                     isWithIcon: true,
                   ),
                   const SizedBox(height: 10),
-                  MyTextField(
+
+                  // CONTACTS TEXT FIELD
+                  SimpleTextField(
                     autofillHints: null,
                     controller: contactController,
                     hintText: 'Contact(s)',
@@ -80,6 +97,8 @@ class _AddJobOrInternshipState extends State<AddJobOrInternship> {
                     isWithIcon: true,
                   ),
                   const SizedBox(height: 10),
+
+                  // JOB TYPE
                   DropdownButtonFormField(
                     decoration: InputDecoration(
                       filled: true,
@@ -104,12 +123,16 @@ class _AddJobOrInternshipState extends State<AddJobOrInternship> {
                     },
                   ),
                   const SizedBox(height: 10),
+
+                  // DESCRIPTION TEXT FIELD
                   MultiLineTextField(
                     controller: descriptionController,
                     hintText: 'Description',
                     maxLines: 5,
                   ),
                   const SizedBox(height: 20),
+
+                  // SUBMIT BUTTON
                   MyButton(
                     onPressed: () async {
                       setState(() {
@@ -133,26 +156,44 @@ class _AddJobOrInternshipState extends State<AddJobOrInternship> {
                         'location': locationController.text.trim(),
                         'company-contacts': contacts,
                         'details': descriptionController.text.trim(),
+                        'time-added': DateTime.now()
+                            .toIso8601String() // converted to string for notification
                       };
 
-                      // store job event in firestore
                       try {
-                        await FirestoreRepo().addJobsOrIntershipEvents(jobDetails);
-                        setState(() {
-                          _isLoading = false;
-                        });
-                        ScaffoldMessenger.of(context)
-                            .showSnackBar(const SnackBar(
-                          content: Text('Job Posted Successfully'),
-                        ));
+                        // todo: send notification to all users
+                        await FireMessaging().sendPushNotifiationToAllUsers(
+                          title: 'New Job In ${jobDetails['company-name']}',
+                          body: jobDetails['title'],
+                          type: 'job',
+                          routeName: '/job-details',
+                          routeArgs: {'job-details': jobDetails},
+                        );
+
+                        // convert from String to Timestamp for firestore
+                        final date = jobDetails['time-added'] as String;
+                        jobDetails['time-added'] =
+                            Timestamp.fromDate(DateTime.parse(date));
+
+                        // store job event in firestore
+                        await FirestoreRepo()
+                            .addJobsOrIntershipEvents(jobDetails);
+
                         if (context.mounted) {
+                          setState(() {
+                            _isLoading = false;
+                          });
+                          showSnackBar(
+                            context,
+                            'Job Posted Successfully',
+                          );
                           Navigator.pop(context);
                         }
                       } catch (e) {
-                        ScaffoldMessenger.of(context).showSnackBar(SnackBar(
-                          content: Text('Error Adding Event: ${e.toString()}'),
-                        ));
-                      } finally {
+                        showSnackBar(
+                          context,
+                          'Error Adding Event: ${e.toString()}',
+                        );
                         setState(() {
                           _isLoading = false;
                         });

@@ -1,12 +1,16 @@
-import 'package:cloud_firestore/cloud_firestore.dart';
+// import 'dart:developer';
+
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
+import 'package:gt_daily/authentication/helper_methods.dart/global.dart';
 import 'package:provider/provider.dart';
 
-import '../../components/buttons.dart';
-import '../../components/custom_back_button.dart';
+import '../../components/buttons/buttons.dart';
+import '../../components/buttons/custom_back_button.dart';
+import '../../helper_methods.dart/messaging.dart';
 import '../../helper_methods.dart/profile.dart';
+import '../../models/admin.dart';
 import '../../providers/user_provider.dart';
 import '../messaging/chat_page.dart';
 
@@ -19,24 +23,26 @@ class OtherUserAccountPage extends StatefulWidget {
 }
 
 class _OtherUserAccountPageState extends State<OtherUserAccountPage> {
-  final uid = FirebaseAuth.instance.currentUser!.uid;
+  final currentUid = FirebaseAuth.instance.currentUser!.uid;
   final currentUser = FirebaseAuth.instance.currentUser!;
 
   @override
   Widget build(BuildContext context) {
-    final Map<String, dynamic> otherUserMap =
-        Provider.of<UserProvider>(context, listen: false)
-                .getUserDataFromEmail(widget.otherUserEmail) ??
-            {};
+    // For Admin Privileges
+    final isUserAdmin = context.watch<UserProvider>().isUserAdmin;
+    final administrator = isUserAdmin ? Administrator() : null;
+
+    // Get User's Stored Data
+    final Map<String, dynamic> otherUserMap = context
+            .watch<UserProvider>()
+            .getUserDataFromEmail(widget.otherUserEmail) ??
+        {};
+
+    // User's First Name
     final userFirstName = otherUserMap['fullname']?.split(' ')[0] ?? '';
 
-    String getRoomId(String receiverEmail) {
-      String roomId = '';
-      final ids = [FirebaseAuth.instance.currentUser!.email, receiverEmail];
-      ids.sort();
-      roomId = ids.join();
-      return roomId;
-    }
+    // Is Other User An Admin
+    final isOtherUserAdmin = otherUserMap['admin'] ?? false;
 
     return Scaffold(
       body: Stack(
@@ -51,23 +57,26 @@ class _OtherUserAccountPageState extends State<OtherUserAccountPage> {
                     ? Column(
                         children: [
                           StreamBuilder(
-                            stream: FirebaseFirestore.instance
-                                .collection('users')
-                                .doc(otherUserMap['uid'])
-                                .snapshots(),
+                            stream: getThrottledStream(
+                              collectionPath: 'users',
+                              docPath: otherUserMap['uid'],
+                            ),
                             builder: (context, snapshot) {
-                              if (!snapshot.hasData){
+                              if (!snapshot.hasData) {
                                 return showNoProfilePicture(context);
                               }
-                              final String? profilePicture = snapshot.data!.data()?['profile-picture'];
+
+                              final data = snapshot.data!.data();
+                              final String? profilePicture =
+                                  data['profile-picture'];
                               if (profilePicture != null) {
-                                return showOtherUserProfilePicture(profilePicture, context, 75);
+                                return showOtherUserProfilePicture(
+                                    data['uid'], profilePicture, context, 75);
                               }
-                              return showNoOtherUserProfilePicture(context, 150);
+                              return showNoOtherUserProfilePicture(
+                                  context, 150);
                             },
                           ),
-
-
                           const SizedBox(height: 20),
                           ListTile(
                             leading: Icon(Icons.person_rounded,
@@ -106,7 +115,9 @@ class _OtherUserAccountPageState extends State<OtherUserAccountPage> {
                             subtitle: Text(otherUserMap['user-type']),
                           ),
                           const SizedBox(height: 10),
-                          otherUserMap['user-type'] != 'student'
+
+                          // todo: User Can Only Chat With Other Users If They Are Admins Or Non-Students
+                          otherUserMap['user-type'] != 'student' || isUserAdmin
                               ? MyButton(
                                   onPressed: () {
                                     // Navigate to [other-user]'s Chat Page
@@ -126,8 +137,63 @@ class _OtherUserAccountPageState extends State<OtherUserAccountPage> {
                                 )
                               : Container(),
                           const SizedBox(height: 10),
+
+                          isUserAdmin
+                              ? Column(
+                                  children: [
+                                    // todo: Only Admins Can Make Other Users Admins
+                                    // make other users ADMIN iff they are not ADMIN already
+                                    isOtherUserAdmin
+                                        ? MyButton(
+                                            onPressed: () async {
+                                              try {
+                                                await administrator!
+                                                    .makeUserAdmin(
+                                                        otherUserMap['uid']);
+                                                if (context.mounted) {
+                                                  showSnackBar(
+                                                      context, 'Success!');
+                                                }
+                                              } catch (e) {
+                                                showSnackBar(context,
+                                                    'Error Making User Admin: ${e.toString()}');
+                                              }
+                                            },
+                                            btnText: 'Make Admin',
+                                            isPrimary: false,
+                                          )
+                                        : Container(),
+                                    const SizedBox(height: 10),
+
+                                    // todo: Delete User Account
+                                    isOtherUserAdmin
+                                        ? MyButton(
+                                            onPressed: () async {
+                                              try {
+                                                await administrator!
+                                                    .deleteUserAccount(
+                                                        otherUserMap['uid']);
+                                                if (context.mounted) {
+                                                  showSnackBar(
+                                                      context, 'Success!');
+                                                  Navigator.pop(context);
+                                                }
+                                              } catch (e) {
+                                                showSnackBar(context,
+                                                    'Error Deleting User Account: ${e.toString()}');
+                                              }
+                                            },
+                                            btnText: 'Delete Account',
+                                            isPrimary: false,
+                                          )
+                                        : Container(),
+                                  ],
+                                )
+                              : Container(),
                         ],
                       )
+
+                    // User's Account No Longer Exists
                     : Column(
                         children: [
                           const SizedBox(height: 100),
@@ -145,7 +211,7 @@ class _OtherUserAccountPageState extends State<OtherUserAccountPage> {
                           const SizedBox(height: 15),
                           MyButton(
                             btnText: 'Contact  Support Team',
-                            isPrimary: true,
+                            isPrimary: false,
                             onPressed: () {
                               Navigator.pushNamed(context, '/contact-us');
                             },
@@ -155,7 +221,7 @@ class _OtherUserAccountPageState extends State<OtherUserAccountPage> {
               ),
             ),
           ),
-          const MyBackButton()
+          const MyBackButton(),
         ],
       ),
     );

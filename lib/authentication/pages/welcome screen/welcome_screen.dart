@@ -43,7 +43,7 @@ class _WelcomeScreenState extends State<WelcomeScreen> {
                         'Skip',
                         style: GoogleFonts.montserrat(
                           color:
-                              Theme.of(context).primaryColor.withOpacity(0.5),
+                              const Color.fromARGB(255, 75, 125, 200),
                         ),
                       ),
                     ),
@@ -57,7 +57,7 @@ class _WelcomeScreenState extends State<WelcomeScreen> {
               onPressed: () => setState(() {
                 _pageIndex++;
               }),
-              backgroundColor: Theme.of(context).primaryColor.withOpacity(0.5),
+              backgroundColor: const Color.fromARGB(255, 75, 125, 200),
               child: const Icon(Icons.double_arrow_rounded),
             )
           : Container(),

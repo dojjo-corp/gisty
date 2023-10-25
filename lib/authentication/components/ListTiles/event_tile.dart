@@ -1,24 +1,24 @@
 import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
 
-import '../pages/jobs/job_details.dart';
+import '../../pages/events/event_details_page.dart';
 
-class JobsTile extends StatelessWidget {
-  final Map<String, dynamic> jobDetails;
+class EventTile extends StatelessWidget {
+  final Map<String, dynamic> eventDetails;
 
-  const JobsTile({super.key, required this.jobDetails});
+  const EventTile({super.key, required this.eventDetails});
 
   @override
   Widget build(BuildContext context) {
-    final String title = jobDetails['title'] ?? '',
-        organisation = jobDetails['company-name'] ?? '',
-        location = jobDetails['location'] ?? '';
+    final String title = eventDetails['title'] ?? '',
+        organisation = eventDetails['organizers'] ?? '',
+        location = eventDetails['location'] ?? '';
     return GestureDetector(
       onTap: () => Navigator.push(
         context,
         MaterialPageRoute(
-          builder: (context) => JobDetailsPage(
-            jobDetails: jobDetails,
+          builder: (context) => EventDetailsPage(
+            eventDetails: eventDetails,
           ),
         ),
       ),
@@ -28,9 +28,9 @@ class JobsTile extends StatelessWidget {
           side: BorderSide(color: Colors.grey[100]!),
         ),
         tileColor: Colors.grey[300],
-        leading: Icon(
-          Icons.assured_workload_rounded,
-          color: Colors.yellow[800],
+        leading: const Icon(
+          Icons.event,
+          color: Colors.yellow,
         ),
         title: Text(
           title,

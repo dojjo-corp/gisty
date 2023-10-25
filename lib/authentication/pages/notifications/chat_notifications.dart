@@ -1,5 +1,5 @@
-import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/material.dart';
+import 'package:gt_daily/authentication/helper_methods.dart/global.dart';
 
 class ChatNotifications extends StatelessWidget {
   const ChatNotifications({super.key});
@@ -7,8 +7,7 @@ class ChatNotifications extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return StreamBuilder(
-        stream:
-            FirebaseFirestore.instance.collection('Notifications').snapshots(),
+        stream: getThrottledStream(collectionPath: 'Notifications'),
         builder: (context, snapshot) {
           return ListView();
         });

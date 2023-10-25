@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
 
-import '../../components/custom_back_button.dart';
+import '../../components/buttons/custom_back_button.dart';
 
 class EventDetailsPage extends StatelessWidget {
   final Map<String, dynamic> eventDetails;
@@ -9,13 +9,12 @@ class EventDetailsPage extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    
     return Scaffold(
       body: Stack(
         children: [
           Padding(
-            padding:
-                const EdgeInsets.only(top: 100, bottom: 10, right: 20, left: 20),
+            padding: const EdgeInsets.only(
+                top: 100, bottom: 10, right: 20, left: 20),
             child: SizedBox(
               height: MediaQuery.of(context).size.height,
               child: ListView(
@@ -37,7 +36,7 @@ class EventDetailsPage extends StatelessWidget {
                           ),
                           const SizedBox(width: 5),
                           Text(
-                            eventDetails['company-name'],
+                            eventDetails['organizers'],
                             style: GoogleFonts.poppins(
                                 fontWeight: FontWeight.w600, fontSize: 20),
                           ),
@@ -69,7 +68,7 @@ class EventDetailsPage extends StatelessWidget {
                           ),
                           const SizedBox(width: 5),
                           Text(
-                            eventDetails['company-contacts'].join('/'),
+                            eventDetails['contacts'].join('/'),
                             style: GoogleFonts.poppins(
                               fontSize: 16,
                               fontWeight: FontWeight.w500,
@@ -79,6 +78,13 @@ class EventDetailsPage extends StatelessWidget {
                         ],
                       ),
                       const SizedBox(height: 25),
+                      const Text(
+                        'Details',
+                        style: TextStyle(
+                          fontWeight: FontWeight.w600,
+                          letterSpacing: 2,
+                        ),
+                      ),
                       Text(
                         eventDetails['details'],
                         style: GoogleFonts.poppins(

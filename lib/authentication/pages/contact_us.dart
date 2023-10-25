@@ -1,6 +1,8 @@
 import 'package:flutter/material.dart';
 
-import '../components/custom_back_button.dart';
+import '../components/buttons/buttons.dart';
+import '../components/buttons/custom_back_button.dart';
+import '../components/page_title.dart';
 
 class ContactUsPage extends StatelessWidget {
   const ContactUsPage({super.key});
@@ -15,29 +17,33 @@ class ContactUsPage extends StatelessWidget {
                 top: 100, bottom: 10, right: 20, left: 20),
             child: SizedBox(
               height: MediaQuery.of(context).size.height,
-              child: const SingleChildScrollView(
+              child: SingleChildScrollView(
                 child: Column(
                   crossAxisAlignment: CrossAxisAlignment.center,
                   children: <Widget>[
-                    Text(
-                      'Contact Information',
-                      style: TextStyle(
-                        fontSize: 24,
-                        fontWeight: FontWeight.bold,
-                      ),
-                    ),
-                    SizedBox(height: 20),
-                    ListTile(
+                    const PageTitle(title: 'Contact Information'),
+                    const ListTile(
                       leading: Icon(Icons.phone),
-                      title: Text('Phone Number: +1 (123) 456-7890'),
+                      title: Text('Phone Number'),
+                      subtitle: Text('+1 (123) 456-7890'),
                     ),
-                    ListTile(
+                    const ListTile(
                       leading: Icon(Icons.email),
-                      title: Text('Email: info@example.com'),
+                      title: Text('Email'),
+                      subtitle: Text('info@example.com'),
                     ),
-                    ListTile(
+                    const ListTile(
                       leading: Icon(Icons.location_on),
-                      title: Text('Address: 123 Main St, City, Country'),
+                      title: Text('Address'),
+                      subtitle: Text('123 Main St, City, Country'),
+                    ),
+                    const SizedBox(height: 20),
+                    MyButton(
+                      onPressed: () {
+                        Navigator.pushNamed(context, '/feedback');
+                      },
+                      btnText: 'Feedback / Report',
+                      isPrimary: true,
                     ),
                   ],
                 ),

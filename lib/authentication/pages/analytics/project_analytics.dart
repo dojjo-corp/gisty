@@ -1,9 +1,9 @@
-import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:fl_chart/fl_chart.dart';
 import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
+import 'package:gt_daily/authentication/helper_methods.dart/global.dart';
 
-import '../../components/custom_back_button.dart';
+import '../../components/buttons/custom_back_button.dart';
 import '../../helper_methods.dart/analytics.dart';
 
 class ProjectAnalytics extends StatelessWidget {
@@ -21,10 +21,10 @@ class ProjectAnalytics extends StatelessWidget {
             child: SizedBox(
               height: MediaQuery.of(context).size.height,
               child: StreamBuilder(
-                  stream: FirebaseFirestore.instance
-                      .collection('All Projects')
-                      .doc(pid)
-                      .snapshots(),
+                  stream: getThrottledStream(
+                    collectionPath: 'All Projects',
+                    docPath: pid,
+                  ),
                   builder: (context, snapshot) {
                     if (!snapshot.hasData) {
                       return const Center(child: Text('Loading...'));
@@ -43,6 +43,7 @@ class ProjectAnalytics extends StatelessWidget {
                         projectData['saved'].length.toDouble();
                     final double numDownloaded =
                         projectData['downloaded-by'].length.toDouble();
+
                     // IMPRESSIONS
                     final impressionsData = projectData['impressions'];
                     final nLikes = impressionsData['like'].length;
@@ -59,7 +60,10 @@ class ProjectAnalytics extends StatelessWidget {
                       {'2': numDownloaded},
                       {'3': numComments},
                     ];
+
+                    // get maxY from the sum of all barData
                     final maxY = sum([numImpressions, numSaved, numDownloaded]);
+
                     return ListView(
                       children: [
                         Text(
@@ -71,9 +75,8 @@ class ProjectAnalytics extends StatelessWidget {
                         ),
                         const SizedBox(height: 20),
                         SizedBox(
-                          height: 200,
+                          height: 250,
                           child: BarChart(
-                            // get maxY from the sum of all barData
                             BarChartData(
                               maxY: maxY,
                               barGroups: barDataList
@@ -87,7 +90,7 @@ class ProjectAnalytics extends StatelessWidget {
                                                 BackgroundBarChartRodData(
                                               show: true,
                                               toY: maxY,
-                                              color: Colors.grey,
+                                              color: Colors.grey[300],
                                             ),
                                             borderRadius:
                                                 BorderRadius.circular(4),

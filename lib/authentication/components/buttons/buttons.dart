@@ -26,7 +26,8 @@ class MyButton extends StatelessWidget {
       ),
       child: Text(
         btnText,
-        style: TextStyle(color: textColor, fontWeight: FontWeight.w600),
+        style: TextStyle(color: textColor, fontWeight: FontWeight.w600, fontSize: 16),
+        textAlign: TextAlign.center,
       ),
     );
   }

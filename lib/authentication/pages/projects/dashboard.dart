@@ -4,8 +4,9 @@ import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
-import 'package:gt_daily/authentication/components/buttons.dart';
+import 'package:gt_daily/authentication/components/buttons/buttons.dart';
 import 'package:provider/provider.dart';
+import 'package:rxdart/transformers.dart';
 
 import '../../components/project_grid_item.dart';
 import '../../providers/projects_provider.dart';
@@ -67,7 +68,8 @@ class _DashboardState extends State<Dashboard> {
                       stream: FirebaseFirestore.instance
                           .collection('All Projects')
                           .orderBy('time-added', descending: true)
-                          .snapshots(),
+                          .snapshots()
+                          .throttleTime(const Duration(seconds: 5)),
                       builder: (context, snapshot) {
                         if (!snapshot.hasData) {
                           return const Center(
@@ -136,8 +138,7 @@ class _DashboardState extends State<Dashboard> {
                   textStyle: TextStyle(color: Colors.grey[700]),
                   triggerMode: TooltipTriggerMode.longPress,
                   child: FloatingActionButton(
-                    backgroundColor:
-                        Theme.of(context).primaryColor.withOpacity(0.5),
+                    backgroundColor: const Color.fromARGB(255, 75, 125, 200),
                     onPressed: () {
                       Navigator.pushNamed(context, '/add-project');
                     },

@@ -7,6 +7,7 @@ import 'package:font_awesome_flutter/font_awesome_flutter.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:provider/provider.dart';
 
+import '../helper_methods.dart/global.dart';
 import '../pages/projects/project_details.dart';
 import '../providers/projects_provider.dart';
 
@@ -51,7 +52,7 @@ class _ProjectGridItemState extends State<ProjectGridItem> {
       Icons.bookmark_add_outlined,
     );
 
-    // add project to saved projects
+    // todo: add project to saved projects
     Future<void> saveProject() async {
       try {
         await FirebaseFirestore.instance
@@ -75,7 +76,7 @@ class _ProjectGridItemState extends State<ProjectGridItem> {
       }
     }
 
-    // remove from saved projects
+    // todo: remove from saved projects
     Future<void> unsaveProject() async {
       try {
         await FirebaseFirestore.instance
@@ -126,84 +127,78 @@ class _ProjectGridItemState extends State<ProjectGridItem> {
                 projectColor.withOpacity(0.4)
               ]),
             ),
-            child: Row(
+            child: Column(
               children: [
-                VerticalDivider(
-                  thickness: 6,
-                  color: projectColor,
-                  width: 9,
-                ),
-                const SizedBox(width: 8),
-                Expanded(
-                  child: Column(
-                    children: [
-                      Column(
-                        crossAxisAlignment: CrossAxisAlignment.start,
-                        mainAxisAlignment: MainAxisAlignment.spaceAround,
-                        children: [
-                          Row(
-                            mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                            children: [
-                              Image.asset(
-                                categoryMap[category]['image'],
-                                height: 30,
-                              ),
-                              widget.showLiked
-                                  ? IconButton(
-                                      onPressed: () async {
-                                        setState(() {
-                                          isSaved = !isSaved;
-                                        });
-                                        isSaved
-                                            ? await saveProject()
-                                            : await unsaveProject();
-                                      },
-                                      icon: isSaved ? savedIcon : notSavedIcon,
-                                    )
-                                  : Container(),
-                            ],
-                          ),
-                          // PROJECT TITLE
-                          Column(
-                            crossAxisAlignment: CrossAxisAlignment.start,
-                            children: [
-                              Text(
-                                title,
-                                style: GoogleFonts.montserrat(
-                                    fontWeight: FontWeight.bold,
-                                    fontSize: 25,
-                                    color: projectColor),
-                              ),
-                              const SizedBox(height: 5),
-                              Row(
-                                children: [
-                                  Text(
-                                    student,
-                                    style: GoogleFonts.montserrat(
-                                      color: Colors.grey[700],
-                                    ),
-                                  ),
-                                  const SizedBox(width: 10),
-                                  Text(year,
-                                      style: GoogleFonts.montserrat(
-                                          color: Colors.grey[700]))
-                                ],
-                              ),
-                              const SizedBox(height: 5),
-                              Text(
-                                description,
-                                style: GoogleFonts.montserrat(
-                                    fontWeight: FontWeight.w500),
-                                overflow: TextOverflow.ellipsis,
-                                maxLines: 2,
-                                softWrap: true,
+                Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  mainAxisAlignment: MainAxisAlignment.spaceAround,
+                  children: [
+                    Row(
+                      mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                      children: [
+                        Image.asset(
+                          categoryMap[category]['image'],
+                          height: 30,
+                        ),
+                        widget.showLiked
+                            ? IconButton(
+                                onPressed: () async {
+                                  setState(() {
+                                    isSaved = !isSaved;
+                                  });
+                                  isSaved
+                                      ? await saveProject()
+                                      : await unsaveProject();
+                                },
+                                icon: isSaved ? savedIcon : notSavedIcon,
                               )
+                            : Container(),
+                      ],
+                    ),
+                    // PROJECT TITLE
+                    Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        Text(
+                          title,
+                          style: GoogleFonts.montserrat(
+                              fontWeight: FontWeight.bold,
+                              fontSize: 25,
+                              color: projectColor),
+                        ),
+                        const SizedBox(height: 5),
+                        Padding(
+                          padding: const EdgeInsets.symmetric(horizontal: 8.0),
+                          child: Row(
+                            children: [
+                              Text(
+                                student,
+                                style: GoogleFonts.montserrat(
+                                  color: Colors.grey[700],
+                                ),
+                              ),
+                              const SizedBox(width: 10),
+                              Text(year,
+                                  style: GoogleFonts.montserrat(
+                                      color: Colors.grey[700]))
                             ],
                           ),
-                        ],
-                      ),
-                    ],
-                  ),
+                        ),
+                        const SizedBox(height: 5),
+                        Padding(
+                          padding: const EdgeInsets.symmetric(horizontal: 8.0),
+                          child: Text(
+                            description,
+                            style: GoogleFonts.montserrat(
+                                fontWeight: FontWeight.w500),
+                            overflow: TextOverflow.ellipsis,
+                            maxLines: 2,
+                            softWrap: true,
+                          ),
+                        )
+                      ],
+                    ),
+                  ],
                 ),
               ],
             ),
@@ -220,10 +215,10 @@ class _ProjectGridItemState extends State<ProjectGridItem> {
             children: [
               Expanded(
                 child: StreamBuilder(
-                    stream: FirebaseFirestore.instance
-                        .collection('All Projects')
-                        .doc(pid)
-                        .snapshots(),
+                    stream: getThrottledStream(
+                      collectionPath: 'All Projects',
+                      docPath: pid,
+                    ),
                     builder: (context, snapshot) {
                       if (!snapshot.hasData) {
                         return Container();

@@ -1,8 +1,8 @@
-import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/material.dart';
-import 'package:gt_daily/authentication/components/custom_back_button.dart';
-import 'package:gt_daily/authentication/components/jobs_tile.dart';
+import 'package:gt_daily/authentication/components/buttons/custom_back_button.dart';
+import 'package:gt_daily/authentication/components/ListTiles/jobs_tile.dart';
 import 'package:gt_daily/authentication/components/page_title.dart';
+import 'package:gt_daily/authentication/helper_methods.dart/global.dart';
 
 class AllJobsPage extends StatelessWidget {
   const AllJobsPage({super.key});
@@ -21,9 +21,7 @@ class AllJobsPage extends StatelessWidget {
                 children: [
                   const PageTitle(title: 'All Jobs And Internships'),
                   StreamBuilder(
-                      stream: FirebaseFirestore.instance
-                          .collection('All Jobs')
-                          .snapshots(),
+                      stream: getThrottledStream(collectionPath: 'All Jobs'),
                       builder: (context, snapshot) {
                         if (!snapshot.hasData) {
                           return const Text('No Jobs Posted Yet');

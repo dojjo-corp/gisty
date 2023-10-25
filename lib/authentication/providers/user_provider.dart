@@ -8,6 +8,11 @@ class UserProvider extends ChangeNotifier {
   List<Map<String, dynamic>> get allUsers => _allUsers;
   final User? currentUser = FirebaseAuth.instance.currentUser;
 
+  bool get isUserAdmin =>
+      getUserDataFromEmail(
+          FirebaseAuth.instance.currentUser?.email)?['admin'] ??
+      false;
+
   String get userType {
     String userType = '';
     for (var user in _allUsers) {
@@ -18,7 +23,7 @@ class UserProvider extends ChangeNotifier {
     return userType;
   }
 
-  Map<String, dynamic>? getUserDataFromEmail(String email) {
+  Map<String, dynamic>? getUserDataFromEmail(String? email) {
     for (var user in _allUsers) {
       if (user['email'] == email) {
         return user;
@@ -44,4 +49,5 @@ class UserProvider extends ChangeNotifier {
       notifyListeners();
     });
   }
+
 }

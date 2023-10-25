@@ -2,13 +2,13 @@ import 'dart:convert';
 import 'dart:developer';
 
 import 'package:cloud_firestore/cloud_firestore.dart';
-import 'package:firebase_auth/firebase_auth.dart';
 import 'package:firebase_messaging/firebase_messaging.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_local_notifications/flutter_local_notifications.dart';
+import 'package:gt_daily/authentication/helper_methods.dart/messaging.dart';
 import 'package:http/http.dart' as http;
 
-import 'navigation_reo.dart';
+import 'navigation_repo.dart';
 
 Future<void> handleBackgroundMessage(RemoteMessage message) async {
   log('Notification Title: ${message.notification?.title}');
@@ -31,11 +31,21 @@ class FireMessaging {
   );
   final _localNotifications = FlutterLocalNotificationsPlugin();
 
+  // todo: Handle Clicked Notifications
   void handleMessage(RemoteMessage? message) {
     if (message == null) return;
-    NavigationService.instance.navigateTo('/messaging');
+
+    // navigate to corresponding route (screen/page)
+    final args = message.data;
+    final routeName = args['route-name'];
+    final routeArgs = jsonDecode(args['route-arguments']);
+    NavigationService.instance.navigateTo(
+      routeName ?? '/',
+      arguments: routeArgs,
+    );
   }
 
+  // todo: Initialize Firebase Messaging
   Future initPushNoifications() async {
     await messaging.setForegroundNotificationPresentationOptions(
       alert: true,
@@ -50,6 +60,7 @@ class FireMessaging {
       final notification = message.notification;
       if (notification == null) return;
 
+      // display notification on device's notification panel
       _localNotifications.show(
         notification.hashCode,
         notification.title,
@@ -72,6 +83,7 @@ class FireMessaging {
     });
   }
 
+  // todo: Initialize Local Notifications
   Future<void> initLocalNotifications() async {
     const android = AndroidInitializationSettings('@mipmap/ic_launcher');
     const settings = InitializationSettings(android: android);
@@ -85,7 +97,9 @@ class FireMessaging {
             );
             handleMessage(message);
           }
-        } catch (e) {}
+        } catch (e) {
+          rethrow;
+        }
       },
     );
 
@@ -94,7 +108,7 @@ class FireMessaging {
     await platform?.createNotificationChannel(_androidChannel);
   }
 
-  // initialize firebase messaging
+  // todo: Perform All Notifications Initialization
   Future<void> initNotifications() async {
     // request permission from user
     await messaging.requestPermission();
@@ -103,7 +117,6 @@ class FireMessaging {
     _fCMToken = fCMToken;
     debugPrint(_fCMToken);
     messaging.onTokenRefresh.listen((newFcmToken) {
-      //  send token to application server.
       _fCMToken = newFcmToken;
       // Note: This callback is fired at each app startup and whenever a new
       // token is generated.
@@ -117,31 +130,20 @@ class FireMessaging {
     FirebaseMessaging.onBackgroundMessage(handleBackgroundMessage);
   }
 
-  Future<void> handleNotification(RemoteMessage? message) async {
-    if (message != null) {
-      final notificationMap = {
-        'title': message.notification!.title,
-        'body': message.notification!.body,
-        'time': Timestamp.fromDate(message.sentTime!),
-        'type': message.data['type']
-      };
-      FirebaseFirestore.instance
-          .collection('Notifications')
-          .doc(FirebaseAuth.instance.currentUser?.uid)
-          .update({
-        'notifications': FieldValue.arrayUnion([notificationMap]),
-      });
-    }
-  }
-
+  // todo: Send Notification To Users Device
   Future<http.Response?> sendPushNotifiation({
     required String token,
     required String title,
     required String body,
     required String type,
+    required String receiverEmail,
+    String? routeName,
+    Map<String, dynamic>? routeArgs,
   }) async {
     try {
-      return await http.post(
+
+      // send to user's device
+      final response = await http.post(
         Uri.parse('https://fcm.googleapis.com/fcm/send'),
         headers: {
           'Content-Type': 'application/json',
@@ -157,6 +159,8 @@ class FireMessaging {
             "body": body,
           },
           "data": {
+            "route-name": routeName,
+            "route-arguments": routeArgs,
             "click_action": "FLUTTER_NOTIFICATION_CLICK",
             "status": "done",
             "type": type,
@@ -165,9 +169,103 @@ class FireMessaging {
           }
         }),
       );
+
+      // send notification to firestore
+      await repo.sendNotificationToFirestore(
+        to: receiverEmail,
+        type: type,
+        title: title,
+        body: body,
+        routeArgs: routeArgs,
+        routeName: routeName,
+      );
+
+      // send to user's device
+      return response;
     } catch (e) {
-      log(e.toString());
-      return null;
+      rethrow;
+    }
+  }
+
+  // todo: Notification To All Users
+  Future<Map<String, String?>?> sendPushNotifiationToAllUsers({
+    required String title,
+    required String body,
+    required String type,
+    String? routeName,
+    Map<String, dynamic>? routeArgs,
+  }) async {
+    Map<String, String?> resultMap = {};
+
+    try {
+      // get all user tokens and emails
+      final usersSnapshot =
+          await FirebaseFirestore.instance.collection('users').get();
+      final docs = usersSnapshot.docs;
+      List tokens = [];
+      List emails = [];
+      for (var doc in docs) {
+        tokens.add(doc.data()['fcm-token']);
+        emails.add(doc.data()['email']);
+      }
+
+      // send notifications
+      for (var i = 0; i < tokens.length; i++) {
+        final response = await sendPushNotifiation(
+          token: tokens[i],
+          receiverEmail: emails[i],
+          title: title,
+          body: body,
+          type: type,
+          routeArgs: routeArgs,
+          routeName: routeName,
+        );
+        log('This is the token for ${emails[i]}: ${tokens[i]}}');
+        resultMap[emails[i]] = response?.statusCode.toString();
+      }
+      return resultMap;
+    } catch (e) {
+      rethrow;
+    }
+  }
+
+  // todo: send to particular users
+  Future<Map<String, String>?> sendPushNotifiationToSomeUsers({
+    required String title,
+    required String body,
+    required String type,
+    required List<String> userEmails,
+    String? routeName,
+    Map<String, dynamic>? routeArgs,
+  }) async {
+    Map<String, String> resultMap = {};
+
+    try {
+      // get all user tokens and emails
+      final allUsersSnapshot =
+          await FirebaseFirestore.instance.collection('users').get();
+      final docs = allUsersSnapshot.docs;
+      final usersDataSnapshot = docs
+          .where((doc) => userEmails.contains(doc.data()['email']))
+          .toList();
+
+      // send notifications
+      for (var snapshot in usersDataSnapshot) {
+        final data = snapshot.data();
+        final response = await sendPushNotifiation(
+          token: data['fcm-token'],
+          receiverEmail: data['email'],
+          title: title,
+          body: body,
+          type: 'admin',
+          routeArgs: routeArgs,
+          routeName: routeName,
+        );
+        resultMap[data['email']] = response.toString();
+      }
+      return resultMap;
+    } catch (e) {
+      rethrow;
     }
   }
 }

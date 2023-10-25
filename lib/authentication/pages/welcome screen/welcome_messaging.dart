@@ -9,9 +9,9 @@ class WelcomeMessaging extends StatelessWidget {
     return Column(
       mainAxisAlignment: MainAxisAlignment.center,
       children: [
-        Icon(
+        const Icon(
           Icons.message_rounded,
-          color: Theme.of(context).primaryColor.withOpacity(0.5),
+          color: Color.fromARGB(255, 75, 125, 200),
           size: 150,
         ),
         Text(

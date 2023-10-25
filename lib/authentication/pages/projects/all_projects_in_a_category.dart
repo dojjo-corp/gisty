@@ -1,13 +1,19 @@
-import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
-import '../../components/custom_back_button.dart';
+import 'package:gt_daily/authentication/helper_methods.dart/global.dart';
+import '../../components/buttons/custom_back_button.dart';
 import '../../components/project_grid_item.dart';
 
-class AllProjectsInACategory extends StatelessWidget {
+class AllProjectsInACategory extends StatefulWidget {
   final String title;
   const AllProjectsInACategory({super.key, required this.title});
 
+  @override
+  State<AllProjectsInACategory> createState() => _AllProjectsInACategoryState();
+}
+
+class _AllProjectsInACategoryState extends State<AllProjectsInACategory> {
+  
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -23,14 +29,13 @@ class AllProjectsInACategory extends StatelessWidget {
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
                   Text(
-                    title,
+                    widget.title,
                     style: GoogleFonts.poppins(
                         fontSize: 40, fontWeight: FontWeight.bold),
                   ),
                   StreamBuilder(
-                      stream: FirebaseFirestore.instance
-                          .collection('All Projects')
-                          .snapshots(),
+                      stream:
+                          getThrottledStream(collectionPath: 'All Projects'),
                       builder: (context, snapshot) {
                         // no data
                         if (!snapshot.hasData) {
@@ -51,7 +56,7 @@ class AllProjectsInACategory extends StatelessWidget {
                         final List<Map<String, dynamic>> projectList = [];
                         for (var doc in docs) {
                           if (doc.data()['category'].toLowerCase() ==
-                              title.toLowerCase()) {
+                              widget.title.toLowerCase()) {
                             projectList.add(doc.data());
                           }
                         }
@@ -61,20 +66,24 @@ class AllProjectsInACategory extends StatelessWidget {
                                 children: projectList.map((projectData) {
                                   return ProjectGridItem(
                                     projectData: projectData,
-                                    showLiked: true,
+                                    showLiked: false,
                                   );
                                 }).toList(),
                               )
                             : SizedBox(
                                 height: 200,
                                 child: Center(
-                                    child: Row(
-                                      mainAxisAlignment: MainAxisAlignment.center,
-                                      children: [
-                                        const Text('No Project On '),
-                                        Text(title, style: const TextStyle(fontWeight: FontWeight.bold))
-                                      ],
-                                    )));
+                                  child: Row(
+                                    mainAxisAlignment: MainAxisAlignment.center,
+                                    children: [
+                                      const Text('No Project On '),
+                                      Text(widget.title,
+                                          style: const TextStyle(
+                                              fontWeight: FontWeight.bold))
+                                    ],
+                                  ),
+                                ),
+                              );
                       })
                 ],
               )),

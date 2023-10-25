@@ -3,11 +3,12 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
-import 'package:gt_daily/authentication/components/custom_back_button.dart';
 
 import '../../../global/homepage.dart';
-import '../../components/buttons.dart';
+import '../../components/buttons/buttons.dart';
+import '../../components/buttons/custom_back_button.dart';
 import '../../components/page_title.dart';
+import '../../helper_methods.dart/global.dart';
 import '../../helper_methods.dart/profile.dart';
 
 class AddProfileImagePage extends StatefulWidget {
@@ -38,10 +39,10 @@ class _AddProfileImagePageState extends State<AddProfileImagePage> {
 
                     // USER PROFILE PICTURE
                     StreamBuilder(
-                      stream: store
-                          .collection('users')
-                          .doc(auth.currentUser!.uid)
-                          .snapshots(),
+                      stream: getThrottledStream(
+                        collectionPath: 'users',
+                        docPath: auth.currentUser!.uid,
+                      ),
                       builder: (context, snapshot) {
                         if (!snapshot.hasData) {
                           return Column(

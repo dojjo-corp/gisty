@@ -2,8 +2,8 @@ import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:provider/provider.dart';
 
-import '../pages/projects/all_projects_in_a_category.dart';
-import '../providers/projects_provider.dart';
+import '../../pages/projects/all_projects_in_a_category.dart';
+import '../../providers/projects_provider.dart';
 
 class ArchiveTile extends StatelessWidget {
   final String title;

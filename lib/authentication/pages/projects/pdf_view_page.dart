@@ -7,7 +7,8 @@ import 'package:flutter_pdfview/flutter_pdfview.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:path_provider/path_provider.dart';
 
-import '../../components/custom_back_button.dart';
+import '../../components/buttons/custom_back_button.dart';
+import '../../components/loading_circle.dart';
 
 class PDFViewPage extends StatefulWidget {
   final String pdfPath;
@@ -46,44 +47,39 @@ class _PDFViewPageState extends State<PDFViewPage> {
 
   @override
   Widget build(BuildContext context) {
-    return Scaffold(
-      body: localPDFPath.isNotEmpty
-          ? Stack(
-              children: [
-                Padding(
-                  padding: const EdgeInsets.only(
-                      top: 100, bottom: 10, right: 15, left: 15),
-                  child: Column(
-                    crossAxisAlignment: CrossAxisAlignment.start,
-                    children: [
-                      Text(
-                        pdfUrl,
-                        style: GoogleFonts.poppins(
-                            fontSize: 30, fontWeight: FontWeight.bold),
-                        softWrap: true,
-                        overflow: TextOverflow.ellipsis,
-                        maxLines: 1,
+    return localPDFPath.isNotEmpty
+        ? Scaffold(
+            body: Stack(
+            children: [
+              Padding(
+                padding: const EdgeInsets.only(
+                    top: 100, bottom: 10, right: 15, left: 15),
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Text(
+                      pdfUrl,
+                      style: GoogleFonts.poppins(
+                          fontSize: 30, fontWeight: FontWeight.bold),
+                      softWrap: true,
+                      overflow: TextOverflow.ellipsis,
+                      maxLines: 1,
+                    ),
+                    Expanded(
+                      child: PDFView(
+                        filePath: localPDFPath,
+                        enableSwipe: true,
+                        // swipeHorizontal: true,
+                        autoSpacing: false,
+                        pageFling: false,
                       ),
-                      Expanded(
-                        child: PDFView(
-                          filePath: localPDFPath,
-                          enableSwipe: true,
-                          // swipeHorizontal: true,
-                          autoSpacing: false,
-                          pageFling: false,
-                        ),
-                      ),
-                    ],
-                  ),
+                    ),
+                  ],
                 ),
-                const MyBackButton()
-              ],
-            )
-          : const Center(
-              child: CircularProgressIndicator(),
-            ),
-    );
+              ),
+              const MyBackButton()
+            ],
+          ))
+        : const LoadingCircle();
   }
 }
-
-

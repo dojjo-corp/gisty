@@ -1,12 +1,13 @@
 // ignore_for_file: no_leading_underscores_for_local_identifiers
 
-import 'dart:developer';
+// import 'dart:developer';
 import 'dart:io';
 
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:firebase_storage/firebase_storage.dart';
 import 'package:flutter/material.dart';
+import 'package:gt_daily/authentication/pages/user%20account/view_profile_picture.dart';
 import 'package:image_picker/image_picker.dart';
 import 'package:path/path.dart';
 
@@ -17,9 +18,7 @@ Future<void> changePicture(BuildContext _context) async {
   try {
     final XFile? pickedImage =
         await ImagePicker().pickImage(source: ImageSource.gallery);
-    log('here');
     if (pickedImage == null) return;
-    log('here too');
     final File imageFile = File(pickedImage.path);
     final String fileName = basename(pickedImage.path);
     final Reference firebaseStorageRef = FirebaseStorage.instance.ref().child(
@@ -32,8 +31,6 @@ Future<void> changePicture(BuildContext _context) async {
         .doc(FirebaseAuth.instance.currentUser!.uid)
         .update({'profile-picture': downloadUrl});
   } catch (e) {
-    log(e.toString());
-
     ScaffoldMessenger.of(_context).showSnackBar(
       SnackBar(
         content: Text('Error Changing Profile Picture: ${e.toString()}'),
@@ -108,47 +105,71 @@ Widget showProfilePicture(String downloadUrl, BuildContext _context) =>
     );
 
 // OTHER USER'S PROFILE PICTURE
-Widget showOtherUserProfilePicture(String downloadUrl, BuildContext _context, double radius) =>
-    CircleAvatar(
-      radius: radius,
-      backgroundColor: Colors.transparent,
-      foregroundImage: Image.network(downloadUrl).image,
-      onForegroundImageError: (exception, stackTrace) =>
-          showNoOtherUserProfilePicture(_context, radius*2),
+Widget showOtherUserProfilePicture(
+  String uid,
+  String downloadUrl,
+  BuildContext _context,
+  double radius,
+) =>
+    GestureDetector(
+      onTap: () {
+        Navigator.push(
+          _context,
+          MaterialPageRoute(
+            builder: (context) =>
+                ViewProfilePicture(uid: uid),
+          ),
+        );
+      },
+      child: CircleAvatar(
+        radius: radius,
+        backgroundColor: Colors.transparent,
+        foregroundImage: Image.network(downloadUrl).image,
+        onForegroundImageError: (exception, stackTrace) =>
+            showNoOtherUserProfilePicture(_context, radius * 2),
+      ),
     );
 
 Widget showNoOtherUserProfilePicture(BuildContext _context, double size) =>
     Icon(Icons.person, color: Theme.of(_context).primaryColor, size: size);
 
-
 // DELETE ACCOUNT
-void deleteAccount(BuildContext _context) async {
+void deleteAccount({
+  required BuildContext context,
+  required String uid,
+  required String email,
+}) async {
   try {
-    await FirestoreRepo().deleteUserRecords();
+    await FirestoreRepo().deleteUserRecords(uid: uid, email: email);
     await FirebaseAuth.instance.currentUser!.delete();
 
-    if (_context.mounted) {
+    if (context.mounted) {
       Navigator.pushAndRemoveUntil(
-          _context,
+          context,
           MaterialPageRoute(
             builder: (context) => const LoginPage(),
           ),
           (route) => false);
     }
     // ignore: use_build_context_synchronously
-    ScaffoldMessenger.of(_context).showSnackBar(const SnackBar(
+    ScaffoldMessenger.of(context).showSnackBar(const SnackBar(
       content: Text('Account Deleted Successfully!'),
     ));
   } catch (e) {
-    ScaffoldMessenger.of(_context).showSnackBar(SnackBar(
+    ScaffoldMessenger.of(context).showSnackBar(SnackBar(
       content: Text('Error Deleting Accout: ${e.toString()}'),
     ));
   }
 }
 
-Future<Widget?> showDeletePromptDialog(BuildContext _context) async {
+// DELETE PROMPT
+Future<Widget?> showDeletePromptDialog({
+  required BuildContext context,
+  required String uid,
+  required String email,
+}) async {
   return await showDialog(
-    context: _context,
+    context: context,
     builder: (context) {
       return AlertDialog(
         title: const Text('Delete Account'),
@@ -162,7 +183,7 @@ Future<Widget?> showDeletePromptDialog(BuildContext _context) async {
           ),
           TextButton(
             onPressed: () {
-              deleteAccount(context);
+              deleteAccount(context: context, uid: uid, email: email);
             },
             child: const Text('Delete'),
           ),

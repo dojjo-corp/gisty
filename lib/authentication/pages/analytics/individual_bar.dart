@@ -2,7 +2,7 @@ import 'package:flutter/material.dart';
 
 class IndividualBar {
   final int x; // position on the x aixs
-  final List y; // height of bar
+  final List y; // height of bars
   final Color barColor;
 
   IndividualBar({

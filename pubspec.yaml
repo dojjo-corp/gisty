@@ -57,6 +57,7 @@ dependencies:
   flutter_native_splash: ^2.3.3
   http: ^1.1.0
   image_picker: ^1.0.4
+  rxdart: ^0.27.7
 
 dev_dependencies:
   flutter_test:
@@ -99,11 +100,15 @@ flutter:
       - assets/robotics.png
       - assets/research.png
       - assets/embedded-systems.png
+      - assets/teacher.png
+      - assets/student.png
+      - assets/engineer.png
       - android/app/src/main/res/mipmap-mdpi/ic_launcher.png
       - android/app/src/main/res/mipmap-hdpi/ic_launcher.png
       - android/app/src/main/res/mipmap-xhdpi/ic_launcher.png
       - android/app/src/main/res/mipmap-xxhdpi/ic_launcher.png
       - android/app/src/main/res/mipmap-xxxhdpi/ic_launcher.png
+
 
   #   - images/a_dot_burr.jpeg
   #   - images/a_dot_ham.jpeg

@@ -1,18 +1,26 @@
 // ignore_for_file: use_build_context_synchronously
 
-import 'dart:developer';
+// import 'dart:developer';
 
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
+import 'package:gt_daily/authentication/helper_methods.dart/global.dart';
 import 'package:gt_daily/authentication/pages/user%20account/add_profile_picture.dart';
 
-import '../../components/buttons.dart';
-import '../../components/custom_back_button.dart';
+import '../../components/buttons/buttons.dart';
+import '../../components/buttons/custom_back_button.dart';
 
-class EnterPhonePage extends StatelessWidget {
-  EnterPhonePage({super.key});
+class EnterPhonePage extends StatefulWidget {
+  const EnterPhonePage({super.key});
+
+  @override
+  State<EnterPhonePage> createState() => _EnterPhonePageState();
+}
+
+class _EnterPhonePageState extends State<EnterPhonePage> {
+  bool _isLoading = false;
   final _key = GlobalKey<FormState>();
   final contactController = TextEditingController();
   final auth = FirebaseAuth.instance;
@@ -20,7 +28,9 @@ class EnterPhonePage extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     void goToProfilePicture() async {
-      log(contactController.text);
+      setState(() {
+        _isLoading = true;
+      });
       try {
         if (_key.currentState!.validate()) {
           _key.currentState!.save();
@@ -36,16 +46,18 @@ class EnterPhonePage extends StatelessWidget {
           Navigator.push(
             context,
             MaterialPageRoute(
-              builder: (context) => const AddProfileImagePage(isFromRegistration: true,),
+              builder: (context) => const AddProfileImagePage(
+                isFromRegistration: true,
+              ),
             ),
           );
         }
       } catch (e) {
-        ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(
-            content: Text('Error Updating Contact Info: ${e.toString()}'),
-          ),
-        );
+        showSnackBar(context, 'Error Updating Contact Info: ${e.toString()}');
+      } finally {
+        setState(() {
+          _isLoading = false;
+        });
       }
     }
 
@@ -114,6 +126,7 @@ class EnterPhonePage extends StatelessWidget {
           const MyBackButton(),
         ],
       ),
+      floatingActionButton: _isLoading ? const LinearProgressIndicator() : null,
     );
   }
 }

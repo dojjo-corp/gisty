@@ -3,8 +3,8 @@ import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:provider/provider.dart';
 
-import '../pages/user account/other_user_account_page.dart';
-import '../providers/user_provider.dart';
+import '../../pages/user account/other_user_account_page.dart';
+import '../../providers/user_provider.dart';
 
 class CommentTile extends StatefulWidget {
   final String commenter, commentText;

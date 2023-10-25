@@ -3,8 +3,8 @@ import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
 
-import '../../components/buttons.dart';
-import '../../components/custom_back_button.dart';
+import '../../components/buttons/buttons.dart';
+import '../../components/buttons/custom_back_button.dart';
 
 class EditAccount extends StatefulWidget {
   const EditAccount({super.key});

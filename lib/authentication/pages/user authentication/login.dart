@@ -1,14 +1,15 @@
 // ignore_for_file: use_build_context_synchronously
 
 import 'package:cloud_firestore/cloud_firestore.dart';
+import 'package:firebase_auth/firebase_auth.dart';
 import 'package:firebase_messaging/firebase_messaging.dart';
 import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
 
 import '../../../global/homepage.dart';
-import '../../components/buttons.dart';
-import '../../components/custom_back_button.dart';
-import '../../components/my_textfield.dart';
+import '../../components/buttons/buttons.dart';
+import '../../components/buttons/custom_back_button.dart';
+import '../../components/textfields/simple_textfield.dart';
 import '../../repository/authentication_repo.dart';
 
 class LoginPage extends StatefulWidget {
@@ -28,6 +29,7 @@ class _LoginPageState extends State<LoginPage> {
   @override
   Widget build(BuildContext context) {
     final auth = AuthRepository();
+
     Future<void> login() async {
       try {
         setState(() {
@@ -39,16 +41,31 @@ class _LoginPageState extends State<LoginPage> {
         );
         if (u != null) {
           final fcmToken = await FirebaseMessaging.instance.getToken();
-          await FirebaseFirestore.instance
+
+          // check if user's document exists in firestore
+          final docSnapshot = await FirebaseFirestore.instance
               .collection('users')
               .doc(u.user!.uid)
-              .update({'fcm-token': fcmToken});
-          Navigator.pushReplacement(
-            context,
-            MaterialPageRoute(
-              builder: (context) => MyHomePage(pageIndex: 0),
-            ),
-          );
+              .get();
+
+          if (docSnapshot.exists) {
+            await FirebaseFirestore.instance
+                .collection('users')
+                .doc(u.user!.uid)
+                .update({'fcm-token': fcmToken});
+            if (context.mounted) {
+              Navigator.pushReplacement(
+                context,
+                MaterialPageRoute(
+                  builder: (context) => MyHomePage(pageIndex: 0),
+                ),
+              );
+            }
+          } else {
+            // user's account is inactive/deleted if their document does not exist
+            FirebaseAuth.instance.signOut();
+            throw 'User Accout Does Not Exist';
+          }
         }
       } catch (e) {
         ScaffoldMessenger.of(context).showSnackBar(
@@ -90,18 +107,18 @@ class _LoginPageState extends State<LoginPage> {
                           key: _formKey,
                           child: Column(
                             children: [
-                              // Email TextField
-                              MyTextField(
+                              // todo: Email TextField
+                              SimpleTextField(
                                 autofillHints: const [AutofillHints.email],
                                 controller: emailController,
                                 hintText: 'Email',
                                 iconData: Icons.email_rounded,
                                 isWithIcon: true,
                               ),
-                              const SizedBox(height: 15),
+                              const SizedBox(height: 10),
 
-                              // Password TextField
-                              MyTextField(
+                              // todo: Password TextField
+                              SimpleTextField(
                                 controller: passwordController,
                                 hintText: 'Password',
                                 iconData: Icons.lock_rounded,
@@ -112,7 +129,7 @@ class _LoginPageState extends State<LoginPage> {
                           ),
                         ),
                       ),
-                      const SizedBox(height: 15),
+                      const SizedBox(height: 10),
                       Row(
                         mainAxisAlignment: MainAxisAlignment.end,
                         children: [
@@ -120,9 +137,12 @@ class _LoginPageState extends State<LoginPage> {
                             onTap: () {
                               Navigator.pushNamed(context, '/reset-password');
                             },
-                            child: Text(
-                              'Forgot password?',
-                              style: TextStyle(color: Colors.grey[800]),
+                            child: Padding(
+                              padding: const EdgeInsets.only(right:10.0),
+                              child: Text(
+                                'Forgot password?',
+                                style: TextStyle(color: Colors.yellow[800]),
+                              ),
                             ),
                           )
                         ],

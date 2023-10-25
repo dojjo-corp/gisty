@@ -1,12 +1,12 @@
 import 'package:flutter/material.dart';
 
-class MyTextField extends StatefulWidget {
+class SimpleTextField extends StatefulWidget {
   final TextEditingController controller;
   final String hintText;
   final IconData? iconData;
   final bool isWithIcon;
   final Iterable<String>? autofillHints;
-  const MyTextField({
+  const SimpleTextField({
     super.key,
     required this.controller,
     required this.hintText,
@@ -16,17 +16,26 @@ class MyTextField extends StatefulWidget {
   });
 
   @override
-  State<MyTextField> createState() => _MyTextFieldState();
+  State<SimpleTextField> createState() => _SimpleTextFieldState();
 }
 
-class _MyTextFieldState extends State<MyTextField> {
+class _SimpleTextFieldState extends State<SimpleTextField> {
+  late bool showSuffixIcon;
+  late bool obscureText;
+  @override
+  void initState() {
+    super.initState();
+    showSuffixIcon = widget.hintText.toLowerCase() == 'password';
+    obscureText = showSuffixIcon;
+  }
+
   Color prefixIconColor = Colors.grey;
   @override
   Widget build(BuildContext context) {
     return TextFormField(
       autofillHints: widget.autofillHints,
       controller: widget.controller,
-      obscureText: widget.hintText.toLowerCase() == 'password',
+      obscureText: obscureText,
       decoration: InputDecoration(
         filled: true,
         fillColor: Colors.white,
@@ -37,7 +46,21 @@ class _MyTextFieldState extends State<MyTextField> {
         prefixIcon: widget.isWithIcon ? Icon(widget.iconData) : null,
         prefixIconColor: widget.isWithIcon ? prefixIconColor : null,
         hintText: widget.hintText,
-        labelText: widget.hintText,
+        hintStyle: TextStyle(color: Colors.grey[400]),
+        // only show suffix icon for a password textfield (to show/hide password text)
+        suffixIcon: showSuffixIcon
+            ? IconButton(
+                onPressed: () {
+                  setState(() {
+                    obscureText = !obscureText;
+                  });
+                },
+                icon: obscureText
+                    ? const Icon(Icons.visibility_rounded, color: Colors.grey)
+                    : const Icon(Icons.visibility_off_rounded,
+                        color: Colors.grey),
+              )
+            : null,
       ),
       onChanged: (String value) {
         if (value.isNotEmpty) {

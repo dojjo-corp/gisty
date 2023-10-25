@@ -1,14 +1,15 @@
-import 'dart:developer';
+// import 'dart:developer';
 
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
+import 'package:gt_daily/authentication/helper_methods.dart/global.dart';
 import 'package:gt_daily/authentication/pages/user%20account/other_user_account_page.dart';
 import 'package:provider/provider.dart';
 
-import '../pages/messaging/chat_page.dart';
-import '../providers/user_provider.dart';
+import '../../pages/messaging/chat_page.dart';
+import '../../providers/user_provider.dart';
 
 class RecentChatTile extends StatefulWidget {
   final String? receiver;
@@ -58,7 +59,6 @@ class _RecentChatTileState extends State<RecentChatTile> {
         // udpate last-text's read status to true
         final String roomId = getRoomId(widget.receiver ?? '');
         final lastTextData = widget.lastTextData;
-        log(lastTextData?['sender']);
 
         // only update read status if the last text is not sent by the current user
         if (lastTextData?['sender'] !=
@@ -169,10 +169,10 @@ class _RecentChatTileState extends State<RecentChatTile> {
             ? const Icon(Icons.school, color: Colors.blue, size: 40)
             : const Icon(Icons.work_rounded, color: Colors.blue, size: 40);
     return StreamBuilder(
-      stream: FirebaseFirestore.instance
-          .collection('users')
-          .doc(receiverData['uid'])
-          .snapshots(),
+      stream: getThrottledStream(
+        collectionPath: 'users',
+        docPath: receiverData['uid'],
+      ),
       builder: (context, snapshot) {
         if (!snapshot.hasData ||
             snapshot.hasError ||
@@ -184,7 +184,7 @@ class _RecentChatTileState extends State<RecentChatTile> {
         }
         final String? profilePicture =
             snapshot.data!.data()!['profile-picture'];
-        
+
         // return circular image if user has profile picture
         if (profilePicture != null) {
           return CircleAvatar(

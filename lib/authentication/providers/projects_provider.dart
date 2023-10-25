@@ -14,7 +14,7 @@ class ProjectProvider extends ChangeNotifier {
       'x': 0
     },
     'AI & ML': {
-      'color': const Color.fromARGB(255, 234, 206, 64),
+      'color': const Color.fromARGB(255, 234, 175, 64),
       'image': 'assets/ai.png',
       'x': 1
     },

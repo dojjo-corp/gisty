@@ -1,3 +1,6 @@
+import 'dart:convert';
+import 'dart:developer';
+
 import 'package:fl_chart/fl_chart.dart';
 import 'package:flutter/material.dart';
 import 'package:gt_daily/authentication/helper_methods.dart/analytics.dart';
@@ -6,9 +9,12 @@ import 'bar_data.dart';
 
 class MyBarGraph extends StatefulWidget {
   final Map<String, dynamic> rawDataMap;
+  final bool isOverallAnalytics;
+
   const MyBarGraph({
     super.key,
     required this.rawDataMap,
+    required this.isOverallAnalytics,
   });
 
   @override
@@ -18,28 +24,33 @@ class MyBarGraph extends StatefulWidget {
 class _MyBarGraphState extends State<MyBarGraph> {
   @override
   Widget build(BuildContext context) {
+    final rawDataMap = widget.rawDataMap;
     // initialize barData
-    BarData myBarData = BarData(rawDataMap: widget.rawDataMap);
+    BarData myBarData = BarData(rawDataMap: rawDataMap);
     myBarData.initializeBarData();
-    return BarChart(
-      BarChartData(
-        maxY: 10,
+    myBarData.initializeEngagementBarData();
+
+    log(jsonEncode(myBarData.maxEngagement));
+    // todo: Inidvidual Engagements (impressions, saves, downloads and comments) as Separate Bars
+    BarChartData getOverallAnalyticsBarChart() {
+      return BarChartData(
+        maxY: myBarData.maxY,
         minY: 0,
-        groupsSpace: 2,
         barGroups: myBarData.barData.map(
           (data) {
+            // y field of this Individual Bar has four values, hence the iteration
             final barRods = data.y
                 .map(
                   (y) => BarChartRodData(
-                      toY: y.toDouble(),
-                      color: data.barColor,
-                      width: 8,
-                      borderRadius: BorderRadius.circular(8),
-                      backDrawRodData: BackgroundBarChartRodData(
-                        show: true,
-                        color: Colors.grey[400],
-                        toY: 10,
-                      )),
+                    toY: y.toDouble(),
+                    color: data.barColor,
+                    width: 6,
+                    backDrawRodData: BackgroundBarChartRodData(
+                      show: false,
+                      color: Colors.grey[300]?.withOpacity(0.5),
+                      toY: myBarData.maxY,
+                    ),
+                  ),
                 )
                 .toList();
             return BarChartGroupData(
@@ -68,8 +79,61 @@ class _MyBarGraphState extends State<MyBarGraph> {
                 }),
           ),
         ),
-      ),
-    );
+      );
+    }
+
+    // todo: All Engagements Put Together As Single Bars
+    BarChartData getCategoryEngagementBarChart() {
+      return BarChartData(
+        maxY: myBarData.maxEngagement,
+        minY: 0,
+        barGroups: myBarData.engagementBarData
+            .map(
+              (engagementBar) => BarChartGroupData(
+                x: engagementBar.x,
+                barRods: [
+                  BarChartRodData(
+                    // since the y field of this Individual Bar has only one element, only the [first] element holds value
+                    toY: engagementBar.y.first.toDouble(),
+                    color: engagementBar.barColor,
+                    borderRadius: BorderRadius.circular(4),
+                    width: 20,
+                    backDrawRodData: BackgroundBarChartRodData(
+                      show: true,
+                      color: Colors.grey[300]?.withOpacity(0.5),
+                      toY: myBarData.maxEngagement,
+                    ),
+                  ),
+                ],
+              ),
+            )
+            .toList(),
+        gridData: const FlGridData(show: false),
+        borderData: FlBorderData(show: false),
+        titlesData: FlTitlesData(
+          leftTitles: const AxisTitles(
+            sideTitles: SideTitles(showTitles: false),
+          ),
+          rightTitles: const AxisTitles(
+            sideTitles: SideTitles(showTitles: false),
+          ),
+          topTitles: const AxisTitles(
+            sideTitles: SideTitles(showTitles: false),
+          ),
+          bottomTitles: AxisTitles(
+            sideTitles: SideTitles(
+                showTitles: true,
+                getTitlesWidget: (double value, TitleMeta meta) {
+                  return getBottomTitlesForAllProjects(context, value, meta);
+                }),
+          ),
+        ),
+      );
+    }
+
+    return BarChart(widget.isOverallAnalytics
+        ? getOverallAnalyticsBarChart()
+        : getCategoryEngagementBarChart());
   }
 
   double sum(List<double> values) {

@@ -31,7 +31,7 @@ class _MultiLineTextFieldState extends State<MultiLineTextField> {
           borderRadius: BorderRadius.circular(12),
         ),
         hintText: widget.hintText,
-        labelText: widget.hintText,
+        hintStyle: const TextStyle(color: Colors.grey)
       ),
       onChanged: (String value) {
         if (value.isNotEmpty) {

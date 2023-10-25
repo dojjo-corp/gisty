@@ -1,14 +1,22 @@
-downloaded projects (should be in devices's default download's folder)*
+downloaded projects (should be in devices default downloads folder)*
 comments decoration (border with filled background)*
-supervisor's details on project details page (navigate to account page)*
+supervisor details on project details page (navigate to account page)*
 dashboard should have a max of 10 of the latest projects *
-project impressions ? *
-project analytics () ? *
+project impressions **
+project analytics **
 auto fill login credentials 
 background images (login, registration, ) ***
 profile pictures for users *
 messages indicator *
 project details (index number) ***
+
+chat options (remove or get something there) ***
+notifications for events and projects **
+reports and feedbacks (admins only receive, all others send) *
+only send messages when there's internet connection
+all projects analytics completion 
+admin ability to edit user, project and event details 
+remove change picture icon from other user profile picture
 
 
 ************

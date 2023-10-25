@@ -1,12 +1,12 @@
 // ignore_for_file: prefer_const_constructors
 
-import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
+import 'package:gt_daily/authentication/helper_methods.dart/global.dart';
 import 'package:gt_daily/authentication/pages/user%20account/view_profile_picture.dart';
 
-import '../../components/buttons.dart';
+import '../../components/buttons/buttons.dart';
 import '../../helper_methods.dart/profile.dart';
 
 class UserAccountPage extends StatefulWidget {
@@ -23,11 +23,12 @@ class _UserAccountPageState extends State<UserAccountPage> {
   @override
   Widget build(BuildContext context) {
     final auth = FirebaseAuth.instance;
-    final store = FirebaseFirestore.instance;
 
     return StreamBuilder(
-        stream:
-            store.collection('users').doc(auth.currentUser!.uid).snapshots(),
+        stream: getThrottledStream(
+          collectionPath: 'users',
+          docPath: auth.currentUser!.uid,
+        ),
         builder: (context, snapshot) {
           if (!snapshot.hasData ||
               snapshot.connectionState == ConnectionState.waiting) {
@@ -45,7 +46,7 @@ class _UserAccountPageState extends State<UserAccountPage> {
                 onTap: () {
                   Navigator.of(context).push(MaterialPageRoute(
                       builder: (context) =>
-                          ViewProfilePicture(profilePicture: profilePicture)));
+                          ViewProfilePicture(uid: currentUser.uid)));
                 },
                 child: profilePicture != null
                     ? showProfilePicture(profilePicture, context)
@@ -120,7 +121,11 @@ class _UserAccountPageState extends State<UserAccountPage> {
               const SizedBox(height: 10),
               TextButton(
                 onPressed: () {
-                  showDeletePromptDialog(context);
+                  showDeletePromptDialog(
+                    context: context,
+                    uid: currentUser.uid,
+                    email: currentUser.email!,
+                  );
                 },
                 child: Text(
                   'Delete Account',

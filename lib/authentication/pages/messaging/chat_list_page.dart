@@ -3,9 +3,10 @@ import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:provider/provider.dart';
+import 'package:rxdart/rxdart.dart';
 
-import '../../components/custom_back_button.dart';
-import '../../components/recent_chat_tile.dart';
+import '../../components/buttons/custom_back_button.dart';
+import '../../components/ListTiles/recent_chat_tile.dart';
 import '../../components/round_profile.dart';
 import '../../helper_methods.dart/messaging.dart';
 import '../../providers/user_provider.dart';
@@ -87,7 +88,8 @@ class ChatListPage extends StatelessWidget {
                       stream: FirebaseFirestore.instance
                           .collection('Chat Rooms')
                           .orderBy('last-text.time', descending: true)
-                          .snapshots(),
+                          .snapshots()
+                          .throttleTime(const Duration(milliseconds: 1500)),
                       builder: (context, snapshot) {
                         if (!snapshot.hasData) {
                           return const Center(
@@ -114,8 +116,6 @@ class ChatListPage extends StatelessWidget {
 
                             // Check For Last Message Sent In Room
                             if (messages.isNotEmpty) {
-                              allRoomsData[doc.id]?['last-text'] =
-                                  messages.last['read'];
                               // get last message's read status
                               allRoomsData[doc.id]?['last-read'] =
                                   messages.last['read'];

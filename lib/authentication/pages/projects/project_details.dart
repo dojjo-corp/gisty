@@ -11,10 +11,12 @@ import 'package:gt_daily/authentication/pages/analytics/project_analytics.dart';
 import 'package:open_file/open_file.dart';
 import 'package:provider/provider.dart';
 import 'package:external_path/external_path.dart';
+import 'package:rxdart/rxdart.dart';
 
-import '../../components/buttons.dart';
-import '../../components/comment_tile.dart';
-import '../../components/custom_back_button.dart';
+import '../../components/buttons/buttons.dart';
+import '../../components/ListTiles/comment_tile.dart';
+import '../../components/buttons/custom_back_button.dart';
+import '../../helper_methods.dart/projects.dart';
 import '../../providers/projects_provider.dart';
 import '../user account/other_user_account_page.dart';
 
@@ -32,6 +34,8 @@ class ProjectDetails extends StatefulWidget {
 }
 
 class _ProjectDetailsState extends State<ProjectDetails> {
+  late Map<String, dynamic> projectData;
+
   final storage = FirebaseStorage.instance;
   final store = FirebaseFirestore.instance;
   final commentController = TextEditingController();
@@ -47,6 +51,11 @@ class _ProjectDetailsState extends State<ProjectDetails> {
     'insightful',
     'like',
   ];
+
+  @override
+  void initState() {
+    super.initState();
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -113,16 +122,20 @@ class _ProjectDetailsState extends State<ProjectDetails> {
                       GestureDetector(
                         onTap: () {
                           Navigator.push(
-                              context,
-                              MaterialPageRoute(
-                                  builder: (context) => OtherUserAccountPage(
-                                      otherUserEmail: widget
-                                          .projectData['supervisor-email'])));
+                            context,
+                            MaterialPageRoute(
+                              builder: (context) => OtherUserAccountPage(
+                                  otherUserEmail:
+                                      widget.projectData['supervisor-email']),
+                            ),
+                          );
                         },
-                        child: Text(widget.projectData['supervisor-name'],
-                            style: GoogleFonts.poppins(
-                              fontWeight: FontWeight.bold,
-                            )),
+                        child: Text(
+                          widget.projectData['supervisor-name'],
+                          style: GoogleFonts.poppins(
+                            fontWeight: FontWeight.bold,
+                          ),
+                        ),
                       ),
                     ],
                   ),
@@ -160,7 +173,8 @@ class _ProjectDetailsState extends State<ProjectDetails> {
                       stream: FirebaseFirestore.instance
                           .collection('All Projects')
                           .doc(widget.projectData['pid'])
-                          .snapshots(),
+                          .snapshots()
+                          .throttleTime(const Duration(seconds: 1)),
                       builder: (context, snapshot) {
                         if (!snapshot.hasData) {
                           return const Center(
@@ -215,7 +229,10 @@ class _ProjectDetailsState extends State<ProjectDetails> {
                                               // celebrate
                                               GestureDetector(
                                                 onTap: () {
-                                                  toggleImpressions(0);
+                                                  toggleImpressions(0,
+                                                      context: context,
+                                                      pid: widget
+                                                          .projectData['pid']);
                                                 },
                                                 child: Row(
                                                   children: [
@@ -261,7 +278,10 @@ class _ProjectDetailsState extends State<ProjectDetails> {
                                               // support
                                               GestureDetector(
                                                 onTap: () {
-                                                  toggleImpressions(1);
+                                                  toggleImpressions(1,
+                                                      context: context,
+                                                      pid: widget
+                                                          .projectData['pid']);
                                                 },
                                                 child: Row(
                                                   children: [
@@ -306,7 +326,10 @@ class _ProjectDetailsState extends State<ProjectDetails> {
                                               // insightful
                                               GestureDetector(
                                                 onTap: () {
-                                                  toggleImpressions(2);
+                                                  toggleImpressions(2,
+                                                      context: context,
+                                                      pid: widget
+                                                          .projectData['pid']);
                                                 },
                                                 child: Row(
                                                   children: [
@@ -353,7 +376,10 @@ class _ProjectDetailsState extends State<ProjectDetails> {
                                               // like
                                               GestureDetector(
                                                 onTap: () {
-                                                  toggleImpressions(3);
+                                                  toggleImpressions(3,
+                                                      context: context,
+                                                      pid: widget
+                                                          .projectData['pid']);
                                                 },
                                                 child: Row(
                                                   children: [
@@ -452,6 +478,7 @@ class _ProjectDetailsState extends State<ProjectDetails> {
               child: Padding(
                 padding: const EdgeInsets.symmetric(horizontal: 15.0),
                 child: Row(
+                  crossAxisAlignment: CrossAxisAlignment.end,
                   mainAxisAlignment: MainAxisAlignment.center,
                   children: [
                     Expanded(
@@ -488,8 +515,18 @@ class _ProjectDetailsState extends State<ProjectDetails> {
                       ),
                     ),
                     IconButton(
-                      onPressed: sendComment,
-                      icon: const Icon(Icons.arrow_circle_up_rounded),
+                      onPressed: () {
+                        sendComment(
+                          key: _key,
+                          commentController: commentController,
+                          pid: widget.projectData['pid'],
+                          context: context,
+                        );
+                      },
+                      icon: Icon(
+                        Icons.arrow_circle_up_rounded,
+                        color: Theme.of(context).primaryColor,
+                      ),
                     )
                   ],
                 ),
@@ -502,15 +539,21 @@ class _ProjectDetailsState extends State<ProjectDetails> {
     );
   }
 
-  void toggleImpressions(int index) async {
-    // if impression is not already selected
+  // todo: Toggle Impressions
+  void toggleImpressions(
+    int index, {
+    required BuildContext context,
+    required String pid,
+  }) async {
+    // if impression is not already selected and is now selected
     try {
       if (!impressions[index]) {
         for (int i = 0; i < 4; i++) {
+          // deselect all other impressions
           if (i != index) {
             await FirebaseFirestore.instance
                 .collection('All Projects')
-                .doc(widget.projectData['pid'])
+                .doc(pid)
                 .update({
               'impressions.${impressionNames[i]}':
                   FieldValue.arrayRemove([currentUser.email!])
@@ -520,9 +563,10 @@ class _ProjectDetailsState extends State<ProjectDetails> {
             });
           }
         }
+        // then select chosen impression
         await FirebaseFirestore.instance
             .collection('All Projects')
-            .doc(widget.projectData['pid'])
+            .doc(pid)
             .update({
           'impressions.${impressionNames[index]}':
               FieldValue.arrayUnion([currentUser.email!])
@@ -535,7 +579,7 @@ class _ProjectDetailsState extends State<ProjectDetails> {
       else {
         await FirebaseFirestore.instance
             .collection('All Projects')
-            .doc(widget.projectData['pid'])
+            .doc(pid)
             .update({
           'impressions.${impressionNames[index]}':
               FieldValue.arrayRemove([currentUser.email!])
@@ -552,6 +596,7 @@ class _ProjectDetailsState extends State<ProjectDetails> {
       );
     }
   }
+
 
   void downloadProjectDoc() async {
     final docFileName = widget.projectData['project-document'];
@@ -580,17 +625,19 @@ class _ProjectDetailsState extends State<ProjectDetails> {
       });
 
       // ignore: use_build_context_synchronously
-      ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(
-          content: Text('File downloaded to: $downloadDirectory'),
-          action: SnackBarAction(
-            label: 'Open',
-            onPressed: () async {
-              openDownloadedFile('$downloadDirectory/$docFileName');
-            },
+      if (context.mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(
+            content: Text('File downloaded to: $downloadDirectory'),
+            action: SnackBarAction(
+              label: 'Open',
+              onPressed: () async {
+                openDownloadedFile('$downloadDirectory/$docFileName');
+              },
+            ),
           ),
-        ),
-      );
+        );
+      }
     } catch (e) {
       ScaffoldMessenger.of(context).showSnackBar(
         SnackBar(
@@ -607,7 +654,10 @@ class _ProjectDetailsState extends State<ProjectDetails> {
   // open downloaded pdf with device's default pdf viewer
   Future<void> openDownloadedFile(String filePath) async {
     try {
-      await OpenFile.open(filePath);
+      final String downloadDirectory =
+          await ExternalPath.getExternalStoragePublicDirectory(
+              ExternalPath.DIRECTORY_DOWNLOADS);
+      await OpenFile.open('$downloadDirectory/$filePath');
     } catch (e) {
       ScaffoldMessenger.of(context).showSnackBar(
         SnackBar(
@@ -633,32 +683,4 @@ class _ProjectDetailsState extends State<ProjectDetails> {
   }
 
   // send comment to firestore
-  void sendComment() async {
-    // Only send non-empty comments
-    if (commentController.text.isNotEmpty) {
-      try {
-        _key.currentState!.save();
-        final commentData = {
-          'commenter': FirebaseAuth.instance.currentUser!.email!,
-          'comment-text': commentController.text,
-          'timestamp': Timestamp.now(),
-        };
-        await store
-            .collection('All Projects')
-            .doc(widget.projectData['pid'])
-            .update({
-          'comments': FieldValue.arrayUnion([commentData])
-        });
-        setState(() {
-          commentController.clear();
-        });
-      } catch (e) {
-        ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(
-            content: Text('Error sending comment: ${e.toString()}'),
-          ),
-        );
-      }
-    }
-  }
 }

@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
 
-import '../../components/buttons.dart';
+import '../../components/buttons/buttons.dart';
 
 class WelcomeJobs extends StatelessWidget {
   const WelcomeJobs({super.key});
@@ -11,9 +11,9 @@ class WelcomeJobs extends StatelessWidget {
     return Column(
       mainAxisAlignment: MainAxisAlignment.center,
       children: [
-        Icon(
+        const Icon(
           Icons.assured_workload_rounded,
-          color: Theme.of(context).primaryColor.withOpacity(0.5),
+          color: Color.fromARGB(255, 75, 125, 200),
           size: 150,
         ),
         Text(

@@ -23,8 +23,8 @@ class WelcomeGreetings extends StatelessWidget {
               ),
             ),
             Text(
-              'Welcome To GCTU Repo',
-              style: GoogleFonts.poppins(
+              'GCTU Repo',
+              style: GoogleFonts.montserrat(
                   fontSize: 40, fontWeight: FontWeight.bold),
               textAlign: TextAlign.center,
             ),

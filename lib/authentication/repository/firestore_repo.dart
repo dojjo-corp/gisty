@@ -13,6 +13,8 @@ class FirestoreRepo {
     required String userName,
     required String email,
     required String uid,
+    required String startYear,
+    required String endYear,
     String contact = '',
     departmentId = '',
   }) async {
@@ -25,9 +27,12 @@ class FirestoreRepo {
         'contact': contact,
         'user-type': 'student',
         'departmentId': departmentId,
+        'start-year': startYear,
+        'end-year': endYear,
         'download-id': [],
         'saved-projects': [],
         'online': true,
+        'admin': false,
       });
     } on FirebaseException {
       rethrow;
@@ -53,13 +58,20 @@ class FirestoreRepo {
       'download-id': [],
       'saved-projects': [],
       'online': true,
+      'admin': false,
     };
-    // ADMIN
-    if (email == '') {
-      userData['admin'] = true;
-    }
+    final collectionRef = store.collection('users');
+
     try {
-      await store.collection('users').doc(uid).set(userData);
+      await collectionRef.doc(uid).set(userData);
+      // ADMIN
+      if (email == 'andrew@gmail.com') {
+        userData['admin'] = true;
+        // add admin email to admin-emails document
+        await collectionRef.doc('admin-emails').set({
+          'emails': FieldValue.arrayUnion([email])
+        }, SetOptions(merge: true));
+      }
     } on FirebaseException {
       rethrow;
     } catch (e) {
@@ -87,26 +99,23 @@ class FirestoreRepo {
         'download-id': [],
         'saved-projects': [],
         'online': true,
+        'admin': false,
       });
     } on FirebaseException {
       rethrow;
     }
   }
 
-  Future<void> deleteUserRecords() async {
+  Future<void> deleteUserRecords(
+      {required String uid, required String email}) async {
     try {
-      // get user's current profile picture path and delete from firebase storage
-      final userSnapshot = await store
-          .collection('users')
-          .doc(FirebaseAuth.instance.currentUser!.uid)
-          .get();
-      final userProfile = userSnapshot.data()!['profile-picture'];
+      // delete user's firebase document
+      await store.collection('users').doc(uid).delete();
 
-      // now delete user's firebase document
-      FirebaseStorage.instance.ref(userProfile).delete();
-      await store
-          .collection('users')
-          .doc(FirebaseAuth.instance.currentUser!.uid)
+      // delete user's profile picture
+      await FirebaseStorage.instance
+          .ref()
+          .child('Profile Pictures/$email')
           .delete();
     } catch (e) {
       rethrow;
@@ -142,7 +151,10 @@ class FirestoreRepo {
   // Add Events (ie. Jobs/Internships) For Both University and Industry Professionals
   Future<void> addJobsOrIntershipEvents(Map<String, dynamic> jobDetails) async {
     try {
-      await store.collection('All Jobs').doc(jobDetails['id']).update(jobDetails);
+      await store
+          .collection('All Jobs')
+          .doc(jobDetails['id'])
+          .set(jobDetails, SetOptions(merge: true));
     } catch (e) {
       rethrow;
     }
@@ -229,6 +241,8 @@ class FirestoreRepo {
     required String type,
     required String title,
     required String body,
+    String? routeName,
+    Map<String, dynamic>? routeArgs,
   }) async {
     final String from = FirebaseAuth.instance.currentUser!.email!;
     final notificationData = {
@@ -237,6 +251,7 @@ class FirestoreRepo {
       'from': from,
       'type': type,
       'read': false,
+      'time-sent': Timestamp.now(),
     };
     try {
       await store.collection('Notifications').doc(to).set(
@@ -245,6 +260,29 @@ class FirestoreRepo {
         },
         SetOptions(merge: true),
       );
+    } catch (e) {
+      rethrow;
+    }
+  }
+
+  // todo: Send Feedback To Admins
+  Future<void> sendFeedback(
+      {required String subject, required String description}) async {
+    if (subject.isEmpty) throw 'Subject Can\'t Be Empty!';
+    if (description.isEmpty) throw 'Description Can\'t Be Empty!';
+
+    final docId =
+        '${FirebaseAuth.instance.currentUser?.email}-${Timestamp.now()}';
+    final feedbackData = {
+      'subject': subject,
+      'description': description,
+      'time': Timestamp.now(),
+    };
+    try {
+      await store.collection('All Feedbacks').doc(docId).set(
+            feedbackData,
+            SetOptions(merge: true),
+          );
     } catch (e) {
       rethrow;
     }

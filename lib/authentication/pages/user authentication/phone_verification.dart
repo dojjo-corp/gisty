@@ -1,8 +1,8 @@
 import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
-import 'package:gt_daily/authentication/components/buttons.dart';
+import 'package:gt_daily/authentication/components/buttons/buttons.dart';
 
-import '../../components/custom_back_button.dart';
+import '../../components/buttons/custom_back_button.dart';
 
 class PhoneVerificationPage extends StatefulWidget {
   const PhoneVerificationPage({super.key});

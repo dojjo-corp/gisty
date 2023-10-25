@@ -4,7 +4,7 @@ import 'package:gt_daily/authentication/pages/user%20account/other_user_account_
 import 'package:google_fonts/google_fonts.dart';
 import 'package:provider/provider.dart';
 
-import '../components/search_tile.dart';
+import '../components/ListTiles/search_tile.dart';
 import '../providers/projects_provider.dart';
 import '../providers/user_provider.dart';
 

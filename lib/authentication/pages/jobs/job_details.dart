@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
 
-import '../../components/custom_back_button.dart';
+import '../../components/buttons/custom_back_button.dart';
 
 class JobDetailsPage extends StatelessWidget {
   final Map<String, dynamic> jobDetails;

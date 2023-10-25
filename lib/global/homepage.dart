@@ -4,12 +4,16 @@ import 'dart:developer';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:google_nav_bar/google_nav_bar.dart';
 import 'package:gt_daily/authentication/pages/projects/supervised_projects.dart';
 import 'package:provider/provider.dart';
+import 'package:rxdart/rxdart.dart';
 
 import '../authentication/components/drawer.dart';
+import '../authentication/components/loading_circle.dart';
+import '../authentication/helper_methods.dart/global.dart';
 import '../authentication/pages/user account/account_page.dart';
 import '../authentication/pages/events/events_page.dart';
 import '../authentication/pages/projects/dashboard.dart';
@@ -33,16 +37,28 @@ class _MyHomePageState extends State<MyHomePage> {
   void initState() {
     super.initState();
     // Fetch user data when the app is launched
-    _fetchUserData().then((_) {
+    _initializeAppData().then((_) {
       setState(() {
         _dataLoaded = true;
       });
     });
+
+    // todo: Set User As Online On App Start/Launch
+    updateUserOnlineStatus(true);
+
+    // Update Online Status Based On App State (foreground/background)
+    SystemChannels.lifecycle.setMessageHandler((message) {
+      if (message.toString().contains('resumed')) {
+        updateUserOnlineStatus(true);
+      } else {
+        updateUserOnlineStatus(false);
+      }
+      return Future.value(message);
+    });
   }
 
-  Future<void> _fetchUserData() async {
-    final userProvider = Provider.of<UserProvider>(context, listen: false);
-    await userProvider.setAllUsers();
+  Future<void> _initializeAppData() async {
+    await Provider.of<UserProvider>(context, listen: false).setAllUsers();
   }
 
   final List<Widget> _pages = [
@@ -61,14 +77,7 @@ class _MyHomePageState extends State<MyHomePage> {
   @override
   Widget build(BuildContext context) {
     if (!_dataLoaded) {
-      return Container(
-        height: MediaQuery.of(context).size.height,
-        width: MediaQuery.of(context).size.width,
-        color: Colors.white70,
-        child: const Center(
-          child: CircularProgressIndicator(),
-        ),
-      );
+      return const LoadingCircle();
     }
     void changePageIndex(int index) => setState(
           () {
@@ -107,7 +116,8 @@ class _MyHomePageState extends State<MyHomePage> {
               stream: FirebaseFirestore.instance
                   .collection('Notifications')
                   .doc(FirebaseAuth.instance.currentUser?.email)
-                  .snapshots(),
+                  .snapshots()
+                  .throttleTime(const Duration(seconds: 1)),
               builder: (context, snapshot) {
                 if (!snapshot.hasData || snapshot.hasError) {
                   return IconButton(
@@ -134,7 +144,6 @@ class _MyHomePageState extends State<MyHomePage> {
                     .where((element) => !element['read'])
                     .toList()
                     .length;
-                log(unreadNum.toString());
 
                 return unreadNum < 1
                     ? IconButton(
@@ -147,9 +156,9 @@ class _MyHomePageState extends State<MyHomePage> {
                         ),
                       )
                     : Badge.count(
-                      count: unreadNum,
-                      offset: const Offset(-6,6),
-                      child: IconButton(
+                        count: unreadNum,
+                        offset: const Offset(-6, 6),
+                        child: IconButton(
                           onPressed: () {
                             Navigator.pushNamed(context, '/notifications');
                           },
@@ -158,7 +167,7 @@ class _MyHomePageState extends State<MyHomePage> {
                             color: Theme.of(context).primaryColor,
                           ),
                         ),
-                    );
+                      );
               },
             )
           ],
