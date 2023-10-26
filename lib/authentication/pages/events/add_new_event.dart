@@ -1,11 +1,13 @@
-import 'dart:convert';
-import 'dart:developer';
+import 'dart:io';
 
 import 'package:cloud_firestore/cloud_firestore.dart';
+import 'package:firebase_storage/firebase_storage.dart';
 import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:gt_daily/authentication/components/buttons/custom_back_button.dart';
 import 'package:gt_daily/authentication/helper_methods.dart/global.dart';
+import 'package:image_picker/image_picker.dart';
+import 'package:path/path.dart' as path;
 
 import '../../components/ListTiles/time_tile.dart';
 import '../../components/buttons/buttons.dart';
@@ -31,14 +33,10 @@ class _AddNewEventPageState extends State<AddNewEventPage> {
   final descriptionController = TextEditingController();
   final contactController = TextEditingController();
   final dateController = TextEditingController();
-  String dateText = 'Set Event Date';
-  String selectedJobType = 'Internship';
-  final List<String> jobTypes = [
-    'Internship',
-    'Full Time',
-    'Part Time',
-    'Contract',
-  ];
+
+  List<Image> eventImages = [];
+  List<File> imageFiles = [];
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -51,6 +49,7 @@ class _AddNewEventPageState extends State<AddNewEventPage> {
               child: SizedBox(
                 height: MediaQuery.of(context).size.height,
                 child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
                     Form(
                       key: _key,
@@ -64,7 +63,7 @@ class _AddNewEventPageState extends State<AddNewEventPage> {
                           ),
                           const SizedBox(height: 30),
 
-                          // JOB TITLE TEXT FIELD
+                          // todo: EVENT TITLE TEXT FIELD
                           SimpleTextField(
                             autofillHints: null,
                             controller: jobTitleController,
@@ -72,9 +71,10 @@ class _AddNewEventPageState extends State<AddNewEventPage> {
                             iconData: Icons.title_rounded,
                             isWithIcon: true,
                           ),
-                          const SizedBox(height: 10),
 
-                          // LOCATION TEXTFIELD
+                          const SizedBox(height: 5),
+
+                          // todo: LOCATION TEXTFIELD
                           SimpleTextField(
                             autofillHints: null,
                             controller: locationController,
@@ -82,9 +82,10 @@ class _AddNewEventPageState extends State<AddNewEventPage> {
                             iconData: Icons.location_on_rounded,
                             isWithIcon: true,
                           ),
-                          const SizedBox(height: 10),
 
-                          // COMPANY NAME
+                          const SizedBox(height: 5),
+
+                          // todo: COMPANY NAME
                           SimpleTextField(
                             autofillHints: null,
                             controller: companyNameController,
@@ -93,9 +94,9 @@ class _AddNewEventPageState extends State<AddNewEventPage> {
                             isWithIcon: true,
                           ),
 
-                          const SizedBox(height: 10),
+                          const SizedBox(height: 5),
 
-                          // CONTACT TEXT FIELD
+                          // todo: CONTACT TEXT FIELD
                           SimpleTextField(
                             autofillHints: null,
                             controller: contactController,
@@ -103,97 +104,144 @@ class _AddNewEventPageState extends State<AddNewEventPage> {
                             iconData: Icons.phone_rounded,
                             isWithIcon: true,
                           ),
-                          const SizedBox(height: 10),
 
-                          // DATE FIELD
+                          const SizedBox(height: 5),
+
+                          // todo: DATE FIELD
                           const Row(
                             children: [
                               Expanded(child: DateTile()),
                               Expanded(child: TimeTile())
                             ],
                           ),
-                          const SizedBox(height: 10),
 
-                          // JOB DESCRIPTION TEXTFIELD
+                          const SizedBox(height: 5),
+
+                          // todo: EVENT DESCRIPTION TEXTFIELD
                           MultiLineTextField(
                             controller: descriptionController,
                             hintText: 'Description',
                             maxLines: 10,
                           ),
+
+                          const SizedBox(height: 5),
+
+                          // todo: ADD IMAGES
+                          TextButton(
+                            onPressed: chooseImages,
+                            child: const Row(
+                              children: [
+                                Icon(Icons.add),
+                                Text('Add Images'),
+                              ],
+                            ),
+                          ),
+
+                          const SizedBox(height: 5),
+
+                          eventImages.isNotEmpty
+                              ? SizedBox(
+                                  width: MediaQuery.of(context).size.width,
+                                  height: 109,
+                                  child: ListView.separated(
+                                      scrollDirection: Axis.horizontal,
+                                      itemBuilder: (context, index) {
+                                        return showEventImage(index);
+                                      },
+                                      separatorBuilder: (context, index) =>
+                                          const SizedBox(width: 5),
+                                      itemCount: eventImages.length),
+                                )
+                              : Container(),
+
                           const SizedBox(height: 10),
 
                           MyButton(
                             onPressed: () async {
-                              List<String> contacts;
-                              if (contactController.text.characters
-                                  .contains(',')) {
-                                contacts =
-                                    contactController.text.trim().split(',');
-                              } else if (contactController.text.characters
-                                  .contains('/')) {
-                                contacts =
-                                    contactController.text.trim().split('/');
-                              } else {
-                                contacts = [contactController.text.trim()];
-                              }
+                              if (_key.currentState!.validate()) {
+                                _key.currentState!.save();
 
-                              final id =
-                                  '$selectedJobType${companyNameController.text}${jobTitleController.text}${descriptionController.text.characters.takeLast(10)}';
-                              final Map<String, dynamic> eventDetails = {
-                                'id': id,
-                                'title': jobTitleController.text.trim(),
-                                'organizers': companyNameController.text.trim(),
-                                'location': locationController.text.trim(),
-                                'contacts': contacts,
-                                'details': descriptionController.text.trim(),
-                                'event-date': dateController.text.trim(),
-                                'time-added': DateTime.now()
-                                    .toIso8601String() // use String for easy encoding to json format (notifications)
-                              };
-                              setState(() {
-                                _isLoading = true;
-                              });
+                                List<String> contacts;
+                                if (contactController.text.characters
+                                    .contains(',')) {
+                                  contacts =
+                                      contactController.text.trim().split(',');
+                                } else if (contactController.text.characters
+                                    .contains('/')) {
+                                  contacts =
+                                      contactController.text.trim().split('/');
+                                } else {
+                                  contacts = [contactController.text.trim()];
+                                }
 
-                              try {
-                                // todo: send notification to all users
-                                final responseMap = await FireMessaging()
-                                    .sendPushNotifiationToAllUsers(
-                                  title:
-                                      'New Event In ${eventDetails['organizers']}',
-                                  body: '${eventDetails['title']}',
-                                  type: 'event',
-                                  routeName: '/event-details',
-                                  routeArgs: {'event-details': eventDetails},
-                                );
+                                final id = FirebaseFirestore.instance
+                                    .collection('All Events')
+                                    .doc()
+                                    .id;
 
-                                // store event in firestore
-                                // convert from DateTime to Timestamp for firestore
-                                final date = eventDetails['time-added'];
-                                eventDetails['time-added'] =
-                                    Timestamp.fromDate(DateTime.parse(date));
-                                await FirestoreRepo().addEvents(eventDetails);
+                                final Map<String, dynamic> eventDetails = {
+                                  'id': id,
+                                  'title': jobTitleController.text.trim(),
+                                  'organizers':
+                                      companyNameController.text.trim(),
+                                  'location': locationController.text.trim(),
+                                  'contacts': contacts,
+                                  'details': descriptionController.text.trim(),
+                                  'event-date': dateController.text.trim(),
+                                  'time-added': DateTime.now()
+                                      .toIso8601String() // used String for easy encoding to json format (notifications)
+                                };
 
-                                log('This is the response: ${jsonEncode(responseMap)}');
+                                // show loading indicator
+                                setState(() {
+                                  _isLoading = true;
+                                });
 
-                                if (context.mounted) {
+                                try {
+                                  // todo: send notification to all users
+                                  await FireMessaging()
+                                      .sendPushNotifiationToAllUsers(
+                                    title:
+                                        'New Event By ${eventDetails['organizers']}',
+                                    body: '${eventDetails['title']}',
+                                    type: 'event',
+                                    routeName: '/event-details',
+                                    routeArgs: {'event-details': eventDetails},
+                                  );
+
+                                  // todo store event in firestore
+                                  // convert from DateTime to Timestamp for firestore
+                                  final date = eventDetails['time-added'];
+                                  eventDetails['time-added'] =
+                                      Timestamp.fromDate(DateTime.parse(date));
+                                  await FirestoreRepo().addEvents(eventDetails);
+
+                                  // todo upload images to firebase storage
+                                  await uploadImages(
+                                    imageFiles: imageFiles,
+                                    eventId: id,
+                                  );
+
+                                  if (context.mounted) {
+                                    setState(() {
+                                      _isLoading = false;
+                                    });
+                                    showSnackBar(
+                                      context,
+                                      'Event Posted Successfully',
+                                    );
+                                    Navigator.pop(context);
+                                  }
+                                } catch (e) {
+                                  showSnackBar(
+                                    context,
+                                    'Error Adding Event: ${e.toString()}',
+                                  );
+                                } finally {
                                   setState(() {
                                     _isLoading = false;
                                   });
-                                  showSnackBar(
-                                    context,
-                                    'Event Posted Successfully',
-                                  );
-                                  Navigator.pop(context);
                                 }
-                              } catch (e) {
-                                showSnackBar(
-                                  context,
-                                  'Error Adding Event: ${e.toString()}',
-                                );
-                              } finally {
-                                setState(() {
-                                  _isLoading = false;
-                                });
                               }
                             },
                             btnText: 'Add Event',
@@ -212,5 +260,101 @@ class _AddNewEventPageState extends State<AddNewEventPage> {
       ),
       floatingActionButton: _isLoading ? const LinearProgressIndicator() : null,
     );
+  }
+
+  // todo: CONVINIENCE METHODS
+
+  Future<List<Image>> chooseImages() async {
+    try {
+      List<XFile?> images = await ImagePicker().pickMultiImage();
+      List<Image> imagesChosen = [];
+
+      for (var image in images) {
+        if (image == null) continue;
+        final imageFile = File(image.path);
+
+        final imageAsset = Image.file(
+          imageFile,
+          height: 60,
+        );
+        imagesChosen.add(imageAsset);
+      }
+      setState(() {
+        eventImages.addAll(imagesChosen);
+      });
+      return imagesChosen;
+    } catch (e) {
+      showSnackBar(context, 'Error Choosing Images: ${e.toString()}');
+      return Future.value([]);
+    }
+  }
+
+  Widget showEventImage(int index) {
+    return Column(
+      children: [
+        GestureDetector(
+          onTap: () async {
+            await showGeneralDialog(
+              context: context,
+              barrierDismissible: true,
+              barrierLabel: 'Exit',
+              pageBuilder: (context, animation, secondaryAnimation) {
+                return AspectRatio(
+                  aspectRatio: 16 / 9,
+                  child: AlertDialog(
+                    backgroundColor: Colors.grey[400],
+                    content: Image(image: eventImages[index].image),
+                    contentPadding: EdgeInsets.zero,
+                    shape: RoundedRectangleBorder(
+                        borderRadius: BorderRadius.circular(8)),
+                  ),
+                );
+              },
+            );
+          },
+          child: CircleAvatar(
+            radius: 30,
+            foregroundImage: eventImages[index].image,
+
+            // show icon if image fails to load
+            onForegroundImageError: (exception, stackTrace) => const Icon(
+              Icons.event,
+              color: Colors.grey,
+            ),
+          ),
+        ),
+        IconButton(
+          padding: EdgeInsets.zero,
+          onPressed: () {
+            setState(() {
+              eventImages.removeAt(index);
+            });
+          },
+          icon: const Icon(
+            Icons.delete_rounded,
+            color: Colors.red,
+            size: 20,
+          ),
+        )
+      ],
+    );
+  }
+
+  // todo: Upload Images To Firebase Storage
+  Future<void> uploadImages({
+    required List<File> imageFiles,
+    required String eventId,
+  }) async {
+    try {
+      for (var file in imageFiles) {
+        String fileName = path.basename(file.path);
+        Reference storageReference = FirebaseStorage.instance
+            .ref()
+            .child('Job Files/$eventId/$fileName');
+        await storageReference.putFile(file);
+      }
+    } catch (e) {
+      rethrow;
+    }
   }
 }

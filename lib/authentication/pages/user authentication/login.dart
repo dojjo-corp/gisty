@@ -13,7 +13,8 @@ import '../../components/textfields/simple_textfield.dart';
 import '../../repository/authentication_repo.dart';
 
 class LoginPage extends StatefulWidget {
-  const LoginPage({super.key});
+  final bool isFromWelcomeScreen;
+  const LoginPage({super.key, required this.isFromWelcomeScreen});
 
   @override
   State<LoginPage> createState() => _LoginPageState();

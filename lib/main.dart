@@ -13,7 +13,6 @@ import 'package:gt_daily/authentication/pages/contact_us.dart';
 import 'package:gt_daily/authentication/pages/projects/project_details.dart';
 import 'package:gt_daily/authentication/pages/projects/saved_projects.dart';
 import 'package:gt_daily/authentication/pages/user%20account/edit_account_page.dart';
-import 'package:gt_daily/authentication/pages/user%20authentication/login.dart';
 import 'package:gt_daily/authentication/providers/projects_provider.dart';
 import 'package:gt_daily/global/homepage.dart';
 import 'package:provider/provider.dart';
@@ -25,6 +24,7 @@ import 'authentication/pages/user authentication/password_reset.dart';
 import 'authentication/pages/user authentication/phone_verification.dart';
 import 'authentication/pages/user authentication/register.dart';
 import 'authentication/pages/projects/supervised_projects.dart';
+import 'authentication/providers/connectivity_provider.dart';
 import 'authentication/providers/user_provider.dart';
 import 'authentication/repository/firebase_messaging.dart';
 import 'firebase_options.dart';
@@ -41,6 +41,7 @@ Future<void> main() async {
     providers: [
       ChangeNotifierProvider(create: (_) => ProjectProvider()),
       ChangeNotifierProvider(create: (_) => UserProvider()),
+      ChangeNotifierProvider(create: (_) => ConnectivityProvider()),
     ],
     child: const MyApp(),
   ));
@@ -68,7 +69,6 @@ class _MyAppState extends State<MyApp> {
           textTheme: GoogleFonts.openSansTextTheme()),
       routes: {
         '/': (context) => const AuthGate(),
-        '/login': (context) => const LoginPage(),
         '/register': (context) => const RegisterPage(),
         '/reset-password': (context) => const PasswordResetPage(),
         '/verify-phone': (context) => const PhoneVerificationPage(),

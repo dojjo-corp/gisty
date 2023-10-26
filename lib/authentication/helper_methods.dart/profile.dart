@@ -18,7 +18,9 @@ Future<void> changePicture(BuildContext _context) async {
   try {
     final XFile? pickedImage =
         await ImagePicker().pickImage(source: ImageSource.gallery);
+
     if (pickedImage == null) return;
+
     final File imageFile = File(pickedImage.path);
     final String fileName = basename(pickedImage.path);
     final Reference firebaseStorageRef = FirebaseStorage.instance.ref().child(
@@ -30,18 +32,6 @@ Future<void> changePicture(BuildContext _context) async {
         .collection('users')
         .doc(FirebaseAuth.instance.currentUser!.uid)
         .update({'profile-picture': downloadUrl});
-  } catch (e) {
-    ScaffoldMessenger.of(_context).showSnackBar(
-      SnackBar(
-        content: Text('Error Changing Profile Picture: ${e.toString()}'),
-      ),
-    );
-  }
-}
-
-Future<void> deleteFolder(BuildContext _context) async {
-  try {
-    await FirebaseStorage.instance.ref().child('temp').delete();
   } catch (e) {
     ScaffoldMessenger.of(_context).showSnackBar(
       SnackBar(
@@ -99,7 +89,11 @@ Widget showProfilePicture(String downloadUrl, BuildContext _context) =>
     CircleAvatar(
       radius: 75,
       backgroundColor: Colors.transparent,
-      foregroundImage: Image.network(downloadUrl).image,
+      foregroundImage: Image.network(
+        downloadUrl,
+        frameBuilder: (context, child, frame, wasSynchronouslyLoaded) =>
+            const CircularProgressIndicator(),
+      ).image,
       onForegroundImageError: (exception, stackTrace) =>
           showNoProfilePicture(_context),
     );
@@ -116,15 +110,18 @@ Widget showOtherUserProfilePicture(
         Navigator.push(
           _context,
           MaterialPageRoute(
-            builder: (context) =>
-                ViewProfilePicture(uid: uid),
+            builder: (context) => ViewProfilePicture(uid: uid),
           ),
         );
       },
       child: CircleAvatar(
         radius: radius,
         backgroundColor: Colors.transparent,
-        foregroundImage: Image.network(downloadUrl).image,
+        foregroundImage: Image.network(
+          downloadUrl,
+          frameBuilder: (context, child, frame, wasSynchronouslyLoaded) =>
+              const CircularProgressIndicator(),
+        ).image,
         onForegroundImageError: (exception, stackTrace) =>
             showNoOtherUserProfilePicture(_context, radius * 2),
       ),
@@ -147,7 +144,7 @@ void deleteAccount({
       Navigator.pushAndRemoveUntil(
           context,
           MaterialPageRoute(
-            builder: (context) => const LoginPage(),
+            builder: (context) => const LoginPage(isFromWelcomeScreen: false),
           ),
           (route) => false);
     }

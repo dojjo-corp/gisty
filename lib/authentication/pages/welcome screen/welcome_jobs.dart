@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
+import 'package:gt_daily/authentication/pages/user%20authentication/login.dart';
 
 import '../../components/buttons/buttons.dart';
 
@@ -30,13 +31,20 @@ class WelcomeJobs extends StatelessWidget {
           textAlign: TextAlign.center,
         ),
         const SizedBox(height: 50),
-        Row(mainAxisAlignment: MainAxisAlignment.end,
+        Row(
+          mainAxisAlignment: MainAxisAlignment.end,
           children: [
             SizedBox(
               width: 150,
               child: MyButton(
                 onPressed: () {
-                  Navigator.pushNamed(context, '/login');
+                  Navigator.pushReplacement(
+                    context,
+                    MaterialPageRoute(
+                      builder: (context) =>
+                          const LoginPage(isFromWelcomeScreen: true),
+                    ),
+                  );
                 },
                 btnText: 'Join Us!',
                 isPrimary: true,

@@ -3,6 +3,7 @@
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
+import 'package:gt_daily/authentication/components/loading_circle.dart';
 import 'package:gt_daily/authentication/helper_methods.dart/global.dart';
 import 'package:provider/provider.dart';
 
@@ -23,207 +24,288 @@ class OtherUserAccountPage extends StatefulWidget {
 }
 
 class _OtherUserAccountPageState extends State<OtherUserAccountPage> {
+  bool _isLoaded = false;
   final currentUid = FirebaseAuth.instance.currentUser!.uid;
   final currentUser = FirebaseAuth.instance.currentUser!;
 
+  // update local users data
+  @override
+  void initState() {
+    super.initState();
+    setAllUsers().then((value) {
+      setState(() {
+        _isLoaded = true;
+      });
+    });
+  }
+
   @override
   Widget build(BuildContext context) {
-    // For Admin Privileges
-    final isUserAdmin = context.watch<UserProvider>().isUserAdmin;
-    final administrator = isUserAdmin ? Administrator() : null;
+    return !_isLoaded
+        ? const LoadingCircle()
+        : Scaffold(
+            body: Stack(
+              children: [
+                Padding(
+                  padding: const EdgeInsets.only(
+                      top: 100, right: 15, left: 15, bottom: 10),
+                  child: SizedBox(
+                    height: MediaQuery.of(context).size.height,
+                    child: SingleChildScrollView(
+                      child: Consumer<UserProvider>(
+                        builder: (context, userProvider, child) {
+                          // For Admin Privileges
+                          final isUserAdmin = userProvider.isUserAdmin;
+                          final administrator =
+                              isUserAdmin ? Administrator() : null;
 
-    // Get User's Stored Data
-    final Map<String, dynamic> otherUserMap = context
-            .watch<UserProvider>()
-            .getUserDataFromEmail(widget.otherUserEmail) ??
-        {};
+                          // Get User's Stored Data
+                          final Map<String, dynamic> otherUserMap =
+                              userProvider.getUserDataFromEmail(
+                                      widget.otherUserEmail) ??
+                                  {};
 
-    // User's First Name
-    final userFirstName = otherUserMap['fullname']?.split(' ')[0] ?? '';
+                          // User's First Name
+                          final userFirstName =
+                              otherUserMap['fullname']?.split(' ')[0] ?? '';
 
-    // Is Other User An Admin
-    final isOtherUserAdmin = otherUserMap['admin'] ?? false;
+                          // Is Other User An Admin
+                          final isOtherUserAdmin =
+                              otherUserMap['admin'] ?? false;
 
-    return Scaffold(
-      body: Stack(
-        children: [
-          Padding(
-            padding: const EdgeInsets.only(
-                top: 100, right: 15, left: 15, bottom: 10),
-            child: SizedBox(
-              height: MediaQuery.of(context).size.height,
-              child: SingleChildScrollView(
-                child: otherUserMap.isNotEmpty
-                    ? Column(
-                        children: [
-                          StreamBuilder(
-                            stream: getThrottledStream(
-                              collectionPath: 'users',
-                              docPath: otherUserMap['uid'],
-                            ),
-                            builder: (context, snapshot) {
-                              if (!snapshot.hasData) {
-                                return showNoProfilePicture(context);
-                              }
-
-                              final data = snapshot.data!.data();
-                              final String? profilePicture =
-                                  data['profile-picture'];
-                              if (profilePicture != null) {
-                                return showOtherUserProfilePicture(
-                                    data['uid'], profilePicture, context, 75);
-                              }
-                              return showNoOtherUserProfilePicture(
-                                  context, 150);
-                            },
-                          ),
-                          const SizedBox(height: 20),
-                          ListTile(
-                            leading: Icon(Icons.person_rounded,
-                                color: Theme.of(context).primaryColor),
-                            title: Text(
-                              'Name',
-                              style: GoogleFonts.poppins(color: Colors.grey),
-                            ),
-                            subtitle: Text(otherUserMap['fullname']),
-                          ),
-                          ListTile(
-                            leading: Icon(Icons.email_rounded,
-                                color: Theme.of(context).primaryColor),
-                            title: Text(
-                              'Email',
-                              style: GoogleFonts.poppins(color: Colors.grey),
-                            ),
-                            subtitle: Text(otherUserMap['email']),
-                          ),
-                          ListTile(
-                            leading: Icon(Icons.phone_rounded,
-                                color: Theme.of(context).primaryColor),
-                            title: Text(
-                              'Contact',
-                              style: GoogleFonts.poppins(color: Colors.grey),
-                            ),
-                            subtitle: Text(otherUserMap['contact']),
-                          ),
-                          ListTile(
-                            leading: Icon(Icons.work_rounded,
-                                color: Theme.of(context).primaryColor),
-                            title: Text(
-                              'Role',
-                              style: GoogleFonts.poppins(color: Colors.grey),
-                            ),
-                            subtitle: Text(otherUserMap['user-type']),
-                          ),
-                          const SizedBox(height: 10),
-
-                          // todo: User Can Only Chat With Other Users If They Are Admins Or Non-Students
-                          otherUserMap['user-type'] != 'student' || isUserAdmin
-                              ? MyButton(
-                                  onPressed: () {
-                                    // Navigate to [other-user]'s Chat Page
-                                    Navigator.push(
-                                      context,
-                                      MaterialPageRoute(
-                                        builder: (context) => ChatPage(
-                                          roomId:
-                                              getRoomId(otherUserMap['email']),
-                                          receiverEmail: otherUserMap['email'],
-                                        ),
-                                      ),
-                                    );
-                                  },
-                                  btnText: 'Chat With $userFirstName!',
-                                  isPrimary: false,
-                                )
-                              : Container(),
-                          const SizedBox(height: 10),
-
-                          isUserAdmin
+                          // currentUser type
+                          final currentUserType = userProvider.userType;
+                          
+                          return otherUserMap.isNotEmpty
                               ? Column(
                                   children: [
-                                    // todo: Only Admins Can Make Other Users Admins
-                                    // make other users ADMIN iff they are not ADMIN already
-                                    isOtherUserAdmin
+                                    StreamBuilder(
+                                      stream: getThrottledStream(
+                                        collectionPath: 'users',
+                                        docPath: otherUserMap['uid'],
+                                      ),
+                                      builder: (context, snapshot) {
+                                        if (!snapshot.hasData) {
+                                          return showNoProfilePicture(context);
+                                        }
+
+                                        final data = snapshot.data!.data();
+                                        final String? profilePicture =
+                                            data['profile-picture'];
+                                        if (profilePicture != null) {
+                                          return showOtherUserProfilePicture(
+                                              data['uid'],
+                                              profilePicture,
+                                              context,
+                                              75);
+                                        }
+                                        return showNoOtherUserProfilePicture(
+                                            context, 150);
+                                      },
+                                    ),
+                                    const SizedBox(height: 20),
+                                    ListTile(
+                                      leading: Icon(Icons.person_rounded,
+                                          color:
+                                              Theme.of(context).primaryColor),
+                                      title: Text(
+                                        'Name',
+                                        style: GoogleFonts.poppins(
+                                            color: Colors.grey),
+                                      ),
+                                      subtitle: Text(otherUserMap['fullname']),
+                                    ),
+                                    ListTile(
+                                      leading: Icon(Icons.email_rounded,
+                                          color:
+                                              Theme.of(context).primaryColor),
+                                      title: Text(
+                                        'Email',
+                                        style: GoogleFonts.poppins(
+                                            color: Colors.grey),
+                                      ),
+                                      subtitle: Text(otherUserMap['email']),
+                                    ),
+                                    ListTile(
+                                      leading: Icon(Icons.phone_rounded,
+                                          color:
+                                              Theme.of(context).primaryColor),
+                                      title: Text(
+                                        'Contact',
+                                        style: GoogleFonts.poppins(
+                                            color: Colors.grey),
+                                      ),
+                                      subtitle: Text(otherUserMap['contact']),
+                                    ),
+                                    ListTile(
+                                      leading: Icon(Icons.work_rounded,
+                                          color:
+                                              Theme.of(context).primaryColor),
+                                      title: Text(
+                                        'Role',
+                                        style: GoogleFonts.poppins(
+                                            color: Colors.grey),
+                                      ),
+                                      subtitle: Text(otherUserMap['user-type']),
+                                    ),
+                                    const SizedBox(height: 10),
+
+                                    // todo: User Can Only Chat With Other Users If They Are Admins Or Non-Students
+                                    (otherUserMap['user-type'] != 'student' ||
+                                                isUserAdmin) &&
+                                            currentUserType != 'student'
                                         ? MyButton(
-                                            onPressed: () async {
-                                              try {
-                                                await administrator!
-                                                    .makeUserAdmin(
-                                                        otherUserMap['uid']);
-                                                if (context.mounted) {
-                                                  showSnackBar(
-                                                      context, 'Success!');
-                                                }
-                                              } catch (e) {
-                                                showSnackBar(context,
-                                                    'Error Making User Admin: ${e.toString()}');
-                                              }
+                                            onPressed: () {
+                                              // Navigate to [other-user]'s Chat Page
+                                              Navigator.push(
+                                                context,
+                                                MaterialPageRoute(
+                                                  builder: (context) =>
+                                                      ChatPage(
+                                                    roomId: getRoomId(
+                                                        otherUserMap['email']),
+                                                    receiverEmail:
+                                                        otherUserMap['email'],
+                                                  ),
+                                                ),
+                                              );
                                             },
-                                            btnText: 'Make Admin',
+                                            btnText:
+                                                'Chat With $userFirstName!',
                                             isPrimary: false,
                                           )
                                         : Container(),
                                     const SizedBox(height: 10),
 
-                                    // todo: Delete User Account
-                                    isOtherUserAdmin
-                                        ? MyButton(
-                                            onPressed: () async {
-                                              try {
-                                                await administrator!
-                                                    .deleteUserAccount(
-                                                        otherUserMap['uid']);
-                                                if (context.mounted) {
-                                                  showSnackBar(
-                                                      context, 'Success!');
-                                                  Navigator.pop(context);
-                                                }
-                                              } catch (e) {
-                                                showSnackBar(context,
-                                                    'Error Deleting User Account: ${e.toString()}');
-                                              }
-                                            },
-                                            btnText: 'Delete Account',
-                                            isPrimary: false,
+                                    isUserAdmin
+                                        ? Column(
+                                            children: [
+                                              // todo: Only Admins Can Make / Unmake Other Users As Admins
+                                              // make other users ADMIN iff they are not ADMIN already or remove their admin status
+                                              isOtherUserAdmin
+                                                  // todo: Button To Make Other User An Admin
+                                                  ? MyButton(
+                                                      onPressed: () async {
+                                                        try {
+                                                          await administrator!
+                                                              .makeUserAdmin(
+                                                                  otherUserMap[
+                                                                      'uid']);
+                                                          // udpate provider data
+                                                          await setAllUsers();
+                                                          if (context.mounted) {
+                                                            // rebuild screen to change button
+                                                            setState(() {});
+                                                            showSnackBar(
+                                                                context,
+                                                                'Success!');
+                                                          }
+                                                        } catch (e) {
+                                                          showSnackBar(context,
+                                                              'Error Making User Admin: ${e.toString()}');
+                                                        }
+                                                      },
+                                                      btnText: 'Make Admin',
+                                                      isPrimary: false,
+                                                    )
+                                                  // todo: Button To Undo User Admin Status
+                                                  : MyButton(
+                                                      onPressed: () async {
+                                                        try {
+                                                          await administrator!
+                                                              .removeUserAsAdmin(
+                                                                  otherUserMap[
+                                                                      'uid']);
+                                                          // udpate provider data
+                                                          await setAllUsers();
+                                                          if (context.mounted) {
+                                                            // rebuild screen to change button
+                                                            setState(() {});
+                                                            showSnackBar(
+                                                                context,
+                                                                'Success!');
+                                                          }
+                                                        } catch (e) {
+                                                          showSnackBar(context,
+                                                              'Error Removing User As Admin: ${e.toString()}');
+                                                        }
+                                                      },
+                                                      btnText: 'Make Admin',
+                                                      isPrimary: false,
+                                                    ),
+                                              const SizedBox(height: 10),
+
+                                              // todo: Delete User Account (Only Non Admins Can Be Deleted)
+                                              !isOtherUserAdmin
+                                                  ? MyButton(
+                                                      onPressed: () async {
+                                                        try {
+                                                          await administrator!
+                                                              .deleteUserAccount(
+                                                                  otherUserMap[
+                                                                      'uid']);
+                                                          // udpate provider data
+                                                          await setAllUsers();
+                                                          if (context.mounted) {
+                                                            showSnackBar(
+                                                                context,
+                                                                'Success!');
+                                                            Navigator.pop(
+                                                                context);
+                                                          }
+                                                        } catch (e) {
+                                                          showSnackBar(context,
+                                                              'Error Deleting User Account: ${e.toString()}');
+                                                        }
+                                                      },
+                                                      btnText: 'Delete Account',
+                                                      isPrimary: false,
+                                                    )
+                                                  : Container(),
+                                            ],
                                           )
                                         : Container(),
                                   ],
                                 )
-                              : Container(),
-                        ],
-                      )
-
-                    // User's Account No Longer Exists
-                    : Column(
-                        children: [
-                          const SizedBox(height: 100),
-                          const Icon(Icons.person_off_rounded,
-                              size: 100, color: Colors.red),
-                          const SizedBox(height: 50),
-                          Row(
-                            children: [
-                              Text(widget.otherUserEmail,
-                                  style: const TextStyle(
-                                      fontWeight: FontWeight.bold)),
-                              const Text(' Does Not Exist In Our Database.'),
-                            ],
-                          ),
-                          const SizedBox(height: 15),
-                          MyButton(
-                            btnText: 'Contact  Support Team',
-                            isPrimary: false,
-                            onPressed: () {
-                              Navigator.pushNamed(context, '/contact-us');
-                            },
-                          )
-                        ],
+                              // User's Account No Longer Exists
+                              : Column(
+                                  children: [
+                                    const SizedBox(height: 100),
+                                    const Icon(Icons.person_off_rounded,
+                                        size: 100, color: Colors.red),
+                                    const SizedBox(height: 50),
+                                    Row(
+                                      children: [
+                                        Text(widget.otherUserEmail,
+                                            style: const TextStyle(
+                                                fontWeight: FontWeight.bold)),
+                                        const Text(
+                                            ' Does Not Exist In Our Database.'),
+                                      ],
+                                    ),
+                                    const SizedBox(height: 15),
+                                    MyButton(
+                                      btnText: 'Contact  Support Team',
+                                      isPrimary: false,
+                                      onPressed: () {
+                                        Navigator.pushNamed(
+                                            context, '/contact-us');
+                                      },
+                                    )
+                                  ],
+                                );
+                        },
                       ),
-              ),
+                    ),
+                  ),
+                ),
+                const MyBackButton(),
+              ],
             ),
-          ),
-          const MyBackButton(),
-        ],
-      ),
-    );
+          );
+  }
+
+  Future<void> setAllUsers() async {
+    await Provider.of<UserProvider>(context, listen: false).setAllUsers();
   }
 }

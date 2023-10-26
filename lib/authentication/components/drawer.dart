@@ -346,7 +346,7 @@ class MyDrawer extends StatelessWidget {
                   Navigator.pushAndRemoveUntil(
                       context,
                       MaterialPageRoute(
-                          builder: (context) => const LoginPage()),
+                          builder: (context) => const LoginPage(isFromWelcomeScreen: false,)),
                       (route) => false);
                 }
               },

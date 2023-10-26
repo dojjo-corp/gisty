@@ -10,6 +10,7 @@ import 'package:gt_daily/authentication/components/buttons/buttons.dart';
 import 'package:gt_daily/authentication/components/page_title.dart';
 import 'package:gt_daily/authentication/components/textfields/simple_textfield.dart';
 import 'package:gt_daily/authentication/helper_methods.dart/global.dart';
+import 'package:gt_daily/authentication/pages/user%20authentication/login.dart';
 import 'package:gt_daily/authentication/pages/user%20authentication/phone_number.dart';
 import 'package:gt_daily/authentication/repository/authentication_repo.dart';
 import 'package:gt_daily/authentication/repository/firestore_repo.dart';
@@ -64,7 +65,7 @@ class _RegisterPageState extends State<RegisterPage> {
           });
           // authenticate user with firebase auth
           final userCredential = await auth.register(
-            email: emailController.text,
+            email: emailController.text.toLowerCase(),
             password: passwordController.text,
           );
           final user = userCredential?.user;
@@ -79,7 +80,7 @@ class _RegisterPageState extends State<RegisterPage> {
                   uid: userId,
                   fullName: nameController.text,
                   userName: userNameController.text,
-                  email: emailController.text,
+                  email: emailController.text.toLowerCase(),
                   startYear: startYearController.text,
                   endYear: endYearController.text,
                 );
@@ -89,7 +90,7 @@ class _RegisterPageState extends State<RegisterPage> {
                   uid: userId,
                   fullName: nameController.text,
                   userName: userNameController.text,
-                  email: emailController.text,
+                  email: emailController.text.toLowerCase(),
                 );
                 break;
               case 'university professional':
@@ -97,7 +98,7 @@ class _RegisterPageState extends State<RegisterPage> {
                   uid: userId,
                   fullName: nameController.text,
                   userName: userNameController.text,
-                  email: emailController.text,
+                  email: emailController.text.toLowerCase(),
                 );
                 break;
               default:
@@ -349,7 +350,9 @@ class _RegisterPageState extends State<RegisterPage> {
                             const Text('Already Have An Account?'),
                             GestureDetector(
                               onTap: () => Navigator.of(context)
-                                  .popAndPushNamed('/login'),
+                                  .pushReplacement(MaterialPageRoute(
+                                      builder: (context) => const LoginPage(
+                                          isFromWelcomeScreen: true))),
                               child: Text(
                                 ' Sign In',
                                 style: GoogleFonts.poppins(

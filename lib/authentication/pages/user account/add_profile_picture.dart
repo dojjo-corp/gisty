@@ -22,6 +22,8 @@ class AddProfileImagePage extends StatefulWidget {
 class _AddProfileImagePageState extends State<AddProfileImagePage> {
   final store = FirebaseFirestore.instance;
   final auth = FirebaseAuth.instance;
+  bool _isLoading = false;
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -103,6 +105,7 @@ class _AddProfileImagePageState extends State<AddProfileImagePage> {
           const MyBackButton()
         ],
       ),
+      floatingActionButton: _isLoading ? const LinearProgressIndicator() : null,
     );
   }
 }

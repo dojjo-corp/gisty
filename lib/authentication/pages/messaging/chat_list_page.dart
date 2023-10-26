@@ -20,7 +20,6 @@ class ChatListPage extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final allUsers = Provider.of<UserProvider>(context).allUsers;
-    debugPrint('This is the room id: ${getRoomId(allUsers[0]['email'])}');
 
     return Scaffold(
       body: Stack(

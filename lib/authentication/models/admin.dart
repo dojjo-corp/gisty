@@ -19,13 +19,27 @@ class Administrator {
     final snapshot = await docRef.get();
 
     if (snapshot.exists) {
-      // only make user admin if they are university professionals
-      if (snapshot.data()?['user-type'].toLowerCase() !=
-          'university professional') {
-        throw 'Only University Professionals Can Be Administrators!';
-      }
       try {
         await docRef.update({'admin': true});
+      } catch (e) {
+        rethrow;
+      }
+    }
+    // throw Exception if not
+    else {
+      throw 'Error Finding User\'s Records.\nCheck Your Internet';
+    }
+  }
+
+  // todo: unmake user admin
+  Future<void> removeUserAsAdmin(String uid) async {
+    // get user data from firestore
+    final docRef = store.collection('users').doc(uid);
+    final snapshot = await docRef.get();
+
+    if (snapshot.exists) {
+      try {
+        await docRef.update({'admin': false});
       } catch (e) {
         rethrow;
       }

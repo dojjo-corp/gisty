@@ -29,7 +29,7 @@ class ProjectArchive extends StatelessWidget {
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
                     Text(
-                      'Project Archive',
+                      'Project Categories',
                       style: GoogleFonts.poppins(
                           fontSize: 40, fontWeight: FontWeight.bold),
                     ),

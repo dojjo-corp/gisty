@@ -55,11 +55,16 @@ Future<void> sendMessage({
   required String messageText,
   required BuildContext context,
 }) async {
-  try {
-    if (messageText.characters.isNotEmpty) {
-      String text = messageText;
-      String senderFullName =
-          getUserFullname(FirebaseAuth.instance.currentUser!.email!, context);
+  // only send a message if the message text field is not empty
+  if (messageText.characters.isNotEmpty) {
+    String text = messageText;
+    String senderFullName = getUserFullname(
+      FirebaseAuth.instance.currentUser!.email!,
+      context,
+    );
+    log(senderFullName);
+
+    try {
       // sned to firstore
       await repo.sendMessage(
         text,
@@ -69,23 +74,20 @@ Future<void> sendMessage({
       // notify receiver's device of message
       // ignore: unused_local_variable
       final response = await FireMessaging().sendPushNotifiation(
-          token: token,
-          receiverEmail: receiverEmail,
-          title: senderFullName,
-          body: text,
-          type: 'chat',
-          routeName: '/chat-page',
-          routeArgs: {
-            'room-id': roomId,
-            'receiver-email': FirebaseAuth.instance.currentUser!.email!
-          });
+        token: token,
+        receiverEmail: receiverEmail,
+        title: senderFullName,
+        body: text,
+        type: 'chat',
+        routeName: '/chat-page',
+        routeArgs: {
+          'room-id': roomId,
+          'receiver-email': FirebaseAuth.instance.currentUser!.email!
+        },
+      );
+    } catch (e) {
+      showSnackBar(context, 'Error Sending Message: ${e.toString()}');
     }
-  } catch (e) {
-    ScaffoldMessenger.of(context).showSnackBar(
-      SnackBar(
-        content: Text('Error Sending Message: ${e.toString()}'),
-      ),
-    );
   }
 }
 

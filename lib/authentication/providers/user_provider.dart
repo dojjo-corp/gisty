@@ -25,7 +25,7 @@ class UserProvider extends ChangeNotifier {
 
   Map<String, dynamic>? getUserDataFromEmail(String? email) {
     for (var user in _allUsers) {
-      if (user['email'] == email) {
+      if (user['email'].toLowerCase() == email!.toLowerCase()) {
         return user;
       }
     }

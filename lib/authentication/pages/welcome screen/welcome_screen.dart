@@ -5,6 +5,8 @@ import 'package:gt_daily/authentication/pages/welcome%20screen/welcome_greetings
 import 'package:gt_daily/authentication/pages/welcome%20screen/welcome_jobs.dart';
 import 'package:gt_daily/authentication/pages/welcome%20screen/welcome_messaging.dart';
 
+import '../user authentication/login.dart';
+
 class WelcomeScreen extends StatefulWidget {
   const WelcomeScreen({super.key});
 
@@ -37,13 +39,18 @@ class _WelcomeScreenState extends State<WelcomeScreen> {
                     left: 0,
                     child: TextButton(
                       onPressed: () {
-                        Navigator.pushNamed(context, '/login');
+                        Navigator.pushReplacement(
+                          context,
+                          MaterialPageRoute(
+                            builder: (context) =>
+                                const LoginPage(isFromWelcomeScreen: true),
+                          ),
+                        );
                       },
                       child: Text(
                         'Skip',
                         style: GoogleFonts.montserrat(
-                          color:
-                              const Color.fromARGB(255, 75, 125, 200),
+                          color: const Color.fromARGB(255, 75, 125, 200),
                         ),
                       ),
                     ),
