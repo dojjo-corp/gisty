@@ -25,25 +25,28 @@ class _AllProjectsAnalyticsState extends State<AllProjectsAnalytics> {
   void initState() {
     super.initState();
     getOverallAnalyticsChart(context)?.then((value) {
-      mapForChart = value;
       setState(() {
         _isLoading = false;
+         mapForChart = value;
       });
     }).onError(
-      (error, stackTrace) => showDialog(
-        context: context,
-        builder: (context) => AlertDialog(
-          title: Container(
-            height: 300,
-            decoration: BoxDecoration(
-              borderRadius: BorderRadius.circular(8),
-            ),
-            child: Text(
-              error.toString(),
+      (error, stackTrace) {
+        showDialog(
+          context: context,
+          builder: (context) => AlertDialog(
+            title: Container(
+              // height: 300,
+              decoration: BoxDecoration(
+                borderRadius: BorderRadius.circular(8),
+              ),
+              child: Text(
+                error.toString(),
+                style: const TextStyle(fontWeight: FontWeight.normal),
+              ),
             ),
           ),
-        ),
-      ),
+        );
+      },
     );
   }
 
@@ -106,13 +109,23 @@ class _AllProjectsAnalyticsState extends State<AllProjectsAnalytics> {
                             subtitile:
                                 mapForChart['total-downloads'].toString(),
                             trailing: null,
+                          ),
+                          AnalyticsTile(
+                            title: 'Industry\'s Favorite',
+                            subtitile: mapForChart['industry-favorite-category']
+                                .toString(),
+                            trailing: null,
                           )
                         ],
                       ),
                     ),
                   ),
                 ),
+
+                /// Custom Back Button
                 const MyBackButton(),
+
+                /// Switch between single-rod and multi-rod charts
                 Positioned(
                   top: 50,
                   right: 5,
@@ -124,6 +137,27 @@ class _AllProjectsAnalyticsState extends State<AllProjectsAnalytics> {
                         isOverallAnalytics = value;
                       });
                     },
+                  ),
+                ),
+
+                /// Show help icon for [Switch] widget
+                Positioned(
+                  top: 50,
+                  right: 65,
+                  child: Tooltip(
+                    decoration: BoxDecoration(
+                      borderRadius: BorderRadius.circular(8),
+                      color: Colors.blueGrey[100],
+                    ),
+                    message: 'Change chart type',
+                    triggerMode: TooltipTriggerMode.tap,
+                    textStyle: GoogleFonts.montserrat(color: Colors.grey[700]),
+                    showDuration: const Duration(seconds: 15),
+                    child: const Icon(
+                      Icons.info,
+                      color: Colors.grey,
+                      size: 20,
+                    ),
                   ),
                 ),
               ],

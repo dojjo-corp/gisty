@@ -59,6 +59,7 @@ class _MyBarGraphState extends State<MyBarGraph> {
             );
           },
         ).toList(),
+        barTouchData: getTooltips(),
         gridData: const FlGridData(show: false),
         borderData: FlBorderData(show: false),
         titlesData: FlTitlesData(
@@ -108,6 +109,7 @@ class _MyBarGraphState extends State<MyBarGraph> {
               ),
             )
             .toList(),
+        barTouchData: getSingleTooltips(),
         gridData: const FlGridData(show: false),
         borderData: FlBorderData(show: false),
         titlesData: FlTitlesData(
@@ -134,6 +136,83 @@ class _MyBarGraphState extends State<MyBarGraph> {
     return BarChart(widget.isOverallAnalytics
         ? getOverallAnalyticsBarChart()
         : getCategoryEngagementBarChart());
+  }
+
+  BarTouchData getTooltips() {
+    return BarTouchData(
+      touchTooltipData: BarTouchTooltipData(
+        tooltipBgColor: Colors.blueGrey,
+        tooltipHorizontalAlignment: FLHorizontalAlignment.right,
+        tooltipMargin: -10,
+        getTooltipItem: (group, groupIndex, rod, rodIndex) {
+          String engagementType;
+          switch (rodIndex) {
+            case 0:
+              engagementType = 'Saves';
+              break;
+            case 1:
+              engagementType = 'Downloads';
+              break;
+            case 2:
+              engagementType = 'Comments';
+              break;
+            case 3:
+              engagementType = 'Impressions';
+              break;
+            default:
+              throw Error();
+          }
+          return BarTooltipItem(
+            '$engagementType\n',
+            const TextStyle(
+              color: Colors.white,
+              fontWeight: FontWeight.bold,
+              fontSize: 16,
+            ),
+            children: <TextSpan>[
+              TextSpan(
+                text: (rod.toY.toInt()).toString(),
+                style: const TextStyle(
+                  color: Colors.white,
+                  fontWeight: FontWeight.w500,
+                ),
+              ),
+            ],
+          );
+        },
+      ),
+    );
+  }
+
+  /// Gets tooltips to display for chart with single bars per category
+  BarTouchData getSingleTooltips() {
+    return BarTouchData(
+      touchTooltipData: BarTouchTooltipData(
+        tooltipBgColor: Colors.blueGrey,
+        tooltipHorizontalAlignment: FLHorizontalAlignment.right,
+        tooltipMargin: -10,
+        getTooltipItem: (group, groupIndex, rod, rodIndex) {
+          
+          return BarTooltipItem(
+            'Total Engagements\n',
+            const TextStyle(
+              color: Colors.white,
+              fontWeight: FontWeight.bold,
+              fontSize: 16,
+            ),
+            children: <TextSpan>[
+              TextSpan(
+                text: (rod.toY.toInt()).toString(),
+                style: const TextStyle(
+                  color: Colors.white,
+                  fontWeight: FontWeight.w500,
+                ),
+              ),
+            ],
+          );
+        },
+      ),
+    );
   }
 
   double sum(List<double> values) {

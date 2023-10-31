@@ -91,6 +91,9 @@ flutter:
   assets:
       - assets/GCTU-Logo-600x600.png
       - assets/ic_launcher_foreground.png
+      - assets/register-background.jpg
+      - assets/login-background.jpg
+      - assets/app-icon.jpg
       - assets/ai.png
       - assets/cyber.png
       - assets/data.png

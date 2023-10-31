@@ -118,6 +118,7 @@ class _DashboardState extends State<Dashboard> {
                       btnText: 'See More',
                       isPrimary: false,
                     ),
+                    const SizedBox(height: 10),
                   ],
                 ),
               ],

@@ -146,8 +146,11 @@ class _ProjectDetailsState extends State<ProjectDetails> {
                     'Short Description',
                     style: GoogleFonts.poppins(fontWeight: FontWeight.bold),
                   ),
-                  Text(widget.projectData['description'],
-                      style: GoogleFonts.poppins()),
+                  Padding(
+                    padding: const EdgeInsets.symmetric(horizontal: 8.0),
+                    child: Text(widget.projectData['description'],
+                        style: GoogleFonts.poppins()),
+                  ),
                   const SizedBox(height: 30),
                   Row(
                     children: [
@@ -611,8 +614,8 @@ class _ProjectDetailsState extends State<ProjectDetails> {
               ExternalPath.DIRECTORY_DOWNLOADS);
 
       final File tempFile = File('$downloadDirectory/$docFileName');
-      await downloadFileRef.writeToFile(tempFile);
-      // on sucessful download, add user email to downloadedBy field in firestore
+      // await downloadFileRef.writeToFile(tempFile);
+      // on sucessful download, add current user's email to downloadedBy field in firestore
       await store
           .collection('All Projects')
           .doc(widget.projectData['pid'])
@@ -654,10 +657,7 @@ class _ProjectDetailsState extends State<ProjectDetails> {
   // open downloaded pdf with device's default pdf viewer
   Future<void> openDownloadedFile(String filePath) async {
     try {
-      final String downloadDirectory =
-          await ExternalPath.getExternalStoragePublicDirectory(
-              ExternalPath.DIRECTORY_DOWNLOADS);
-      await OpenFile.open('$downloadDirectory/$filePath');
+      await OpenFile.open(filePath);
     } catch (e) {
       ScaffoldMessenger.of(context).showSnackBar(
         SnackBar(

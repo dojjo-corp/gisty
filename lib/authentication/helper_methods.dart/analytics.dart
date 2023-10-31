@@ -1,13 +1,13 @@
-// ignore_for_file: no_leading_underscores_for_local_identifiers, use_build_context_synchronously
-
-// import 'dart:developer' as dev;
+// ignore_for_file: no_leading_underscores_for_local_identifiers, use_build_context_synchronously, unused_import
 
 import 'dart:convert';
 import 'dart:developer';
 
 import 'package:cloud_firestore/cloud_firestore.dart';
+import 'package:connectivity_plus/connectivity_plus.dart';
 import 'package:fl_chart/fl_chart.dart';
 import 'package:flutter/material.dart';
+import 'package:gt_daily/authentication/providers/connectivity_provider.dart';
 import 'package:gt_daily/authentication/providers/projects_provider.dart';
 import 'package:provider/provider.dart';
 
@@ -128,8 +128,14 @@ Future<Map<String, dynamic>>? getOverallAnalyticsChart(
   final docs = await FirebaseFirestore.instance
       .collection('All Projects')
       .get()
-      .timeout(const Duration(seconds: 15), onTimeout: () {
-    throw 'No internet connection';
+      .timeout(const Duration(seconds: 30), onTimeout: () {
+    final connectionState =
+        Provider.of<ConnectivityProvider>(_context, listen: false)
+            .connectivityResult;
+    if (connectionState == ConnectivityResult.none) {
+      throw 'Unable to load analytics data\nCheck your internet connection';
+    }
+    throw 'Some error occured when loading analytics data';
   });
 
   // store all projects data in a list
@@ -140,10 +146,15 @@ Future<Map<String, dynamic>>? getOverallAnalyticsChart(
 
   // store analytics data for each project category
   Map<String, dynamic> mapToUse = {};
-  final categoryMap = Provider.of<ProjectProvider>(_context, listen:false).categoryMap;
+  final categoryMap =
+      Provider.of<ProjectProvider>(_context, listen: false).categoryMap;
   final categoryNames = categoryMap.keys.toList();
   final categoryData = categoryMap.values.toList();
+  List<int> industryImpressions =
+      []; // for finding category with the highest impressions from industry professionals
   List engagements = []; // for finding category with highest engagement
+  List maxYs =
+      []; // For finding the maxY value to use for the multiple-rod chart.
 
   // ignore: unused_local_variable
   double maxY = 0;
@@ -169,16 +180,20 @@ Future<Map<String, dynamic>>? getOverallAnalyticsChart(
     totalProjectsNum += listForCategory.length;
 
     // get required analytics data for each project under a category
-    for (var item in listForCategory) {
+    for (var project in listForCategory) {
       // calculate sum of impressions given for project
-      final impressions = item['impressions'].values.toList();
+      final impressions = project['impressions'].values.toList();
       impressionsSum += sum(impressions);
+
+      // Number of impressions from industry professionals
+      industryImpressions.add(project['industry-impressions-sum'] ?? 0);
+
       // sum of saved
-      saved += item['saved'].length;
+      saved += project['saved'].length;
       // downloads
-      downloads += item['downloaded-by'].length;
+      downloads += project['downloaded-by'].length;
       // comments
-      comments += item['comments'].length;
+      comments += project['comments'].length;
     }
 
     // sum of total engagement for category
@@ -188,12 +203,13 @@ Future<Map<String, dynamic>>? getOverallAnalyticsChart(
     totalComments += comments.toInt();
     totalImpressions += impressionsSum.toInt();
 
-    // maxY for barchart with individual engagement bars 
+    // maxY for barchart with individual engagement bars
     maxY = getMax([saved, downloads, comments, impressionsSum]);
 
     engagements.add(engagementSum);
+    maxYs.add(maxY);
 
-    // store analytics data
+    // store category analytics data
     mapToUse[categoryNames[i]] = {
       'toY': [
         saved,
@@ -206,15 +222,18 @@ Future<Map<String, dynamic>>? getOverallAnalyticsChart(
       'user-engagement': engagementSum
     };
   }
-  mapToUse['maxY'] = getMax(engagements);
+
+  final indexOfIndustryFavoriteCategory = maxYs.indexOf(getMax(maxYs));
+  mapToUse['maxY'] = getMax(maxYs);
   mapToUse['maxEngagement'] = getMax(engagements);
   mapToUse['total-projects'] = totalProjectsNum;
   mapToUse['total-saves'] = totalSaves;
   mapToUse['total-downloads'] = totalDownloads;
   mapToUse['total-comments'] = totalComments;
   mapToUse['total-impressions'] = totalImpressions;
+  mapToUse['industry-favorite-category'] =
+      categoryNames[indexOfIndustryFavoriteCategory];
 
-  log(jsonEncode(mapToUse['maxEngagement']));
   return mapToUse;
 }
 
@@ -235,7 +254,5 @@ double getMax(List values) {
   }
   return max;
 }
-  
-
 
 // BOTOM

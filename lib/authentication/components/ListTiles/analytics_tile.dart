@@ -21,7 +21,7 @@ class AnalyticsTile extends StatelessWidget {
       tileColor: Colors.grey[300],
       title: Text(
         title ?? '',
-        style: GoogleFonts.poppins(fontWeight: FontWeight.bold),
+        style: GoogleFonts.poppins(fontWeight: FontWeight.w600),
       ),
       subtitle: Text(
         subtitile ?? '',

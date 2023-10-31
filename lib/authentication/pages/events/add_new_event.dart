@@ -1,17 +1,19 @@
+import 'dart:developer';
 import 'dart:io';
 
 import 'package:cloud_firestore/cloud_firestore.dart';
+import 'package:firebase_auth/firebase_auth.dart';
 import 'package:firebase_storage/firebase_storage.dart';
 import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:gt_daily/authentication/components/buttons/custom_back_button.dart';
+import 'package:gt_daily/authentication/helper_methods.dart/date_and_time.dart';
 import 'package:gt_daily/authentication/helper_methods.dart/global.dart';
 import 'package:image_picker/image_picker.dart';
 import 'package:path/path.dart' as path;
 
-import '../../components/ListTiles/time_tile.dart';
+import '../../../global/homepage.dart';
 import '../../components/buttons/buttons.dart';
-import '../../components/ListTiles/date_tile.dart';
 import '../../components/textfields/multi_line_textfeld.dart';
 import '../../components/textfields/simple_textfield.dart';
 import '../../repository/firebase_messaging.dart';
@@ -27,18 +29,24 @@ class AddNewEventPage extends StatefulWidget {
 class _AddNewEventPageState extends State<AddNewEventPage> {
   bool _isLoading = false;
   final _key = GlobalKey<FormState>();
-  final jobTitleController = TextEditingController();
-  final companyNameController = TextEditingController();
+  final eventTitleController = TextEditingController();
+  final organizersController = TextEditingController();
   final locationController = TextEditingController();
   final descriptionController = TextEditingController();
   final contactController = TextEditingController();
-  final dateController = TextEditingController();
+
+  String dateText = 'Set Date';
+  Color dateIconColor = Colors.grey;
+
+  Color timeIconColor = Colors.grey;
+  String timeText = 'Set Time';
 
   List<Image> eventImages = [];
   List<File> imageFiles = [];
 
   @override
   Widget build(BuildContext context) {
+    log('Images: ${imageFiles.length}\n\nEvent: ${eventImages.length}\n\n');
     return Scaffold(
       body: Stack(
         children: [
@@ -66,7 +74,7 @@ class _AddNewEventPageState extends State<AddNewEventPage> {
                           // todo: EVENT TITLE TEXT FIELD
                           SimpleTextField(
                             autofillHints: null,
-                            controller: jobTitleController,
+                            controller: eventTitleController,
                             hintText: 'Event Title',
                             iconData: Icons.title_rounded,
                             isWithIcon: true,
@@ -88,7 +96,7 @@ class _AddNewEventPageState extends State<AddNewEventPage> {
                           // todo: COMPANY NAME
                           SimpleTextField(
                             autofillHints: null,
-                            controller: companyNameController,
+                            controller: organizersController,
                             hintText: 'Organizers',
                             iconData: Icons.groups_rounded,
                             isWithIcon: true,
@@ -107,11 +115,15 @@ class _AddNewEventPageState extends State<AddNewEventPage> {
 
                           const SizedBox(height: 5),
 
-                          // todo: DATE FIELD
-                          const Row(
+                          // todo: DATE / FIELD
+                          Row(
                             children: [
-                              Expanded(child: DateTile()),
-                              Expanded(child: TimeTile())
+                              Expanded(
+                                child: getDateTile(),
+                              ),
+                              Expanded(
+                                child: getTimeTile(),
+                              )
                             ],
                           ),
 
@@ -121,10 +133,8 @@ class _AddNewEventPageState extends State<AddNewEventPage> {
                           MultiLineTextField(
                             controller: descriptionController,
                             hintText: 'Description',
-                            maxLines: 10,
+                            maxLines: 8,
                           ),
-
-                          const SizedBox(height: 5),
 
                           // todo: ADD IMAGES
                           TextButton(
@@ -136,8 +146,6 @@ class _AddNewEventPageState extends State<AddNewEventPage> {
                               ],
                             ),
                           ),
-
-                          const SizedBox(height: 5),
 
                           eventImages.isNotEmpty
                               ? SizedBox(
@@ -153,8 +161,6 @@ class _AddNewEventPageState extends State<AddNewEventPage> {
                                       itemCount: eventImages.length),
                                 )
                               : Container(),
-
-                          const SizedBox(height: 10),
 
                           MyButton(
                             onPressed: () async {
@@ -181,14 +187,17 @@ class _AddNewEventPageState extends State<AddNewEventPage> {
 
                                 final Map<String, dynamic> eventDetails = {
                                   'id': id,
-                                  'title': jobTitleController.text.trim(),
+                                  'title': eventTitleController.text.trim(),
                                   'organizers':
-                                      companyNameController.text.trim(),
+                                      organizersController.text.trim(),
                                   'location': locationController.text.trim(),
                                   'contacts': contacts,
                                   'details': descriptionController.text.trim(),
-                                  'event-date': dateController.text.trim(),
-                                  'time-added': DateTime.now()
+                                  'event-date': dateText,
+                                  'event-time': timeText,
+                                  'posted-by':
+                                      FirebaseAuth.instance.currentUser?.email,
+                                  'timestamp': DateTime.now()
                                       .toIso8601String() // used String for easy encoding to json format (notifications)
                                 };
 
@@ -198,6 +207,16 @@ class _AddNewEventPageState extends State<AddNewEventPage> {
                                 });
 
                                 try {
+                                  /// Don't upload event post without an Image
+                                  if (imageFiles.isEmpty) {
+                                    throw 'Add at least one image';
+                                  }
+                                  // todo upload images to firebase storage
+                                  await uploadImages(
+                                    imageFiles: imageFiles,
+                                    eventId: id,
+                                  );
+
                                   // todo: send notification to all users
                                   await FireMessaging()
                                       .sendPushNotifiationToAllUsers(
@@ -206,7 +225,7 @@ class _AddNewEventPageState extends State<AddNewEventPage> {
                                     body: '${eventDetails['title']}',
                                     type: 'event',
                                     routeName: '/event-details',
-                                    routeArgs: {'event-details': eventDetails},
+                                    routeArgs: {'event-id': id},
                                   );
 
                                   // todo store event in firestore
@@ -216,12 +235,6 @@ class _AddNewEventPageState extends State<AddNewEventPage> {
                                       Timestamp.fromDate(DateTime.parse(date));
                                   await FirestoreRepo().addEvents(eventDetails);
 
-                                  // todo upload images to firebase storage
-                                  await uploadImages(
-                                    imageFiles: imageFiles,
-                                    eventId: id,
-                                  );
-
                                   if (context.mounted) {
                                     setState(() {
                                       _isLoading = false;
@@ -230,7 +243,13 @@ class _AddNewEventPageState extends State<AddNewEventPage> {
                                       context,
                                       'Event Posted Successfully',
                                     );
-                                    Navigator.pop(context);
+                                    Navigator.pushAndRemoveUntil(
+                                        context,
+                                        MaterialPageRoute(
+                                          builder: (context) =>
+                                              MyHomePage(pageIndex: 0),
+                                        ),
+                                        (route) => false);
                                   }
                                 } catch (e) {
                                   showSnackBar(
@@ -262,12 +281,11 @@ class _AddNewEventPageState extends State<AddNewEventPage> {
     );
   }
 
-  // todo: CONVINIENCE METHODS
+  // todo: CONVENIENCE METHODS
 
-  Future<List<Image>> chooseImages() async {
+  Future<void> chooseImages() async {
     try {
       List<XFile?> images = await ImagePicker().pickMultiImage();
-      List<Image> imagesChosen = [];
 
       for (var image in images) {
         if (image == null) continue;
@@ -277,16 +295,86 @@ class _AddNewEventPageState extends State<AddNewEventPage> {
           imageFile,
           height: 60,
         );
-        imagesChosen.add(imageAsset);
+
+        setState(() {
+          eventImages.add(imageAsset);
+          imageFiles.add(imageFile);
+        });
       }
-      setState(() {
-        eventImages.addAll(imagesChosen);
-      });
-      return imagesChosen;
     } catch (e) {
       showSnackBar(context, 'Error Choosing Images: ${e.toString()}');
-      return Future.value([]);
     }
+  }
+
+  Widget getDateTile() {
+    return GestureDetector(
+      onTap: () async {
+        final date = await showDatePicker(
+          context: context,
+          initialDate: DateTime.now(),
+          firstDate: DateTime(2023),
+          lastDate: DateTime(2030, 12, 31),
+        );
+        if (date != null) {
+          final dateTextRaw = date.toString().split(' ')[0];
+          // get month in text format. Example: 1 == 'Jan'
+          String month = ', ${formatMonth(date.month)} ';
+          final splitText = dateTextRaw.split('-');
+          // replace month num with month text
+          splitText.replaceRange(1, 2, [month]);
+          // concatenate list
+          final dateFormatted = splitText.join();
+
+          setState(() {
+            dateText = dateFormatted;
+            dateIconColor = Theme.of(context).primaryColor;
+          });
+        }
+      },
+      child: ListTile(
+        shape: RoundedRectangleBorder(
+          borderRadius: BorderRadius.circular(12),
+          side: BorderSide(color: Colors.grey[100]!),
+        ),
+        tileColor: Colors.white,
+        leading: Icon(
+          Icons.calendar_month_rounded,
+          color: dateIconColor,
+        ),
+        title: Text(dateText),
+      ),
+    );
+  }
+
+  Widget getTimeTile() {
+    return GestureDetector(
+      onTap: () async {
+        final time = await showTimePicker(
+          context: context,
+          initialTime: TimeOfDay.now(),
+        );
+
+        if (time != null) {
+          setState(() {
+            timeText =
+                '${time.hour.toString().padLeft(2, '0')}:${time.minute.toString().padLeft(2, '0')}';
+            timeIconColor = Theme.of(context).primaryColor;
+          });
+        }
+      },
+      child: ListTile(
+        shape: RoundedRectangleBorder(
+          borderRadius: BorderRadius.circular(12),
+          side: BorderSide(color: Colors.grey[100]!),
+        ),
+        tileColor: Colors.white,
+        leading: Icon(
+          Icons.timer_rounded,
+          color: timeIconColor,
+        ),
+        title: Text(timeText),
+      ),
+    );
   }
 
   Widget showEventImage(int index) {
@@ -328,6 +416,7 @@ class _AddNewEventPageState extends State<AddNewEventPage> {
           onPressed: () {
             setState(() {
               eventImages.removeAt(index);
+              imageFiles.removeAt(index);
             });
           },
           icon: const Icon(
@@ -345,14 +434,26 @@ class _AddNewEventPageState extends State<AddNewEventPage> {
     required List<File> imageFiles,
     required String eventId,
   }) async {
+    List<String> downloadUrls = [];
     try {
+      /// Upload images to firebase storage
       for (var file in imageFiles) {
         String fileName = path.basename(file.path);
         Reference storageReference = FirebaseStorage.instance
             .ref()
-            .child('Job Files/$eventId/$fileName');
+            .child('Event Files/$eventId/$fileName');
         await storageReference.putFile(file);
+
+        /// Get download url of uploaded image
+        String downloadUrl = await storageReference.getDownloadURL();
+        downloadUrls.add(downloadUrl);
       }
+
+      /// Update job details with download urls
+      await FirebaseFirestore.instance
+          .collection('All Events')
+          .doc(eventId)
+          .update({'images': downloadUrls});
     } catch (e) {
       rethrow;
     }

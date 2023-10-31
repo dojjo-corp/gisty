@@ -252,6 +252,8 @@ class FirestoreRepo {
       'type': type,
       'read': false,
       'time-sent': Timestamp.now(),
+      'route-name': routeName,
+      'route-arguments': routeArgs,
     };
     try {
       await store.collection('Notifications').doc(to).set(

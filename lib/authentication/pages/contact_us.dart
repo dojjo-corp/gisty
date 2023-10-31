@@ -1,14 +1,17 @@
 import 'package:flutter/material.dart';
+import 'package:provider/provider.dart';
 
 import '../components/buttons/buttons.dart';
 import '../components/buttons/custom_back_button.dart';
 import '../components/page_title.dart';
+import '../providers/user_provider.dart';
 
 class ContactUsPage extends StatelessWidget {
   const ContactUsPage({super.key});
 
   @override
   Widget build(BuildContext context) {
+    final isUserAdmin = Provider.of<UserProvider>(context).isUserAdmin;
     return Scaffold(
       body: Stack(
         children: [
@@ -38,13 +41,14 @@ class ContactUsPage extends StatelessWidget {
                       subtitle: Text('123 Main St, City, Country'),
                     ),
                     const SizedBox(height: 20),
+                    !isUserAdmin ?
                     MyButton(
                       onPressed: () {
                         Navigator.pushNamed(context, '/feedback');
                       },
                       btnText: 'Feedback / Report',
                       isPrimary: true,
-                    ),
+                    ):Container(),
                   ],
                 ),
               ),

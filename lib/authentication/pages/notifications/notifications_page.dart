@@ -8,6 +8,7 @@ import 'package:gt_daily/authentication/helper_methods.dart/global.dart';
 import 'package:gt_daily/authentication/pages/jobs/jobs_page.dart';
 import 'package:gt_daily/authentication/pages/messaging/chat_list_page.dart';
 import 'package:gt_daily/authentication/pages/projects/project_details.dart';
+import 'package:gt_daily/authentication/repository/navigation_repo.dart';
 
 import '../../../global/homepage.dart';
 import '../../components/buttons/custom_back_button.dart';
@@ -83,10 +84,16 @@ class _NotificationsPageState extends State<NotificationsPage> {
                               String title = notification['title'];
                               String body = notification['body'];
                               bool read = notification['read'];
+                              String routeName =
+                                  notification['route-name'] ?? '/';
+                              Map<String, dynamic>? routeArgs =
+                                  notification['route-arguments'];
+
                               late IconData iconData;
 
-                              // get icon to use based on notification type
+                              /// Get icon to use based on notification type
                               final type = notification['type'];
+
                               switch (type) {
                                 case 'job':
                                   iconData = Icons.assured_workload_rounded;
@@ -107,18 +114,12 @@ class _NotificationsPageState extends State<NotificationsPage> {
                                 padding: const EdgeInsets.only(bottom: 5.0),
                                 child: GestureDetector(
                                   onTap: () async {
-                                    await updateRead(index);
+                                    updateRead(index);
                                     if (context.mounted) {
                                       // page to navigate to based on notifiation type
-                                      if (type == 'chat') {
-                                        goToChatPage(context);
-                                      } else if (type == 'event') {
-                                        goToEventPage(context);
-                                      } else if (type == 'job') {
-                                        goToJobPage(context);
-                                      } else if (type == 'project') {
-                                        goToProjectPage(context);
-                                      }
+                                      NavigationService.instance.navigateTo(
+                                          routeName,
+                                          arguments: routeArgs);
                                     }
                                   },
                                   child: ListTile(

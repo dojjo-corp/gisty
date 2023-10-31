@@ -31,7 +31,10 @@ class ProjectArchive extends StatelessWidget {
                     Text(
                       'Project Categories',
                       style: GoogleFonts.poppins(
-                          fontSize: 40, fontWeight: FontWeight.bold),
+                        fontSize: 40,
+                        fontWeight: FontWeight.bold,
+                        
+                      ),
                     ),
                     const SizedBox(height: 30),
                     Text(

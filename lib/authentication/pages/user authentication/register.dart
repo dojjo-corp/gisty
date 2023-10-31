@@ -147,7 +147,10 @@ class _RegisterPageState extends State<RegisterPage> {
                     child: Column(
                       crossAxisAlignment: CrossAxisAlignment.start,
                       children: [
-                        const PageTitle(title: 'Create Your Account'),
+                        const PageTitle(
+                          title: 'Create Your Account',
+                          // textColor: Theme.of(context).primaryColor,
+                        ),
                         SimpleTextField(
                           controller: nameController,
                           hintText: 'Enter Your Fullname',
@@ -347,7 +350,12 @@ class _RegisterPageState extends State<RegisterPage> {
                         Row(
                           mainAxisAlignment: MainAxisAlignment.center,
                           children: [
-                            const Text('Already Have An Account?'),
+                            const Text(
+                              'Already Have An Account?',
+                              // style: TextStyle(
+                              //   color: Theme.of(context).primaryColor,
+                              // ),
+                            ),
                             GestureDetector(
                               onTap: () => Navigator.of(context)
                                   .pushReplacement(MaterialPageRoute(
@@ -357,6 +365,7 @@ class _RegisterPageState extends State<RegisterPage> {
                                 ' Sign In',
                                 style: GoogleFonts.poppins(
                                   fontWeight: FontWeight.bold,
+                                  // color: Theme.of(context).primaryColor,
                                 ),
                               ),
                             )

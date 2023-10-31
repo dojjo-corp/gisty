@@ -10,6 +10,7 @@ import 'package:provider/provider.dart';
 import '../helper_methods.dart/global.dart';
 import '../pages/projects/project_details.dart';
 import '../providers/projects_provider.dart';
+import '../providers/user_provider.dart';
 
 class ProjectGridItem extends StatefulWidget {
   final Map<String, dynamic> projectData;
@@ -34,6 +35,8 @@ class _ProjectGridItemState extends State<ProjectGridItem> {
   @override
   Widget build(BuildContext context) {
     final categoryMap = context.read<ProjectProvider>().categoryMap;
+    final isUserIndustryPro =
+        Provider.of<UserProvider>(context).userType == 'industry professional';
     final String pid = widget.projectData['pid'];
     final String title = widget.projectData['title'];
     final String year = widget.projectData['year'];
@@ -113,20 +116,29 @@ class _ProjectGridItemState extends State<ProjectGridItem> {
               ),
             );
           },
-          child: Container(
+          child:
+
+              /// Parent Container
+              Container(
             constraints: const BoxConstraints(
               minWidth: 0,
               maxWidth: double.infinity,
             ),
             padding: const EdgeInsets.only(right: 10, bottom: 10),
-            margin: const EdgeInsets.only(bottom: 5),
+            margin: const EdgeInsets.only(bottom: 3),
             decoration: BoxDecoration(
-              borderRadius: const BorderRadius.all(Radius.circular(8)),
-              gradient: LinearGradient(colors: [
-                projectColor.withOpacity(0.1),
-                projectColor.withOpacity(0.4)
-              ]),
-            ),
+                borderRadius: const BorderRadius.all(Radius.circular(8)),
+                gradient: LinearGradient(
+                  colors: [
+                    projectColor.withOpacity(0.1),
+                    projectColor.withOpacity(0.4)
+                  ],
+                ),
+                boxShadow: [
+                  BoxShadow(
+                      color: projectColor.withOpacity(0.15),
+                      offset: const Offset(0, -3)),
+                ]),
             child: Column(
               children: [
                 Column(
@@ -136,10 +148,14 @@ class _ProjectGridItemState extends State<ProjectGridItem> {
                     Row(
                       mainAxisAlignment: MainAxisAlignment.spaceBetween,
                       children: [
+                        /// Category Image
                         Image.asset(
                           categoryMap[category]['image'],
                           height: 30,
                         ),
+
+                        /// Save Button
+                        /// Acts as a toggle button
                         widget.showLiked
                             ? IconButton(
                                 onPressed: () async {
@@ -169,25 +185,40 @@ class _ProjectGridItemState extends State<ProjectGridItem> {
                         const SizedBox(height: 5),
                         Padding(
                           padding: const EdgeInsets.symmetric(horizontal: 8.0),
-                          child: Row(
-                            children: [
-                              Text(
-                                student,
-                                style: GoogleFonts.montserrat(
-                                  color: Colors.grey[700],
+                          child: SizedBox(
+                            width: MediaQuery.of(context).size.width,
+                            child: Row(
+                              crossAxisAlignment: CrossAxisAlignment.end,
+                              children: [
+                                /// Student(s) Name(s)
+                                Flexible(
+                                  child: Text(
+                                    student,
+                                    style: GoogleFonts.montserrat(
+                                      color: Colors.grey[700],
+                                    ),
+                                    maxLines: 3,
+                                    softWrap: true,
+                                    overflow: TextOverflow.ellipsis,
+                                  ),
                                 ),
-                              ),
-                              const SizedBox(width: 10),
-                              Text(year,
-                                  style: GoogleFonts.montserrat(
-                                      color: Colors.grey[700]))
-                            ],
+                                const SizedBox(width: 10),
+                          
+                                /// Year project was submitted
+                                Text(year,
+                                    style: GoogleFonts.montserrat(
+                                        color: Colors.grey[700]))
+                              ],
+                            ),
                           ),
                         ),
                         const SizedBox(height: 5),
                         Padding(
                           padding: const EdgeInsets.symmetric(horizontal: 8.0),
-                          child: Text(
+                          child:
+
+                              /// Excerpt from project's description.
+                              Text(
                             description,
                             style: GoogleFonts.montserrat(
                                 fontWeight: FontWeight.w500),
@@ -206,7 +237,7 @@ class _ProjectGridItemState extends State<ProjectGridItem> {
         ),
         Container(
           width: MediaQuery.of(context).size.width,
-          margin: const EdgeInsets.only(bottom: 20),
+          margin: const EdgeInsets.only(bottom: 12),
           decoration: BoxDecoration(
               borderRadius: BorderRadius.circular(10),
               color: Colors.grey[300]!.withOpacity(0.6)),
@@ -244,7 +275,7 @@ class _ProjectGridItemState extends State<ProjectGridItem> {
                           // celebrate
                           GestureDetector(
                             onTap: () {
-                              toggleImpressions(0);
+                              toggleImpressions(0, isUserIndustryPro: isUserIndustryPro);
                             },
                             child: Row(
                               children: [
@@ -276,7 +307,7 @@ class _ProjectGridItemState extends State<ProjectGridItem> {
                           // support
                           GestureDetector(
                             onTap: () {
-                              toggleImpressions(1);
+                              toggleImpressions(1, isUserIndustryPro: isUserIndustryPro);
                             },
                             child: Row(
                               children: [
@@ -308,7 +339,7 @@ class _ProjectGridItemState extends State<ProjectGridItem> {
                           // insightful
                           GestureDetector(
                             onTap: () {
-                              toggleImpressions(2);
+                              toggleImpressions(2, isUserIndustryPro: isUserIndustryPro);
                             },
                             child: Row(
                               children: [
@@ -340,7 +371,7 @@ class _ProjectGridItemState extends State<ProjectGridItem> {
                           // like
                           GestureDetector(
                             onTap: () {
-                              toggleImpressions(3);
+                              toggleImpressions(3, isUserIndustryPro: isUserIndustryPro);
                             },
                             child: Row(
                               children: [
@@ -398,48 +429,62 @@ class _ProjectGridItemState extends State<ProjectGridItem> {
     );
   }
 
-  void toggleImpressions(int index) async {
-    // if impression is not already selected
+  void toggleImpressions(int index, {bool? isUserIndustryPro}) async {
+    final store = FirebaseFirestore.instance;
     try {
-      if (!impressions[index]) {
-        for (int i = 0; i < 4; i++) {
-          if (i != index) {
-            await FirebaseFirestore.instance
-                .collection('All Projects')
-                .doc(widget.projectData['pid'])
-                .update({
-              'impressions.${impressionNames[i]}':
-                  FieldValue.arrayRemove([currentUser.email!])
-            });
-            setState(() {
-              impressions[i] = false;
-            });
+      /// The Reference to the project's firestore document
+      final docRef =
+          store.collection('All Projects').doc(widget.projectData['pid']);
+      
+      /// The snapshot of the document with updated fields
+      final snapshot = await docRef.get();
+
+      /// 
+      if (snapshot.exists) {
+        final data = snapshot.data()!;
+        int industryImpressions = data['industry-impressions-sum'] ?? 0;
+
+        if (!impressions[index]) {
+          for (int i = 0; i < 4; i++) {
+            if (i != index) {
+              /// Remove user's previous impressions
+              await docRef.update({
+                'impressions.${impressionNames[i]}':
+                    FieldValue.arrayRemove([currentUser.email!])
+              });
+              setState(() {
+                impressions[i] = false;
+              });
+            }
           }
+
+          /// Set new user impression
+          await docRef.update({
+            'impressions.${impressionNames[index]}':
+                FieldValue.arrayUnion([currentUser.email!]),
+            'industry-impressions-sum': isUserIndustryPro!
+                ? industryImpressions + 1
+                : industryImpressions,
+          });
+
+          setState(() {
+            impressions[index] = true;
+          });
+          return;
         }
-        await FirebaseFirestore.instance
-            .collection('All Projects')
-            .doc(widget.projectData['pid'])
-            .update({
+        // if impression was already selected
+        await docRef.update({
           'impressions.${impressionNames[index]}':
-              FieldValue.arrayUnion([currentUser.email!])
+              FieldValue.arrayRemove([currentUser.email!]),
+          'industry-impressions-sum': isUserIndustryPro!
+              ? industryImpressions - 1
+              : industryImpressions,
         });
         setState(() {
-          impressions[index] = true;
+          impressions[index] = false;
         });
         return;
       }
-      // if impression was already selected
-      await FirebaseFirestore.instance
-          .collection('All Projects')
-          .doc(widget.projectData['pid'])
-          .update({
-        'impressions.${impressionNames[index]}':
-            FieldValue.arrayRemove([currentUser.email!])
-      });
-      setState(() {
-        impressions[index] = false;
-      });
-      return;
     } on FirebaseException catch (e) {
       ScaffoldMessenger.of(context).showSnackBar(
         SnackBar(

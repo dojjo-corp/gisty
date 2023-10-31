@@ -28,19 +28,19 @@ Future<void> uploadPDF({required File file}) async {
 }
 
 // todo: send project to firestore
-Future<void> addProjectToDatabase(
-    {required BuildContext context,
-    required String selectedCategory,
-    required isLoading,
-    required TextEditingController projectDocumentFileNameController,
-    required TextEditingController projectTitleController,
-    required TextEditingController yearController,
-    required TextEditingController studentController,
-    required TextEditingController descriptionController,
-    required TextEditingController supervisorController,
-    required TextEditingController supervisorEmailController}) async {
-  // to be ued in file upload method
-  String absolutePathToDocument = '';
+Future<void> addProjectToDatabase({
+  required BuildContext context,
+  required String selectedCategory,
+  required isLoading,
+  required TextEditingController projectDocumentFileNameController,
+  required TextEditingController projectTitleController,
+  required TextEditingController yearController,
+  required TextEditingController studentController,
+  required TextEditingController descriptionController,
+  required TextEditingController supervisorController,
+  required TextEditingController supervisorEmailController,
+  String? absolutePathToDocument
+}) async {
 
   final projectObj = ProjectModel(
     title: projectTitleController.text.trim(),
@@ -55,15 +55,11 @@ Future<void> addProjectToDatabase(
 
   // store job event in firestore
   try {
-    final result = await choosePDFFile();
-    if (result == null) return;
-    final pdfFile = result.files[0];
-    absolutePathToDocument = pdfFile.path!;
-    await uploadPDF(file: File(absolutePathToDocument));
+    await uploadPDF(file: File(absolutePathToDocument!));
     await FirestoreRepo().addProjectToDatabase(projectData: projectObj.toMap());
 
     // todo: send notification to all users
-    await FireMessaging().sendPushNotifiationToAllUsers(
+    FireMessaging().sendPushNotifiationToAllUsers(
       title: 'New Project In $selectedCategory',
       body: projectTitleController.text.trim(),
       type: 'project',

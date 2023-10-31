@@ -14,10 +14,12 @@ import 'package:path/path.dart';
 import '../pages/user authentication/login.dart';
 import '../repository/firestore_repo.dart';
 
-Future<void> changePicture(BuildContext _context) async {
+Future<void> changePicture(BuildContext _context, {bool? fromCamera}) async {
+  fromCamera ??= false;
+  ImageSource source = fromCamera ? ImageSource.camera : ImageSource.gallery;
+  
   try {
-    final XFile? pickedImage =
-        await ImagePicker().pickImage(source: ImageSource.gallery);
+    final XFile? pickedImage = await ImagePicker().pickImage(source: source);
 
     if (pickedImage == null) return;
 
@@ -57,7 +59,10 @@ Widget showNoProfilePicture(BuildContext _context) => GestureDetector(
                     title: const Text('Camera'),
                     onTap: () {
                       Navigator.of(_context).pop();
-                      changePicture(_context);
+                      changePicture(
+                        _context,
+                        fromCamera: true
+                      );
                     },
                   ),
                   ListTile(

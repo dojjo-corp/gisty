@@ -28,7 +28,7 @@ class _UserListPageState extends State<UserListPage> {
     super.initState();
     getAllUsers().then((value) {
       allUsers = value;
-      if (context.mounted) {
+      if (mounted) {
         setState(() {
           _dataLoaded = true;
         });

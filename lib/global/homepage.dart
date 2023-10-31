@@ -117,7 +117,7 @@ class _MyHomePageState extends State<MyHomePage> {
                   .collection('Notifications')
                   .doc(FirebaseAuth.instance.currentUser?.email)
                   .snapshots()
-                  .throttleTime(const Duration(seconds: 1)),
+                  .throttleTime(const Duration(seconds: 2)),
               builder: (context, snapshot) {
                 if (!snapshot.hasData || snapshot.hasError) {
                   return IconButton(
@@ -175,40 +175,43 @@ class _MyHomePageState extends State<MyHomePage> {
         drawer: const MyDrawer(),
         bottomNavigationBar: Container(
           decoration: BoxDecoration(
-            color: Colors.white,
-            borderRadius: BorderRadius.circular(25),
+            borderRadius: const BorderRadius.vertical(top: Radius.circular(8)),
+            color: Colors.grey[700],
           ),
           child: GNav(
             gap: 8,
+            padding: const EdgeInsets.all(18),
+            tabBorderRadius: 15,
+            tabMargin: const EdgeInsets.symmetric(horizontal: 3, vertical: 2),
             mainAxisAlignment: MainAxisAlignment.center,
             selectedIndex: widget.pageIndex,
-            padding: const EdgeInsets.all(20),
             onTabChange: changePageIndex,
-            activeColor: Theme.of(context).primaryColor,
-            tabs: [
+            activeColor: Colors.white,
+            // backgroundColor: Colors.grey[800]!,
+            tabs: const [
               GButton(
                 icon: Icons.space_dashboard_rounded,
                 iconColor: Colors.grey,
                 text: 'Home',
-                textColor: Theme.of(context).primaryColor,
+                textColor: Colors.white,
               ),
               GButton(
                 icon: Icons.search_rounded,
                 iconColor: Colors.grey,
                 text: 'Search',
-                textColor: Theme.of(context).primaryColor,
+                textColor: Colors.white,
               ),
               GButton(
                 icon: Icons.event_rounded,
                 iconColor: Colors.grey,
                 text: 'Events',
-                textColor: Theme.of(context).primaryColor,
+                textColor: Colors.white,
               ),
               GButton(
                 icon: Icons.person,
                 iconColor: Colors.grey,
                 text: 'Account',
-                textColor: Theme.of(context).primaryColor,
+                textColor: Colors.white,
               ),
             ],
           ),

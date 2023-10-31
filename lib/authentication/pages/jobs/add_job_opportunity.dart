@@ -1,6 +1,7 @@
 import 'dart:io';
 
 import 'package:cloud_firestore/cloud_firestore.dart';
+import 'package:firebase_auth/firebase_auth.dart';
 import 'package:firebase_storage/firebase_storage.dart';
 import 'package:flutter/material.dart';
 import 'package:gt_daily/authentication/components/textfields/multi_line_textfeld.dart';
@@ -8,6 +9,7 @@ import 'package:gt_daily/authentication/helper_methods.dart/global.dart';
 import 'package:image_picker/image_picker.dart';
 import 'package:path/path.dart' as path;
 
+import '../../../global/homepage.dart';
 import '../../components/buttons/buttons.dart';
 import '../../components/buttons/custom_back_button.dart';
 import '../../components/ListTiles/date_tile.dart';
@@ -63,7 +65,10 @@ class _AddJobOrInternshipState extends State<AddJobOrInternship> {
                 key: _key,
                 child: Column(
                   children: [
-                    const PageTitle(title: 'Add Job Opportunity'),
+                    PageTitle(
+                      title: 'Add Job Opportunity',
+                      textColor: Theme.of(context).primaryColor,
+                    ),
 
                     // todo JOB TITLE TEXT FIELD
                     SimpleTextField(
@@ -187,6 +192,7 @@ class _AddJobOrInternshipState extends State<AddJobOrInternship> {
                             _isLoading = true;
                           });
                           List<String> contacts;
+
                           if (contactController.text.characters.contains(',')) {
                             contacts = contactController.text.trim().split(',');
                           } else if (contactController.text.characters
@@ -195,8 +201,10 @@ class _AddJobOrInternshipState extends State<AddJobOrInternship> {
                           } else {
                             contacts = [contactController.text.trim()];
                           }
-                          final id =
-                              '$selectedJobType${companyNameController.text}${jobTitleController.text}${descriptionController.text.characters.takeLast(10)}';
+                          final id = FirebaseFirestore.instance
+                              .collection('All Jobs')
+                              .doc()
+                              .id;
                           final Map<String, dynamic> jobDetails = {
                             'id': id,
                             'title': jobTitleController.text.trim(),
@@ -204,11 +212,17 @@ class _AddJobOrInternshipState extends State<AddJobOrInternship> {
                             'location': locationController.text.trim(),
                             'company-contacts': contacts,
                             'details': descriptionController.text.trim(),
-                            'time-added': DateTime.now()
+                            'posted-by':
+                                FirebaseAuth.instance.currentUser?.email,
+                            'timestamp': DateTime.now()
                                 .toIso8601String() // converted to string for notification
                           };
 
                           try {
+                            /// Don't upload job post without an Image
+                            if (imageFiles.isEmpty) {
+                              throw 'Add at least one image';
+                            }
                             // todo: send notification to all users
                             FireMessaging().sendPushNotifiationToAllUsers(
                               title: 'New Job In ${jobDetails['company-name']}',
@@ -240,12 +254,18 @@ class _AddJobOrInternshipState extends State<AddJobOrInternship> {
                                 context,
                                 'Job Posted Successfully',
                               );
-                              Navigator.pop(context);
+                              Navigator.pushAndRemoveUntil(
+                                  context,
+                                  MaterialPageRoute(
+                                    builder: (context) =>
+                                        MyHomePage(pageIndex: 0),
+                                  ),
+                                  (route) => false);
                             }
                           } catch (e) {
                             showSnackBar(
                               context,
-                              'Error Adding Event: ${e.toString()}',
+                              'Error Adding Job: ${e.toString()}',
                             );
                             setState(() {
                               _isLoading = false;
@@ -280,14 +300,15 @@ class _AddJobOrInternshipState extends State<AddJobOrInternship> {
       for (var image in images) {
         if (image == null) continue;
         final imageFile = File(image.path);
-        imageFiles.add(imageFile);
 
         final imageAsset = Image.file(imageFile);
-        imagesChosen.add(imageAsset);
+
+        setState(() {
+          jobImages.add(imageAsset);
+          imageFiles.add(imageFile);
+        });
       }
-      setState(() {
-        jobImages.addAll(imagesChosen);
-      });
+
       return imagesChosen;
     } catch (e) {
       showSnackBar(context, 'Error Choosing Images: ${e.toString()}');
@@ -335,6 +356,7 @@ class _AddJobOrInternshipState extends State<AddJobOrInternship> {
           onPressed: () {
             setState(() {
               jobImages.removeAt(index);
+              imageFiles.removeAt(index);
             });
           },
           icon: const Icon(
@@ -352,13 +374,25 @@ class _AddJobOrInternshipState extends State<AddJobOrInternship> {
     required List<File> imageFiles,
     required String jobId,
   }) async {
+    List<String> downloadUrls = [];
     try {
+      /// Upload images to firebase storage
       for (var file in imageFiles) {
         String fileName = path.basename(file.path);
         Reference storageReference =
             FirebaseStorage.instance.ref().child('Job Files/$jobId/$fileName');
         await storageReference.putFile(file);
+
+        /// Get download url of uploaded image
+        String downloadUrl = await storageReference.getDownloadURL();
+        downloadUrls.add(downloadUrl);
       }
+
+      /// Update job details with download urls
+      await FirebaseFirestore.instance
+          .collection('All Events')
+          .doc(jobId)
+          .update({'images': downloadUrls});
     } catch (e) {
       rethrow;
     }

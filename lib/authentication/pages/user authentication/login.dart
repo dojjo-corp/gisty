@@ -99,7 +99,10 @@ class _LoginPageState extends State<LoginPage> {
                       Text(
                         'Login Your Account',
                         style: GoogleFonts.poppins(
-                            fontSize: 40, fontWeight: FontWeight.bold),
+                          fontSize: 40,
+                          fontWeight: FontWeight.bold,
+                          // color: Theme.of(context).primaryColor,
+                        ),
                       ),
                       const SizedBox(height: 30),
                       const SizedBox(height: 15),
@@ -138,11 +141,13 @@ class _LoginPageState extends State<LoginPage> {
                             onTap: () {
                               Navigator.pushNamed(context, '/reset-password');
                             },
-                            child: Padding(
-                              padding: const EdgeInsets.only(right:10.0),
+                            child: const Padding(
+                              padding: EdgeInsets.only(right: 10.0),
                               child: Text(
                                 'Forgot password?',
-                                style: TextStyle(color: Colors.yellow[800]),
+                                // style: TextStyle(
+                                //   color: Theme.of(context).primaryColor,
+                                // ),
                               ),
                             ),
                           )
@@ -158,7 +163,9 @@ class _LoginPageState extends State<LoginPage> {
                       Row(
                         mainAxisAlignment: MainAxisAlignment.center,
                         children: [
-                          const Text('Create New Account?'),
+                          Text('Create New Account?',
+                              style: TextStyle(
+                                  color: Theme.of(context).primaryColor)),
                           GestureDetector(
                             onTap: () => Navigator.of(context)
                                 .popAndPushNamed('/register'),
@@ -166,6 +173,7 @@ class _LoginPageState extends State<LoginPage> {
                               ' Register',
                               style: GoogleFonts.poppins(
                                 fontWeight: FontWeight.bold,
+                                // color: Theme.of(context).primaryColor,
                               ),
                             ),
                           )

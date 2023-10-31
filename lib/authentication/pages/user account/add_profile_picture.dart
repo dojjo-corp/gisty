@@ -74,7 +74,21 @@ class _AddProfileImagePageState extends State<AddProfileImagePage> {
                     MyButton(
                       btnText: 'Change Picture',
                       onPressed: () async {
-                        await changePicture(context);
+                        setState(() {
+                          _isLoading = true;
+                        });
+                        try {
+                          await changePicture(context);
+                        } catch (e) {
+                          showSnackBar(
+                            context,
+                            'Error Changing Picture: ${e.toString()}',
+                          );
+                        } finally {
+                          setState(() {
+                            _isLoading = false;
+                          });
+                        }
                       },
                       isPrimary: false,
                     ),

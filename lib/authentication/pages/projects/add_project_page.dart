@@ -66,7 +66,7 @@ class _NewProjectPageState extends State<NewProjectPage> {
                       style: GoogleFonts.poppins(
                           fontSize: 40, fontWeight: FontWeight.bold),
                     ),
-                    const SizedBox(height: 30),
+                    const SizedBox(height: 20),
                     // JOB TITLE TEXT FIELD
                     SimpleTextField(
                       controller: projectTitleController,
@@ -75,7 +75,7 @@ class _NewProjectPageState extends State<NewProjectPage> {
                       isWithIcon: true,
                       autofillHints: null,
                     ),
-                    const SizedBox(height: 10),
+                    const SizedBox(height: 5),
                     SimpleTextField(
                       controller: studentController,
                       hintText: 'Student Name',
@@ -83,7 +83,7 @@ class _NewProjectPageState extends State<NewProjectPage> {
                       isWithIcon: true,
                       autofillHints: null,
                     ),
-                    const SizedBox(height: 10),
+                    const SizedBox(height: 5),
                     // COMPANY NAME TEXT FIELD
                     TextFormField(
                       controller: yearController,
@@ -125,7 +125,7 @@ class _NewProjectPageState extends State<NewProjectPage> {
                         }
                       },
                     ),
-                    const SizedBox(height: 10),
+                    const SizedBox(height: 5),
                     DropdownButtonFormField(
                       decoration: InputDecoration(
                         filled: true,
@@ -150,7 +150,7 @@ class _NewProjectPageState extends State<NewProjectPage> {
                       },
                     ),
 
-                    const SizedBox(height: 10),
+                    const SizedBox(height: 5),
                     // SUPERVISOR NAME TEXT FIELD
                     SimpleTextField(
                       controller: supervisorController,
@@ -159,7 +159,7 @@ class _NewProjectPageState extends State<NewProjectPage> {
                       isWithIcon: true,
                       autofillHints: null,
                     ),
-                    const SizedBox(height: 10),
+                    const SizedBox(height: 5),
                     // SUPERVISOR EMAIL TEXT FIELD
                     SimpleTextField(
                       controller: supervisorEmailController,
@@ -168,13 +168,13 @@ class _NewProjectPageState extends State<NewProjectPage> {
                       isWithIcon: true,
                       autofillHints: null,
                     ),
-                    const SizedBox(height: 10),
+                    const SizedBox(height: 5),
                     MultiLineTextField(
                       controller: descriptionController,
                       hintText: 'Project Description',
                       maxLines: 5,
                     ),
-                    const SizedBox(height: 10),
+                    const SizedBox(height: 5),
                     TextFormField(
                       controller: projectDocumentFileNameController,
                       decoration: InputDecoration(
@@ -226,19 +226,19 @@ class _NewProjectPageState extends State<NewProjectPage> {
                         });
                         try {
                           await addProjectToDatabase(
-                            context: context,
-                            selectedCategory: selectedCategory,
-                            isLoading: _isLoading,
-                            projectDocumentFileNameController:
-                                projectDocumentFileNameController,
-                            projectTitleController: projectTitleController,
-                            yearController: yearController,
-                            studentController: studentController,
-                            descriptionController: descriptionController,
-                            supervisorController: supervisorController,
-                            supervisorEmailController:
-                                supervisorEmailController,
-                          );
+                              context: context,
+                              selectedCategory: selectedCategory,
+                              isLoading: _isLoading,
+                              projectDocumentFileNameController:
+                                  projectDocumentFileNameController,
+                              projectTitleController: projectTitleController,
+                              yearController: yearController,
+                              studentController: studentController,
+                              descriptionController: descriptionController,
+                              supervisorController: supervisorController,
+                              supervisorEmailController:
+                                  supervisorEmailController,
+                              absolutePathToDocument: absolutePathToDocument);
                         } catch (e) {
                           ScaffoldMessenger.of(context).showSnackBar(
                             SnackBar(

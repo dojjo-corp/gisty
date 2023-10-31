@@ -61,20 +61,23 @@ class _SavedProjectsState extends State<SavedProjects> {
                     Text(
                       'Saved Projects',
                       style: GoogleFonts.poppins(
-                          fontSize: 40, fontWeight: FontWeight.bold),
+                        fontSize: 40,
+                        fontWeight: FontWeight.bold,
+                      ),
                     ),
                     const SizedBox(height: 30),
-                    savedProjects.isNotEmpty?
-                    Column(
-                      children: savedProjects
-                          .map(
-                            (e) => ProjectGridItem(
-                              projectData: e!,
-                              showLiked: false,
-                            ),
+                    savedProjects.isNotEmpty
+                        ? Column(
+                            children: savedProjects
+                                .map(
+                                  (e) => ProjectGridItem(
+                                    projectData: e!,
+                                    showLiked: false,
+                                  ),
+                                )
+                                .toList(),
                           )
-                          .toList(),
-                    ): const Center(child: Text('No Saved Projects'))
+                        : const Center(child: Text('No Saved Projects'))
                   ],
                 ),
               ),

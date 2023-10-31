@@ -1,5 +1,6 @@
 // import 'dart:developer';
 
+import 'package:connectivity_plus/connectivity_plus.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
@@ -12,6 +13,7 @@ import '../../components/buttons/custom_back_button.dart';
 import '../../helper_methods.dart/messaging.dart';
 import '../../helper_methods.dart/profile.dart';
 import '../../models/admin.dart';
+import '../../providers/connectivity_provider.dart';
 import '../../providers/user_provider.dart';
 import '../messaging/chat_page.dart';
 
@@ -41,6 +43,7 @@ class _OtherUserAccountPageState extends State<OtherUserAccountPage> {
 
   @override
   Widget build(BuildContext context) {
+    final connectivity = Provider.of<ConnectivityProvider>(context);
     return !_isLoaded
         ? const LoadingCircle()
         : Scaffold(
@@ -56,8 +59,7 @@ class _OtherUserAccountPageState extends State<OtherUserAccountPage> {
                         builder: (context, userProvider, child) {
                           // For Admin Privileges
                           final isUserAdmin = userProvider.isUserAdmin;
-                          final administrator =
-                              isUserAdmin ? Administrator() : null;
+                          final administrator = Administrator();
 
                           // Get User's Stored Data
                           final Map<String, dynamic> otherUserMap =
@@ -75,7 +77,7 @@ class _OtherUserAccountPageState extends State<OtherUserAccountPage> {
 
                           // currentUser type
                           final currentUserType = userProvider.userType;
-                          
+
                           return otherUserMap.isNotEmpty
                               ? Column(
                                   children: [
@@ -92,15 +94,19 @@ class _OtherUserAccountPageState extends State<OtherUserAccountPage> {
                                         final data = snapshot.data!.data();
                                         final String? profilePicture =
                                             data['profile-picture'];
-                                        if (profilePicture != null) {
-                                          return showOtherUserProfilePicture(
-                                              data['uid'],
-                                              profilePicture,
-                                              context,
-                                              75);
+
+                                        if (connectivity.connectivityResult ==
+                                                ConnectivityResult.none ||
+                                            profilePicture == null) {
+                                          return showNoOtherUserProfilePicture(
+                                              context, 150);
                                         }
-                                        return showNoOtherUserProfilePicture(
-                                            context, 150);
+
+                                        return showOtherUserProfilePicture(
+                                            data['uid'],
+                                            profilePicture,
+                                            context,
+                                            75);
                                       },
                                     ),
                                     const SizedBox(height: 20),
@@ -151,8 +157,7 @@ class _OtherUserAccountPageState extends State<OtherUserAccountPage> {
                                     const SizedBox(height: 10),
 
                                     // todo: User Can Only Chat With Other Users If They Are Admins Or Non-Students
-                                    (otherUserMap['user-type'] != 'student' ||
-                                                isUserAdmin) &&
+                                    otherUserMap['user-type'] != 'student' &&
                                             currentUserType != 'student'
                                         ? MyButton(
                                             onPressed: () {
@@ -182,12 +187,12 @@ class _OtherUserAccountPageState extends State<OtherUserAccountPage> {
                                             children: [
                                               // todo: Only Admins Can Make / Unmake Other Users As Admins
                                               // make other users ADMIN iff they are not ADMIN already or remove their admin status
-                                              isOtherUserAdmin
+                                              !isOtherUserAdmin
                                                   // todo: Button To Make Other User An Admin
                                                   ? MyButton(
                                                       onPressed: () async {
                                                         try {
-                                                          await administrator!
+                                                          await administrator
                                                               .makeUserAdmin(
                                                                   otherUserMap[
                                                                       'uid']);
@@ -195,7 +200,7 @@ class _OtherUserAccountPageState extends State<OtherUserAccountPage> {
                                                           await setAllUsers();
                                                           if (context.mounted) {
                                                             // rebuild screen to change button
-                                                            setState(() {});
+                                                            // setState(() {});
                                                             showSnackBar(
                                                                 context,
                                                                 'Success!');
@@ -212,7 +217,7 @@ class _OtherUserAccountPageState extends State<OtherUserAccountPage> {
                                                   : MyButton(
                                                       onPressed: () async {
                                                         try {
-                                                          await administrator!
+                                                          await administrator
                                                               .removeUserAsAdmin(
                                                                   otherUserMap[
                                                                       'uid']);
@@ -220,7 +225,7 @@ class _OtherUserAccountPageState extends State<OtherUserAccountPage> {
                                                           await setAllUsers();
                                                           if (context.mounted) {
                                                             // rebuild screen to change button
-                                                            setState(() {});
+                                                            // setState(() {});
                                                             showSnackBar(
                                                                 context,
                                                                 'Success!');
@@ -230,7 +235,7 @@ class _OtherUserAccountPageState extends State<OtherUserAccountPage> {
                                                               'Error Removing User As Admin: ${e.toString()}');
                                                         }
                                                       },
-                                                      btnText: 'Make Admin',
+                                                      btnText: 'Remove Admin',
                                                       isPrimary: false,
                                                     ),
                                               const SizedBox(height: 10),
@@ -240,7 +245,7 @@ class _OtherUserAccountPageState extends State<OtherUserAccountPage> {
                                                   ? MyButton(
                                                       onPressed: () async {
                                                         try {
-                                                          await administrator!
+                                                          await administrator
                                                               .deleteUserAccount(
                                                                   otherUserMap[
                                                                       'uid']);
@@ -285,7 +290,7 @@ class _OtherUserAccountPageState extends State<OtherUserAccountPage> {
                                     ),
                                     const SizedBox(height: 15),
                                     MyButton(
-                                      btnText: 'Contact  Support Team',
+                                      btnText: 'Contact Support Team',
                                       isPrimary: false,
                                       onPressed: () {
                                         Navigator.pushNamed(

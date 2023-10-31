@@ -14,7 +14,9 @@ class BarData {
 
   void initializeBarData() {
     for (var value in rawDataMap.values.toList()) {
-      if (value.runtimeType == double || value.runtimeType == int) {
+      if (value.runtimeType == double ||
+          value.runtimeType == int ||
+          value.runtimeType == String) {
         continue;
       }
       barData.add(
@@ -32,11 +34,12 @@ class BarData {
   void initializeEngagementBarData() {
     final dataEntries = rawDataMap.entries.toList();
     for (var entry in dataEntries) {
-      if (entry.value.runtimeType == int || entry.value.runtimeType == double) {
-        log(entry.key);
+      if (entry.value.runtimeType == int ||
+          entry.value.runtimeType == double ||
+          entry.value.runtimeType == String) {
         continue;
       }
-      log('After number check');
+      log(entry.value.runtimeType.toString());
 
       engagementBarData.add(
         IndividualBar(
