@@ -12,9 +12,9 @@ import 'package:path/path.dart' as path;
 import '../../../global/homepage.dart';
 import '../../components/buttons/buttons.dart';
 import '../../components/buttons/custom_back_button.dart';
-import '../../components/ListTiles/date_tile.dart';
 import '../../components/textfields/simple_textfield.dart';
 import '../../components/page_title.dart';
+import '../../helper_methods.dart/date_and_time.dart';
 import '../../repository/firebase_messaging.dart';
 import '../../repository/firestore_repo.dart';
 
@@ -40,6 +40,9 @@ class _AddJobOrInternshipState extends State<AddJobOrInternship> {
     'Part Time',
     'Contract',
   ];
+
+  String dateText = 'Set Deadline';
+  Color dateIconColor = Colors.grey;
 
   List<Image> jobImages = [];
   List<File> imageFiles = [];
@@ -93,7 +96,7 @@ class _AddJobOrInternshipState extends State<AddJobOrInternship> {
                     const SizedBox(height: 5),
 
                     // todo DEADLINE TEXT FIELD
-                    const DateTile(),
+                    getDateTile(),
 
                     const SizedBox(height: 5),
 
@@ -125,8 +128,9 @@ class _AddJobOrInternshipState extends State<AddJobOrInternship> {
                         filled: true,
                         fillColor: Colors.white,
                         border: OutlineInputBorder(
-                            borderSide: BorderSide.none,
-                            borderRadius: BorderRadius.circular(12)),
+                          borderSide: BorderSide.none,
+                          borderRadius: BorderRadius.circular(12),
+                        ),
                       ),
                       value: selectedJobType,
                       items: jobTypes
@@ -212,10 +216,12 @@ class _AddJobOrInternshipState extends State<AddJobOrInternship> {
                             'location': locationController.text.trim(),
                             'company-contacts': contacts,
                             'details': descriptionController.text.trim(),
+                            'deadline': dateText,
+                            'job-type': selectedJobType,
                             'posted-by':
                                 FirebaseAuth.instance.currentUser?.email,
-                            'timestamp': DateTime.now()
-                                .toIso8601String() // converted to string for notification
+                            'timestamp': Timestamp.now()
+                            // .toIso8601String() // converted to string for notification
                           };
 
                           try {
@@ -223,19 +229,6 @@ class _AddJobOrInternshipState extends State<AddJobOrInternship> {
                             if (imageFiles.isEmpty) {
                               throw 'Add at least one image';
                             }
-                            // todo: send notification to all users
-                            FireMessaging().sendPushNotifiationToAllUsers(
-                              title: 'New Job In ${jobDetails['company-name']}',
-                              body: jobDetails['title'],
-                              type: 'job',
-                              routeName: '/job-details',
-                              routeArgs: {'job-details': jobDetails},
-                            );
-
-                            // convert from String to Timestamp for firestore
-                            final date = jobDetails['time-added'] as String;
-                            jobDetails['time-added'] =
-                                Timestamp.fromDate(DateTime.parse(date));
 
                             // store job event in firestore
                             await FirestoreRepo()
@@ -246,6 +239,16 @@ class _AddJobOrInternshipState extends State<AddJobOrInternship> {
                               jobId: id,
                             );
 
+                            // todo: send notification to all users
+                            FireMessaging().sendPushNotifiationToAllUsers(
+                              title: 'New Job In ${jobDetails['company-name']}',
+                              body: jobDetails['title'],
+                              type: 'job',
+                              routeName: '/job-details',
+                              routeArgs: {'job-id': jobDetails['id']},
+                            );
+
+                            // Upload was successful
                             if (context.mounted) {
                               setState(() {
                                 _isLoading = false;
@@ -267,6 +270,7 @@ class _AddJobOrInternshipState extends State<AddJobOrInternship> {
                               context,
                               'Error Adding Job: ${e.toString()}',
                             );
+                          } finally {
                             setState(() {
                               _isLoading = false;
                             });
@@ -284,8 +288,7 @@ class _AddJobOrInternshipState extends State<AddJobOrInternship> {
           const MyBackButton()
         ],
       ),
-      floatingActionButton:
-          _isLoading ? const CircularProgressIndicator() : Container(),
+      floatingActionButton: _isLoading ? const LinearProgressIndicator() : null,
     );
   }
 
@@ -390,11 +393,51 @@ class _AddJobOrInternshipState extends State<AddJobOrInternship> {
 
       /// Update job details with download urls
       await FirebaseFirestore.instance
-          .collection('All Events')
+          .collection('All Jobs')
           .doc(jobId)
           .update({'images': downloadUrls});
     } catch (e) {
       rethrow;
     }
+  }
+
+  Widget getDateTile() {
+    return GestureDetector(
+      onTap: () async {
+        final date = await showDatePicker(
+          context: context,
+          initialDate: DateTime.now(),
+          firstDate: DateTime(2023),
+          lastDate: DateTime(2030, 12, 31),
+        );
+        if (date != null) {
+          final dateTextRaw = date.toString().split(' ')[0];
+          // get month in text format. Example: 1 == 'Jan'
+          String month = ', ${formatMonth(date.month)} ';
+          final splitText = dateTextRaw.split('-');
+          // replace month num with month text
+          splitText.replaceRange(1, 2, [month]);
+          // concatenate list
+          final dateFormatted = splitText.join();
+
+          setState(() {
+            dateText = dateFormatted;
+            dateIconColor = Theme.of(context).primaryColor;
+          });
+        }
+      },
+      child: ListTile(
+        shape: RoundedRectangleBorder(
+          borderRadius: BorderRadius.circular(12),
+          side: BorderSide(color: Colors.grey[100]!),
+        ),
+        tileColor: Colors.white,
+        leading: Icon(
+          Icons.calendar_month_rounded,
+          color: dateIconColor,
+        ),
+        title: Text(dateText),
+      ),
+    );
   }
 }

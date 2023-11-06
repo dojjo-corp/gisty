@@ -4,9 +4,9 @@ import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
-import 'package:gt_daily/authentication/helper_methods.dart/global.dart';
 import 'package:gt_daily/authentication/pages/user%20account/other_user_account_page.dart';
 import 'package:provider/provider.dart';
+import 'package:rxdart/rxdart.dart';
 
 import '../../pages/messaging/chat_page.dart';
 import '../../providers/user_provider.dart';
@@ -114,7 +114,7 @@ class _RecentChatTileState extends State<RecentChatTile> {
 
           // RECEIVER'S NAME
           title: Text(
-            receiverData['fullname'],
+            receiverData['fullname'] ?? 'Deleted User',
             style: GoogleFonts.poppins(fontWeight: FontWeight.w500),
           ),
 
@@ -165,14 +165,15 @@ class _RecentChatTileState extends State<RecentChatTile> {
 
   Widget getProfilePicture() {
     final noUserProfileIcon =
-        receiverData['user-type'].toLowerCase() == 'university professional'
+        receiverData['user-type']?.toLowerCase() == 'university professional'
             ? const Icon(Icons.school, color: Colors.blue, size: 40)
             : const Icon(Icons.work_rounded, color: Colors.blue, size: 40);
     return StreamBuilder(
-      stream: getThrottledStream(
-        collectionPath: 'users',
-        docPath: receiverData['uid'],
-      ),
+      stream: FirebaseFirestore.instance
+          .collection('users')
+          .doc(receiverData['uid'])
+          .snapshots()
+          .throttleTime(const Duration(seconds: 2)),
       builder: (context, snapshot) {
         if (!snapshot.hasData ||
             snapshot.hasError ||
@@ -182,16 +183,20 @@ class _RecentChatTileState extends State<RecentChatTile> {
             child: noUserProfileIcon,
           );
         }
-        final String? profilePicture =
-            snapshot.data!.data()!['profile-picture'];
+
+        final String? profilePicture = snapshot.data?.data()?['profile-picture'];
 
         // return circular image if user has profile picture
         if (profilePicture != null) {
-          return CircleAvatar(
-            foregroundImage: Image.network(profilePicture).image,
-            onForegroundImageError: (exception, stackTrace) => CircleAvatar(
-              backgroundColor: Colors.grey[200],
-              child: noUserProfileIcon,
+          return SizedBox(
+            width: 40,
+            child: CircleAvatar(
+              maxRadius: 20,
+              foregroundImage: Image.network(profilePicture).image,
+              onForegroundImageError: (exception, stackTrace) => CircleAvatar(
+                backgroundColor: Colors.grey[200],
+                child: noUserProfileIcon,
+              ),
             ),
           );
         }

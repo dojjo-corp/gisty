@@ -58,6 +58,7 @@ dependencies:
   http: ^1.1.0
   image_picker: ^1.0.4
   rxdart: ^0.27.7
+  js_interop: ^0.0.1
 
 dev_dependencies:
   flutter_test:
@@ -72,8 +73,7 @@ dev_dependencies:
 
 
 flutter_native_splash:
-  color: "#f9f9f9"
-  image: assets/ic_launcher_foreground.png
+  background_image: assets/ic_launcher_foreground.png
 
 
 # For information on the generic Dart part of this file, see the

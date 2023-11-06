@@ -1,6 +1,14 @@
-String formatDate(DateTime date) {
+String formatDateToString(DateTime date) {
   // "MMM dd, yyyy"
   return "${date.month} ${date.day}, ${date.year}";
+}
+
+String formatTime (DateTime date){
+  int hour = date.hour;
+  int minute = date.minute;
+  String hourText = hour.toString().padLeft(2, '0');
+  String minuteText = minute.toString().padLeft(2, '0');
+  return '$hourText:$minuteText'; 
 }
 
 String formatMonth(int monthNum) {

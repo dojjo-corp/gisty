@@ -2,6 +2,7 @@ import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_storage/firebase_storage.dart';
 import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
+import 'package:gt_daily/authentication/pages/jobs/edit_job.dart';
 
 import '../../helper_methods.dart/global.dart';
 import '../../pages/jobs/job_details.dart';
@@ -90,7 +91,8 @@ class JobsTile extends StatelessWidget {
               Navigator.pushReplacement(
                 context,
                 MaterialPageRoute(
-                  builder: (context) => JobDetailsPage(jobId: jobDetails['id']),
+                  builder: (context) =>
+                      EditJobDetailsPage(jobId: jobDetails['id']),
                 ),
               );
             },
@@ -105,7 +107,7 @@ class JobsTile extends StatelessWidget {
           /// Delete Button
           TextButton(
             onPressed: () async {
-              await deleteEvent(context);
+              await deleteJob(context);
             },
             child: const Text(
               'Delete',
@@ -117,17 +119,24 @@ class JobsTile extends StatelessWidget {
     );
   }
 
-  Future<void> deleteEvent(BuildContext context) async {
+  Future<void> deleteJob(BuildContext context) async {
     final id = jobDetails['id'];
     try {
+      /// Delete files in firebase storage
       final Reference eventFilesRef =
           FirebaseStorage.instance.ref().child('Job Files/$id}');
-      await eventFilesRef.delete();
+      ListResult listResult = await eventFilesRef.listAll();
+      for (Reference ref in listResult.items) {
+        await ref.delete();
+      }
+
+      /// Now delete in firestore
       await store.collection('All Jobs').doc(id).delete();
 
       // show success message
       if (context.mounted) {
         showSnackBar(context, 'Success!');
+        Navigator.pop(context);
       }
     } catch (e) {
       showSnackBar(context, 'Error Deleting Event Files: ${e.toString()}');

@@ -18,6 +18,7 @@ import '../../components/ListTiles/comment_tile.dart';
 import '../../components/buttons/custom_back_button.dart';
 import '../../helper_methods.dart/projects.dart';
 import '../../providers/projects_provider.dart';
+import '../../providers/user_provider.dart';
 import '../user account/other_user_account_page.dart';
 
 class ProjectDetails extends StatefulWidget {
@@ -60,6 +61,9 @@ class _ProjectDetailsState extends State<ProjectDetails> {
   @override
   Widget build(BuildContext context) {
     final categoryMap = context.read<ProjectProvider>().categoryMap;
+    final isUserIndustryPro =
+        Provider.of<UserProvider>(context, listen: false).userType ==
+            'industry professional';
     return Scaffold(
       body: Stack(
         children: [
@@ -232,10 +236,14 @@ class _ProjectDetailsState extends State<ProjectDetails> {
                                               // celebrate
                                               GestureDetector(
                                                 onTap: () {
-                                                  toggleImpressions(0,
-                                                      context: context,
-                                                      pid: widget
-                                                          .projectData['pid']);
+                                                  toggleImpressions(
+                                                    0,
+                                                    context: context,
+                                                    pid: widget
+                                                        .projectData['pid'],
+                                                    isUserIndustryPro:
+                                                        isUserIndustryPro,
+                                                  );
                                                 },
                                                 child: Row(
                                                   children: [
@@ -281,10 +289,14 @@ class _ProjectDetailsState extends State<ProjectDetails> {
                                               // support
                                               GestureDetector(
                                                 onTap: () {
-                                                  toggleImpressions(1,
-                                                      context: context,
-                                                      pid: widget
-                                                          .projectData['pid']);
+                                                  toggleImpressions(
+                                                    1,
+                                                    context: context,
+                                                    pid: widget
+                                                        .projectData['pid'],
+                                                    isUserIndustryPro:
+                                                        isUserIndustryPro,
+                                                  );
                                                 },
                                                 child: Row(
                                                   children: [
@@ -329,10 +341,14 @@ class _ProjectDetailsState extends State<ProjectDetails> {
                                               // insightful
                                               GestureDetector(
                                                 onTap: () {
-                                                  toggleImpressions(2,
-                                                      context: context,
-                                                      pid: widget
-                                                          .projectData['pid']);
+                                                  toggleImpressions(
+                                                    2,
+                                                    context: context,
+                                                    pid: widget
+                                                        .projectData['pid'],
+                                                    isUserIndustryPro:
+                                                        isUserIndustryPro,
+                                                  );
                                                 },
                                                 child: Row(
                                                   children: [
@@ -379,10 +395,14 @@ class _ProjectDetailsState extends State<ProjectDetails> {
                                               // like
                                               GestureDetector(
                                                 onTap: () {
-                                                  toggleImpressions(3,
-                                                      context: context,
-                                                      pid: widget
-                                                          .projectData['pid']);
+                                                  toggleImpressions(
+                                                    3,
+                                                    context: context,
+                                                    pid: widget
+                                                        .projectData['pid'],
+                                                    isUserIndustryPro:
+                                                        isUserIndustryPro,
+                                                  );
                                                 },
                                                 child: Row(
                                                   children: [
@@ -543,53 +563,70 @@ class _ProjectDetailsState extends State<ProjectDetails> {
   }
 
   // todo: Toggle Impressions
-  void toggleImpressions(
-    int index, {
-    required BuildContext context,
-    required String pid,
-  }) async {
+  void toggleImpressions(int index,
+      {required BuildContext context,
+      required String pid,
+      bool? isUserIndustryPro}) async {
     // if impression is not already selected and is now selected
     try {
-      if (!impressions[index]) {
-        for (int i = 0; i < 4; i++) {
-          // deselect all other impressions
-          if (i != index) {
-            await FirebaseFirestore.instance
-                .collection('All Projects')
-                .doc(pid)
-                .update({
-              'impressions.${impressionNames[i]}':
-                  FieldValue.arrayRemove([currentUser.email!])
-            });
-            setState(() {
-              impressions[i] = false;
-            });
+      /// The Reference to the project's firestore document
+      final docRef =
+          store.collection('All Projects').doc(widget.projectData['pid']);
+
+      /// The snapshot of the document with updated fields
+      final snapshot = await docRef.get();
+
+      if (snapshot.exists) {
+        final data = snapshot.data()!;
+        int industryImpressions = data['industry-impressions-sum'] ?? 0;
+
+        if (!impressions[index]) {
+          for (int i = 0; i < 4; i++) {
+            // deselect all other impressions
+            if (i != index) {
+              await FirebaseFirestore.instance
+                  .collection('All Projects')
+                  .doc(pid)
+                  .update({
+                'impressions.${impressionNames[i]}':
+                    FieldValue.arrayRemove([currentUser.email!])
+              });
+              setState(() {
+                impressions[i] = false;
+              });
+            }
           }
+          // then select chosen impression
+          await FirebaseFirestore.instance
+              .collection('All Projects')
+              .doc(pid)
+              .update({
+            'impressions.${impressionNames[index]}':
+                FieldValue.arrayUnion([currentUser.email!]),
+            'industry-impressions-sum': isUserIndustryPro!
+                ? industryImpressions + 1
+                : industryImpressions,
+          });
+          setState(() {
+            impressions[index] = true;
+          });
         }
-        // then select chosen impression
-        await FirebaseFirestore.instance
-            .collection('All Projects')
-            .doc(pid)
-            .update({
-          'impressions.${impressionNames[index]}':
-              FieldValue.arrayUnion([currentUser.email!])
-        });
-        setState(() {
-          impressions[index] = true;
-        });
-      }
-      // if impression was already selected
-      else {
-        await FirebaseFirestore.instance
-            .collection('All Projects')
-            .doc(pid)
-            .update({
-          'impressions.${impressionNames[index]}':
-              FieldValue.arrayRemove([currentUser.email!])
-        });
-        setState(() {
-          impressions[index] = false;
-        });
+        // if impression was already selected
+        else {
+          await FirebaseFirestore.instance
+              .collection('All Projects')
+              .doc(pid)
+              .update({
+            'impressions.${impressionNames[index]}':
+                FieldValue.arrayRemove([currentUser.email!]),
+            'industry-impressions-sum': isUserIndustryPro!
+                ? industryImpressions - 1
+                : industryImpressions,
+          });
+          setState(() {
+            impressions[index] = false;
+          });
+        }
       }
     } on FirebaseException catch (e) {
       ScaffoldMessenger.of(context).showSnackBar(
@@ -599,7 +636,6 @@ class _ProjectDetailsState extends State<ProjectDetails> {
       );
     }
   }
-
 
   void downloadProjectDoc() async {
     final docFileName = widget.projectData['project-document'];
@@ -614,6 +650,7 @@ class _ProjectDetailsState extends State<ProjectDetails> {
               ExternalPath.DIRECTORY_DOWNLOADS);
 
       final File tempFile = File('$downloadDirectory/$docFileName');
+      await downloadFileRef.writeToFile(tempFile);
       // await downloadFileRef.writeToFile(tempFile);
       // on sucessful download, add current user's email to downloadedBy field in firestore
       await store
@@ -623,12 +660,12 @@ class _ProjectDetailsState extends State<ProjectDetails> {
         'downloaded-by':
             FieldValue.arrayUnion([FirebaseAuth.instance.currentUser!.email!])
       });
-      setState(() {
-        _isDownloaded = true;
-      });
 
       // ignore: use_build_context_synchronously
       if (context.mounted) {
+        setState(() {
+          _isDownloaded = true;
+        });
         ScaffoldMessenger.of(context).showSnackBar(
           SnackBar(
             content: Text('File downloaded to: $downloadDirectory'),
@@ -657,7 +694,7 @@ class _ProjectDetailsState extends State<ProjectDetails> {
   // open downloaded pdf with device's default pdf viewer
   Future<void> openDownloadedFile(String filePath) async {
     try {
-      await OpenFile.open(filePath);
+      await OpenFile.open(filePath, type: 'pdf');
     } catch (e) {
       ScaffoldMessenger.of(context).showSnackBar(
         SnackBar(

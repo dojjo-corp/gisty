@@ -4,6 +4,7 @@ import 'dart:convert';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:gt_daily/authentication/repository/firebase_messaging.dart';
+import 'package:gt_daily/authentication/repository/firestore_repo.dart';
 import 'package:http/http.dart' as http;
 
 class Administrator {
@@ -71,7 +72,7 @@ class Administrator {
   }
 
   // todo: delete user records
-  Future<void> deleteUserAccount(String uid) async {
+  Future<void> deleteUserAccount({required String uid, required String email}) async {
     final payload = {'uid': uid};
     try {
       final response = await sendServerRequestTemplate(
@@ -82,7 +83,8 @@ class Administrator {
         onTimeout: () => null,
       );
       if (response == null || response.statusCode != 200) {
-        throw 'Unable to delete user. Try again';
+        // delete user's records in database if server-side admin deletion does not work
+        await FirestoreRepo().deleteUserRecords(uid: uid, email: email);
       }
     } catch (e) {
       rethrow;

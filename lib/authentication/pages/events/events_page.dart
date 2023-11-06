@@ -25,7 +25,7 @@ class _EventsPageState extends State<EventsPage> {
         builder: (context, snapshot) {
           if (!snapshot.hasData) {
             return const Center(
-              child: Text('No Job Events Yet'),
+              child: Text('No Events Yet'),
             );
           }
 
@@ -40,7 +40,7 @@ class _EventsPageState extends State<EventsPage> {
 
           if (docs.isEmpty) {
             return const Center(
-              child: Text('No Job Events Yet'),
+              child: Text('No Events Yet'),
             );
           }
           

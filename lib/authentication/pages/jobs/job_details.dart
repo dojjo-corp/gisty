@@ -92,10 +92,10 @@ class _JobDetailsPageState extends State<JobDetailsPage> {
                             child: Text(
                               loadedJobDetails['title'],
                               style: GoogleFonts.poppins(
-                                fontSize: 20,
+                                fontSize: 22,
                                 fontWeight: FontWeight.bold,
                                 color: Colors.white,
-                                backgroundColor: Colors.black54,
+                                backgroundColor: Colors.black87,
                               ),
                               softWrap: true,
                               overflow: TextOverflow.ellipsis,
@@ -107,6 +107,7 @@ class _JobDetailsPageState extends State<JobDetailsPage> {
                         Column(
                           crossAxisAlignment: CrossAxisAlignment.start,
                           children: [
+                            /// Organization
                             ListTile(
                               contentPadding: const EdgeInsets.all(0),
                               leading: Icon(
@@ -121,6 +122,7 @@ class _JobDetailsPageState extends State<JobDetailsPage> {
                             ),
                             Row(
                               children: [
+                                /// Location
                                 Expanded(
                                   child: ListTile(
                                     contentPadding: const EdgeInsets.all(0),
@@ -137,6 +139,29 @@ class _JobDetailsPageState extends State<JobDetailsPage> {
                                         Text(loadedJobDetails['location']),
                                   ),
                                 ),
+                                /// Contacts
+                                Expanded(
+                                  child: ListTile(
+                                    contentPadding: const EdgeInsets.all(0),
+                                    leading: Icon(
+                                      Icons.phone_rounded,
+                                      color: Theme.of(context).primaryColor,
+                                    ),
+                                    title: const Text(
+                                      'Contacts',
+                                      style: TextStyle(
+                                          fontWeight: FontWeight.bold),
+                                    ),
+                                    subtitle: Text(
+                                        loadedJobDetails['company-contacts']
+                                            .join(' / ')),
+                                  ),
+                                ),
+                              ],
+                            ),
+                            Row(
+                              children: [
+                                /// Deadline
                                 Expanded(
                                   child: ListTile(
                                     contentPadding: const EdgeInsets.all(0),
@@ -145,30 +170,31 @@ class _JobDetailsPageState extends State<JobDetailsPage> {
                                       color: Theme.of(context).primaryColor,
                                     ),
                                     title: const Text(
-                                      'Date',
+                                      'Deadline',
                                       style: TextStyle(
                                           fontWeight: FontWeight.bold),
                                     ),
                                     subtitle:
-                                        Text(loadedJobDetails['location']),
+                                        Text(loadedJobDetails['deadline']),
                                   ),
                                 ),
+                                Expanded(
+                                  child: ListTile(
+                                    contentPadding: const EdgeInsets.all(0),
+                                    leading: Icon(
+                                      Icons.work_rounded,
+                                      color: Theme.of(context).primaryColor,
+                                    ),
+                                    title: const Text(
+                                      'Job Type',
+                                      style: TextStyle(
+                                          fontWeight: FontWeight.bold),
+                                    ),
+                                    subtitle:
+                                        Text(loadedJobDetails['job-type']),
+                                  ),
+                                )
                               ],
-                            ),
-                            // const SizedBox(height: 10),
-                            ListTile(
-                              contentPadding: const EdgeInsets.all(0),
-                              leading: Icon(
-                                Icons.phone_rounded,
-                                color: Theme.of(context).primaryColor,
-                              ),
-                              title: const Text(
-                                'Contacts',
-                                style: TextStyle(fontWeight: FontWeight.bold),
-                              ),
-                              subtitle: Text(
-                                  loadedJobDetails['company-contacts']
-                                      .join(' / ')),
                             ),
                             const SizedBox(height: 25),
                             Text(
@@ -183,6 +209,63 @@ class _JobDetailsPageState extends State<JobDetailsPage> {
                               style: GoogleFonts.poppins(
                                 height: 1.5,
                                 color: Colors.black87,
+                              ),
+                            ),
+                            const SizedBox(height: 20),
+                            Text(
+                              'Job Images',
+                              style: GoogleFonts.montserrat(
+                                fontSize: 20,
+                                fontWeight: FontWeight.w700,
+                              ),
+                            ),
+                            SizedBox(
+                              width: MediaQuery.of(context).size.width,
+                              height: 200,
+                              child: ListView.separated(
+                                scrollDirection: Axis.horizontal,
+                                itemBuilder: (contex, index) {
+                                  if (loadedJobDetails['images'].isEmpty ||
+                                      loadedJobDetails['images'] == null) {
+                                    return const Text('No images');
+                                  }
+
+                                  return GestureDetector(
+                                    onTap: () => Navigator.of(context).push(
+                                      MaterialPageRoute(
+                                        /// Navigate to a new page to view the image
+                                        builder: (context) => Scaffold(
+                                          appBar: AppBar(
+                                            title:
+                                                Text(loadedJobDetails['title']),
+                                          ),
+                                          body: Center(
+                                            child: Image.network(
+                                              loadedJobDetails['images'][index],
+                                              fit: BoxFit.cover,
+                                            ),
+                                          ),
+                                        ),
+                                      ),
+                                    ),
+                                    child: Container(
+                                      width: 200,
+                                      height: 150,
+                                      decoration: BoxDecoration(
+                                        color: Colors.grey[600],
+                                        borderRadius: BorderRadius.circular(10),
+                                      ),
+                                      child: Image.network(
+                                        loadedJobDetails['images'][index],
+                                        fit: BoxFit.fill,
+                                      ),
+                                    ),
+                                  );
+                                },
+                                separatorBuilder: (context, index) =>
+                                    const SizedBox(width: 10),
+                                itemCount:
+                                    loadedJobDetails['images']?.length ?? 0,
                               ),
                             )
                           ],

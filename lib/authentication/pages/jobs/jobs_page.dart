@@ -21,9 +21,8 @@ class AllJobsPage extends StatelessWidget {
               height: MediaQuery.of(context).size.height,
               child: Column(
                 children: [
-                  PageTitle(
+                  const PageTitle(
                     title: 'All Jobs And Internships',
-                    textColor: Theme.of(context).primaryColor,
                   ),
                   StreamBuilder(
                     stream: getThrottledStream(collectionPath: 'All Jobs'),

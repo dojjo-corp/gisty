@@ -117,6 +117,8 @@ class FirestoreRepo {
           .ref()
           .child('Profile Pictures/$email')
           .delete();
+    } on FirebaseException catch (e) {
+      log('Firebase Error Caught', error: e);
     } catch (e) {
       rethrow;
     }
@@ -148,6 +150,16 @@ class FirestoreRepo {
     }
   }
 
+  Future<void> updateProjectDetails(
+      {required Map<String, dynamic> projectDetails,
+      required String id}) async {
+    try {
+      await store.collection('All Projects').doc(id).update(projectDetails);
+    } catch (e) {
+      rethrow;
+    }
+  }
+
   // Add Events (ie. Jobs/Internships) For Both University and Industry Professionals
   Future<void> addJobsOrIntershipEvents(Map<String, dynamic> jobDetails) async {
     try {
@@ -160,12 +172,30 @@ class FirestoreRepo {
     }
   }
 
+  Future<void> updateJobDetails(
+      {required Map<String, dynamic> jobDetails, required String id}) async {
+    try {
+      await store.collection('All Jobs').doc(id).update(jobDetails);
+    } catch (e) {
+      rethrow;
+    }
+  }
+
   Future<void> addEvents(Map<String, dynamic> eventDetails) async {
     try {
       await store
           .collection('All Events')
           .doc(eventDetails['id'])
-          .set(eventDetails);
+          .set(eventDetails, SetOptions(merge: true));
+    } catch (e) {
+      rethrow;
+    }
+  }
+
+  Future<void> updateEvents(
+      {required Map<String, dynamic> eventDetails, required String id}) async {
+    try {
+      await store.collection('All Events').doc(id).update(eventDetails);
     } catch (e) {
       rethrow;
     }
@@ -273,11 +303,12 @@ class FirestoreRepo {
     if (subject.isEmpty) throw 'Subject Can\'t Be Empty!';
     if (description.isEmpty) throw 'Description Can\'t Be Empty!';
 
-    final docId =
-        '${FirebaseAuth.instance.currentUser?.email}-${Timestamp.now()}';
+    final userEmail = FirebaseAuth.instance.currentUser?.email;
+    final docId = '$userEmail-${Timestamp.now()}';
     final feedbackData = {
       'subject': subject,
       'description': description,
+      'complainant': userEmail,
       'time': Timestamp.now(),
     };
     try {

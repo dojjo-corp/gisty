@@ -26,7 +26,8 @@ class _GiveFeedbackPageState extends State<GiveFeedbackPage> {
       body: Stack(
         children: [
           Padding(
-            padding: const EdgeInsets.only(top: 100, left: 15, right: 15, bottom: 10),
+            padding: const EdgeInsets.only(
+                top: 100, left: 15, right: 15, bottom: 10),
             child: SizedBox(
               height: MediaQuery.of(context).size.height,
               child: SingleChildScrollView(
@@ -58,6 +59,8 @@ class _GiveFeedbackPageState extends State<GiveFeedbackPage> {
                             description: descriptionController.text,
                           );
                           if (context.mounted) {
+                            subjectController.clear();
+                            descriptionController.clear();
                             showSnackBar(
                                 context, 'Feedback Sent Successfully!');
                           }

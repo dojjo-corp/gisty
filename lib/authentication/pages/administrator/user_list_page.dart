@@ -27,17 +27,16 @@ class _UserListPageState extends State<UserListPage> {
   void initState() {
     super.initState();
     getAllUsers().then((value) {
-      allUsers = value;
-      if (mounted) {
-        setState(() {
-          _dataLoaded = true;
-        });
-      }
+      setState(() {
+        allUsers = value;
+        _dataLoaded = true;
+      });
     });
   }
 
   @override
   Widget build(BuildContext context) {
+    final userList = getUserListTiles();
     return !_dataLoaded
         ? const LoadingCircle()
         : Scaffold(
@@ -58,7 +57,14 @@ class _UserListPageState extends State<UserListPage> {
                         children: [
                           PageTitle(title: '${widget.role.toUpperCase()}S'),
                           Column(
-                            children: getUserListTiles(),
+                            children: userList.isEmpty
+                                ? [
+                                    Center(
+                                      child: Text(
+                                          'No ${widget.role.toUpperCase()}S Found'),
+                                    )
+                                  ]
+                                : userList,
                           )
                         ],
                       ),

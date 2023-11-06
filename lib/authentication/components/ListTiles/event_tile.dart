@@ -1,3 +1,5 @@
+import 'dart:developer';
+
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_storage/firebase_storage.dart';
 import 'package:flutter/material.dart';
@@ -96,7 +98,7 @@ class EventTile extends StatelessWidget {
                 context,
                 MaterialPageRoute(
                   builder: (context) =>
-                      EditEventDetailsPage(eventId: ''),
+                      EditEventDetailsPage(eventId: eventDetails['id']),
                 ),
               );
             },
@@ -123,10 +125,16 @@ class EventTile extends StatelessWidget {
 
   Future<void> deleteEvent(BuildContext context) async {
     final id = eventDetails['id'];
+    log(id);
     try {
       final Reference eventFilesRef =
-          FirebaseStorage.instance.ref().child('Event Files/$id}');
-      await eventFilesRef.delete();
+          FirebaseStorage.instance.ref().child('/Event Files/$id}');
+
+      /// The list of all files (images) in the event's folder
+      ListResult listResult = await eventFilesRef.listAll();
+      for (Reference ref in listResult.items) {
+        await ref.delete();
+      }
       await store.collection('All Events').doc(id).delete();
 
       // show success message

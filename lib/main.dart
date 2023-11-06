@@ -65,26 +65,30 @@ class _MyAppState extends State<MyApp> {
       debugShowCheckedModeBanner: false,
       title: 'Flutter Demo',
       theme: ThemeData(
-        colorScheme: ColorScheme.fromSeed(seedColor: Colors.blue[800]!),
-        useMaterial3: true,
-        scaffoldBackgroundColor: Colors.grey[200],
-        textTheme: GoogleFonts.openSansTextTheme(),
-        dialogTheme: DialogTheme(
-          backgroundColor: Colors.grey,
-          shape: RoundedRectangleBorder(
-            borderRadius: BorderRadius.circular(10),
+          colorScheme: ColorScheme.fromSeed(seedColor: Colors.blue[800]!),
+          useMaterial3: true,
+          scaffoldBackgroundColor: Colors.grey[200],
+          textTheme: GoogleFonts.openSansTextTheme(),
+          dialogTheme: DialogTheme(
+            backgroundColor: Colors.grey,
+            shape: RoundedRectangleBorder(
+              borderRadius: BorderRadius.circular(10),
+            ),
+            titleTextStyle: const TextStyle(
+              color: Colors.white70,
+              fontSize: 18,
+              letterSpacing: 2,
+              fontWeight: FontWeight.bold,
+            ),
+            contentTextStyle: TextStyle(
+              color: Colors.grey[100],
+            ),
           ),
-          titleTextStyle: const TextStyle(
-            color: Colors.white70,
-            fontSize: 18,
-            letterSpacing: 2,
-            fontWeight: FontWeight.bold,
-          ),
-          contentTextStyle:  TextStyle(
-            color: Colors.grey[100],
-          ),
-        ),
-      ),
+          listTileTheme: ListTileThemeData(
+            shape: RoundedRectangleBorder(
+              borderRadius: BorderRadius.circular(12),
+            ),
+          )),
       routes: {
         '/': (context) => const AuthGate(),
         '/register': (context) => const RegisterPage(),
@@ -122,7 +126,7 @@ class _MyAppState extends State<MyApp> {
         if (name == '/event-details') {
           return MaterialPageRoute(
             builder: (context) =>
-                EventDetailsPage(eventId: args['event-details']['id']),
+                EventDetailsPage(eventId: args['event-id']),
           );
         }
 
@@ -137,7 +141,8 @@ class _MyAppState extends State<MyApp> {
         // Job Details Page
         if (name == '/job-details') {
           return MaterialPageRoute(
-            builder: (context) => JobDetailsPage(jobId: args['job-details']['id']),
+            builder: (context) =>
+                JobDetailsPage(jobId: args['job-id']),
           );
         }
 

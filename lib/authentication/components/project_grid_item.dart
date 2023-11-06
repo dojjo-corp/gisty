@@ -5,6 +5,7 @@ import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 import 'package:font_awesome_flutter/font_awesome_flutter.dart';
 import 'package:google_fonts/google_fonts.dart';
+import 'package:gt_daily/authentication/pages/projects/edit_project.dart';
 import 'package:provider/provider.dart';
 
 import '../helper_methods.dart/global.dart';
@@ -36,7 +37,8 @@ class _ProjectGridItemState extends State<ProjectGridItem> {
   Widget build(BuildContext context) {
     final categoryMap = context.read<ProjectProvider>().categoryMap;
     final isUserIndustryPro =
-        Provider.of<UserProvider>(context).userType == 'industry professional';
+        Provider.of<UserProvider>(context, listen: false).userType ==
+            'industry professional';
     final String pid = widget.projectData['pid'];
     final String title = widget.projectData['title'];
     final String year = widget.projectData['year'];
@@ -156,19 +158,33 @@ class _ProjectGridItemState extends State<ProjectGridItem> {
 
                         /// Save Button
                         /// Acts as a toggle button
-                        widget.showLiked
-                            ? IconButton(
-                                onPressed: () async {
-                                  setState(() {
-                                    isSaved = !isSaved;
-                                  });
-                                  isSaved
-                                      ? await saveProject()
-                                      : await unsaveProject();
-                                },
-                                icon: isSaved ? savedIcon : notSavedIcon,
-                              )
-                            : Container(),
+                        Row(children: [
+                          /// Options icon button
+                          GestureDetector(
+                            onTap: () async {
+                              showOptions(context);
+                            },
+                            child: Icon(
+                              Icons.settings_rounded,
+                              color: projectColor.withOpacity(0.8),
+                              size: 18,
+                            ),
+                          ),
+                          const SizedBox(width: 10),
+                          widget.showLiked
+                              ? GestureDetector(
+                                  onTap: () async {
+                                    setState(() {
+                                      isSaved = !isSaved;
+                                    });
+                                    isSaved
+                                        ? await saveProject()
+                                        : await unsaveProject();
+                                  },
+                                  child: isSaved ? savedIcon : notSavedIcon,
+                                )
+                              : Container(),
+                        ]),
                       ],
                     ),
                     // PROJECT TITLE
@@ -203,7 +219,7 @@ class _ProjectGridItemState extends State<ProjectGridItem> {
                                   ),
                                 ),
                                 const SizedBox(width: 10),
-                          
+
                                 /// Year project was submitted
                                 Text(year,
                                     style: GoogleFonts.montserrat(
@@ -260,7 +276,7 @@ class _ProjectGridItemState extends State<ProjectGridItem> {
 
                       // NO ERRORS AND DATA HAS BEEN LOADED SUCCESSFULLY
                       final impressionsData =
-                          snapshot.data!.data()!['impressions'];
+                          snapshot.data!.data()['impressions'];
                       // get impressions data
                       final int numCelebrate =
                           impressionsData['celebrate'].length;
@@ -275,7 +291,8 @@ class _ProjectGridItemState extends State<ProjectGridItem> {
                           // celebrate
                           GestureDetector(
                             onTap: () {
-                              toggleImpressions(0, isUserIndustryPro: isUserIndustryPro);
+                              toggleImpressions(0,
+                                  isUserIndustryPro: isUserIndustryPro);
                             },
                             child: Row(
                               children: [
@@ -307,7 +324,8 @@ class _ProjectGridItemState extends State<ProjectGridItem> {
                           // support
                           GestureDetector(
                             onTap: () {
-                              toggleImpressions(1, isUserIndustryPro: isUserIndustryPro);
+                              toggleImpressions(1,
+                                  isUserIndustryPro: isUserIndustryPro);
                             },
                             child: Row(
                               children: [
@@ -339,7 +357,8 @@ class _ProjectGridItemState extends State<ProjectGridItem> {
                           // insightful
                           GestureDetector(
                             onTap: () {
-                              toggleImpressions(2, isUserIndustryPro: isUserIndustryPro);
+                              toggleImpressions(2,
+                                  isUserIndustryPro: isUserIndustryPro);
                             },
                             child: Row(
                               children: [
@@ -371,7 +390,8 @@ class _ProjectGridItemState extends State<ProjectGridItem> {
                           // like
                           GestureDetector(
                             onTap: () {
-                              toggleImpressions(3, isUserIndustryPro: isUserIndustryPro);
+                              toggleImpressions(3,
+                                  isUserIndustryPro: isUserIndustryPro);
                             },
                             child: Row(
                               children: [
@@ -435,11 +455,11 @@ class _ProjectGridItemState extends State<ProjectGridItem> {
       /// The Reference to the project's firestore document
       final docRef =
           store.collection('All Projects').doc(widget.projectData['pid']);
-      
+
       /// The snapshot of the document with updated fields
       final snapshot = await docRef.get();
 
-      /// 
+      
       if (snapshot.exists) {
         final data = snapshot.data()!;
         int industryImpressions = data['industry-impressions-sum'] ?? 0;
@@ -492,5 +512,54 @@ class _ProjectGridItemState extends State<ProjectGridItem> {
         ),
       );
     }
+  }
+
+  /// CONVENIENCE METHODS
+  Future<void> showOptions(BuildContext context) async {
+    showGeneralDialog(
+      context: context,
+      pageBuilder: (context, animation, secondaryAnimation) => SimpleDialog(
+        backgroundColor: Colors.grey,
+        shape: RoundedRectangleBorder(
+          borderRadius: BorderRadius.circular(10),
+        ),
+        children: [
+          /// Edit Button
+          TextButton(
+            onPressed: () {
+              Navigator.pushReplacement(
+                context,
+                MaterialPageRoute(
+                  builder: (context) =>
+                      EditProjectDetailsPage(pid: widget.projectData['pid']),
+                ),
+              );
+            },
+            child: const Text(
+              'Edit',
+              style: TextStyle(color: Colors.white),
+            ),
+          ),
+
+          /// Delete Button
+          TextButton(
+            onPressed: () async {
+              await FirebaseFirestore.instance
+                  .collection('All Projects')
+                  .doc(widget.projectData['pid'])
+                  .delete();
+
+              if (mounted) {
+                Navigator.pop(context);
+              }
+            },
+            child: const Text(
+              'Delete',
+              style: TextStyle(color: Colors.red),
+            ),
+          ),
+        ],
+      ),
+    );
   }
 }

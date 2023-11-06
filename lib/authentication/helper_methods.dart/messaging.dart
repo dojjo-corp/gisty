@@ -10,6 +10,7 @@ import 'package:google_fonts/google_fonts.dart';
 import 'package:gt_daily/authentication/helper_methods.dart/global.dart';
 import 'package:gt_daily/authentication/helper_methods.dart/profile.dart';
 import 'package:provider/provider.dart';
+import 'package:rxdart/rxdart.dart';
 
 import '../pages/user account/other_user_account_page.dart';
 import '../providers/user_provider.dart';
@@ -114,16 +115,17 @@ AppBar chatCustomAppBar({
           context,
           MaterialPageRoute(
             builder: (context) => OtherUserAccountPage(
-              otherUserEmail: receiverData['email'],
+              otherUserEmail: receiverData?['email'],
             ),
           ),
         );
       },
       child: StreamBuilder(
-        stream: getThrottledStream(
-          collectionPath: 'users',
-          docPath: receiverData!['uid'],
-        ),
+        stream: FirebaseFirestore.instance
+            .collection('users')
+            .doc(receiverData?['uid'])
+            .snapshots()
+            .throttleTime(const Duration(seconds: 2)),
         builder: (context, snapshot) {
           if (!snapshot.hasData ||
               snapshot.connectionState == ConnectionState.waiting) {
@@ -135,7 +137,19 @@ AppBar chatCustomAppBar({
             );
           }
 
-          final data = snapshot.data!.data()!;
+          final data = snapshot.data!.data() ?? {};
+          if (data.isEmpty) {
+            return Center(
+              child: Text(
+                'Deleted User',
+                style: GoogleFonts.poppins(
+                  fontSize: 14,
+                  fontWeight: FontWeight.bold,
+                  color: Colors.red,
+                ),
+              ),
+            );
+          }
           final String? profilePictureUrl = data['profile-picture'];
           final isOnline = snapshot.data!.data()!['online'] ?? false;
           return Row(
@@ -157,7 +171,7 @@ AppBar chatCustomAppBar({
                     mainAxisAlignment: MainAxisAlignment.center,
                     children: [
                       Text(
-                        receiverData['fullname'],
+                        receiverData?['fullname'],
                         style: GoogleFonts.poppins(
                             fontWeight: FontWeight.w600, fontSize: 16),
                         softWrap: true,
@@ -167,7 +181,8 @@ AppBar chatCustomAppBar({
                       Text(
                         isOnline
                             ? 'Onilne'
-                            : showLastSeen(receiverData['last-seen']?.toDate()),
+                            : showLastSeen(
+                                receiverData?['last-seen']?.toDate()),
                         style: GoogleFonts.montserrat(
                             color: Colors.grey, fontSize: 12),
                       )

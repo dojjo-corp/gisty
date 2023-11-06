@@ -20,15 +20,8 @@ class ProjectModel {
     required this.projectDocumentFileName,
   });
 
-  String get pid {
-    final List<String> id = [
-      studentName.splitMapJoin(' '),
-      supervisorName.splitMapJoin(' '),
-      year
-    ];
-    id.sort();
-    return id.join();
-  }
+  String get pid =>
+      FirebaseFirestore.instance.collection('All Projects').doc().id;
 
   Map<String, dynamic> toMap() {
     return {

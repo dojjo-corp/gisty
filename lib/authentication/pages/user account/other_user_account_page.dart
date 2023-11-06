@@ -247,8 +247,10 @@ class _OtherUserAccountPageState extends State<OtherUserAccountPage> {
                                                         try {
                                                           await administrator
                                                               .deleteUserAccount(
-                                                                  otherUserMap[
-                                                                      'uid']);
+                                                                  uid: otherUserMap[
+                                                                      'uid'],
+                                                                  email: otherUserMap[
+                                                                      'email']);
                                                           // udpate provider data
                                                           await setAllUsers();
                                                           if (context.mounted) {
@@ -281,20 +283,26 @@ class _OtherUserAccountPageState extends State<OtherUserAccountPage> {
                                     const SizedBox(height: 50),
                                     Row(
                                       children: [
-                                        Text(widget.otherUserEmail,
+                                        Expanded(
+                                          child: Text(
+                                            widget.otherUserEmail,
                                             style: const TextStyle(
-                                                fontWeight: FontWeight.bold)),
+                                                fontWeight: FontWeight.bold),
+                                            maxLines: 1,
+                                            softWrap: true,
+                                            overflow: TextOverflow.ellipsis,
+                                          ),
+                                        ),
                                         const Text(
                                             ' Does Not Exist In Our Database.'),
                                       ],
                                     ),
                                     const SizedBox(height: 15),
                                     MyButton(
-                                      btnText: 'Contact Support Team',
+                                      btnText: 'Go back',
                                       isPrimary: false,
                                       onPressed: () {
-                                        Navigator.pushNamed(
-                                            context, '/contact-us');
+                                        Navigator.pop(context);
                                       },
                                     )
                                   ],

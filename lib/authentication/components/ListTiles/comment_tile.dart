@@ -48,7 +48,7 @@ class _CommentTileState extends State<CommentTile> {
             );
           },
           child: Text(
-            userData?['fullname'],
+            userData?['fullname'] ?? 'Deleted User',
             style: GoogleFonts.montserrat(fontWeight: FontWeight.w600),
           ),
         ),

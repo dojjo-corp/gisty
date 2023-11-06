@@ -197,8 +197,8 @@ class _AddNewEventPageState extends State<AddNewEventPage> {
                                   'event-time': timeText,
                                   'posted-by':
                                       FirebaseAuth.instance.currentUser?.email,
-                                  'timestamp': DateTime.now()
-                                      .toIso8601String() // used String for easy encoding to json format (notifications)
+                                  'timestamp': Timestamp.now()
+                                  // .toIso8601String() // used String for easy encoding to json format (notifications)
                                 };
 
                                 // show loading indicator
@@ -211,6 +211,10 @@ class _AddNewEventPageState extends State<AddNewEventPage> {
                                   if (imageFiles.isEmpty) {
                                     throw 'Add at least one image';
                                   }
+
+                                  // todo store event in firestore
+                                  await FirestoreRepo().addEvents(eventDetails);
+
                                   // todo upload images to firebase storage
                                   await uploadImages(
                                     imageFiles: imageFiles,
@@ -218,27 +222,16 @@ class _AddNewEventPageState extends State<AddNewEventPage> {
                                   );
 
                                   // todo: send notification to all users
-                                  await FireMessaging()
-                                      .sendPushNotifiationToAllUsers(
+                                  FireMessaging().sendPushNotifiationToAllUsers(
                                     title:
                                         'New Event By ${eventDetails['organizers']}',
                                     body: '${eventDetails['title']}',
                                     type: 'event',
                                     routeName: '/event-details',
-                                    routeArgs: {'event-id': id},
+                                    routeArgs: {'event-id': eventDetails['id']},
                                   );
 
-                                  // todo store event in firestore
-                                  // convert from DateTime to Timestamp for firestore
-                                  final date = eventDetails['time-added'];
-                                  eventDetails['time-added'] =
-                                      Timestamp.fromDate(DateTime.parse(date));
-                                  await FirestoreRepo().addEvents(eventDetails);
-
                                   if (context.mounted) {
-                                    setState(() {
-                                      _isLoading = false;
-                                    });
                                     showSnackBar(
                                       context,
                                       'Event Posted Successfully',

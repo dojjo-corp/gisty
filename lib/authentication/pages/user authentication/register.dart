@@ -130,256 +130,284 @@ class _RegisterPageState extends State<RegisterPage> {
       }
     }
 
-    return Scaffold(
-      floatingActionButton:
-          _isLoading ? const CircularProgressIndicator() : null,
-      body: Stack(
-        children: [
-          Padding(
-            padding: const EdgeInsets.only(
-                top: 100, bottom: 10, right: 20, left: 20),
-            child: SingleChildScrollView(
-              child: SizedBox(
-                height: MediaQuery.of(context).size.height,
-                child: Center(
-                  child: Form(
-                    key: _key,
-                    child: Column(
-                      crossAxisAlignment: CrossAxisAlignment.start,
-                      children: [
-                        const PageTitle(
-                          title: 'Create Your Account',
-                          // textColor: Theme.of(context).primaryColor,
-                        ),
-                        SimpleTextField(
-                          controller: nameController,
-                          hintText: 'Enter Your Fullname',
-                          iconData: Icons.person,
-                          isWithIcon: true,
-                          autofillHints: null,
-                        ),
-                        const SizedBox(height: 10),
-                        SimpleTextField(
-                          controller: emailController,
-                          hintText: 'Enter Your Email',
-                          iconData: Icons.mail_rounded,
-                          isWithIcon: true,
-                          autofillHints: null,
-                        ),
-                        const SizedBox(height: 10),
-                        SimpleTextField(
-                          controller: idController,
-                          hintText: 'Enter Your Id Number',
-                          iconData: Icons.web_rounded,
-                          isWithIcon: true,
-                          autofillHints: null,
-                        ),
-                        const SizedBox(height: 10),
-                        DropdownButtonFormField(
-                          decoration: InputDecoration(
-                            border: OutlineInputBorder(
-                              borderRadius: BorderRadius.circular(12),
-                              borderSide: BorderSide.none,
-                            ),
-                            fillColor: Colors.white,
-                            filled: true,
+    return WillPopScope(
+      onWillPop: () async {
+        return await showDialog(
+          context: context,
+          builder: (context) => AlertDialog(
+            title: const Text('Confirm'),
+            content: const Text('Do you want to exit the app?'),
+            actions: <Widget>[
+              TextButton(
+                onPressed: () => Navigator.of(context).pop(false),
+                child: const Text('No'),
+              ),
+              TextButton(
+                onPressed: () => Navigator.of(context).pop(true),
+                child: const Text(
+                  'Yes',
+                  style: TextStyle(color: Colors.red),
+                ),
+              ),
+            ],
+          ),
+        );
+      },
+      child: Scaffold(
+        floatingActionButton:
+            _isLoading ? const CircularProgressIndicator() : null,
+        body: Stack(
+          children: [
+            Padding(
+              padding: const EdgeInsets.only(
+                  top: 100, bottom: 10, right: 20, left: 20),
+              child: SingleChildScrollView(
+                child: SizedBox(
+                  height: MediaQuery.of(context).size.height,
+                  child: Center(
+                    child: Form(
+                      key: _key,
+                      child: Column(
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        children: [
+                          const PageTitle(
+                            title: 'Create Your Account',
+                            // textColor: Theme.of(context).primaryColor,
                           ),
-                          value: selectedUserType,
-                          items: userTypes
-                              .map(
-                                (String category) => DropdownMenuItem<String>(
-                                  value: category,
-                                  child: Text(
-                                    category,
-                                    style: TextStyle(color: Colors.grey[700]),
-                                  ),
-                                ),
-                              )
-                              .toList(),
-                          onChanged: (value) {
-                            setState(() {
-                              selectedUserType = value!;
-                              // show student specific text fields
-                              if (value.toLowerCase() == 'student') {
-                                _isStudent = true;
-                              } else {
-                                _isStudent = false;
-                              }
-                            });
-                          },
-                        ),
-                        const SizedBox(height: 10),
-                        // show start and end years textfield if user is a student
-                        _isStudent
-                            ? Column(
-                                children: [
-                                  Row(
-                                    children: [
-                                      Expanded(
-                                        child: SimpleTextField(
-                                          controller: startYearController,
-                                          hintText: 'Start Year',
-                                          iconData: Icons.date_range_rounded,
-                                          isWithIcon: true,
-                                          autofillHints: null,
-                                        ),
-                                      ),
-                                      const SizedBox(width: 10),
-                                      Expanded(
-                                        child: SimpleTextField(
-                                          controller: endYearController,
-                                          hintText: 'End Year',
-                                          iconData:
-                                              Icons.calendar_month_rounded,
-                                          isWithIcon: true,
-                                          autofillHints: null,
-                                        ),
-                                      ),
-                                    ],
-                                  ),
-                                  const SizedBox(height: 10),
-                                ],
-                              )
-                            : Container(),
-                        TextFormField(
-                          controller: passwordController,
-                          obscureText: _passwordbscureText,
-                          decoration: InputDecoration(
-                            filled: true,
-                            fillColor: Colors.white,
-                            border: OutlineInputBorder(
-                              borderSide: BorderSide.none,
-                              borderRadius: BorderRadius.circular(12),
-                            ),
-                            prefixIcon: const Icon(Icons.lock_rounded),
-                            prefixIconColor: _prefixIconColorPassword,
-                            hintText: 'Password',
-                            suffixIcon: GestureDetector(
-                              onTap: () {
-                                setState(() {
-                                  _passwordbscureText = !_passwordbscureText;
-                                });
-                              },
-                              child: _passwordbscureText
-                                  ? const Icon(
-                                      Icons.visibility_rounded,
-                                      color: Colors.grey,
-                                    )
-                                  : const Icon(
-                                      Icons.visibility_off_rounded,
-                                      color: Colors.grey,
-                                    ),
-                            ),
+                          SimpleTextField(
+                            controller: nameController,
+                            hintText: 'Enter Your Fullname',
+                            iconData: Icons.person,
+                            isWithIcon: true,
+                            autofillHints: null,
                           ),
-                          onChanged: (value) {
-                            if (passwordController.text.isNotEmpty) {
-                              setState(() {
-                                _prefixIconColorPassword =
-                                    Theme.of(context).primaryColor;
-                              });
-                            } else {
-                              setState(() {
-                                _prefixIconColorPassword = Colors.grey;
-                              });
-                            }
-                          },
-                          validator: (value) {
-                            if (value!.isEmpty) {
-                              return 'Field can\'t be empty!';
-                            }
-                            return null;
-                          },
-                        ),
-                        const SizedBox(height: 10),
-                        TextFormField(
-                          controller: confirmPasswordController,
-                          obscureText: _confirmObscureText,
-                          decoration: InputDecoration(
-                            filled: true,
-                            fillColor: Colors.white,
-                            border: OutlineInputBorder(
-                              borderSide: BorderSide.none,
-                              borderRadius: BorderRadius.circular(12),
-                            ),
-                            prefixIcon: const Icon(Icons.lock_rounded),
-                            prefixIconColor: _prefixIconColorConfirmPassword,
-                            hintText: 'Confirm Password',
-                            suffixIcon: GestureDetector(
-                              onTap: () {
-                                setState(() {
-                                  _confirmObscureText = !_confirmObscureText;
-                                });
-                              },
-                              child: _confirmObscureText
-                                  ? const Icon(
-                                      Icons.visibility_rounded,
-                                      color: Colors.grey,
-                                    )
-                                  : const Icon(
-                                      Icons.visibility_off_rounded,
-                                      color: Colors.grey,
-                                    ),
-                            ),
+                          const SizedBox(height: 10),
+                          SimpleTextField(
+                            controller: emailController,
+                            hintText: 'Enter Your Email',
+                            iconData: Icons.mail_rounded,
+                            isWithIcon: true,
+                            autofillHints: null,
                           ),
-                          onChanged: (value) {
-                            setState(() {
-                              value.isNotEmpty
-                                  ? _prefixIconColorConfirmPassword =
-                                      Theme.of(context).primaryColor
-                                  : _prefixIconColorConfirmPassword =
-                                      Colors.grey;
-                            });
-                          },
-                          validator: (value) {
-                            if (value!.isEmpty) {
-                              return 'Field can\'t be empty!';
-                            }
-                            if (value != passwordController.text) {
-                              return 'Passwords Don\'t Match!';
-                            }
-                            return null;
-                          },
-                        ),
-                        const SizedBox(height: 20),
-                        MyButton(
-                          onPressed: register,
-                          btnText: 'Register',
-                          isPrimary: true,
-                        ),
-                        const SizedBox(height: 10),
-                        Row(
-                          mainAxisAlignment: MainAxisAlignment.center,
-                          children: [
-                            const Text(
-                              'Already Have An Account?',
-                              // style: TextStyle(
-                              //   color: Theme.of(context).primaryColor,
-                              // ),
-                            ),
-                            GestureDetector(
-                              onTap: () => Navigator.of(context)
-                                  .pushReplacement(MaterialPageRoute(
-                                      builder: (context) => const LoginPage(
-                                          isFromWelcomeScreen: true))),
-                              child: Text(
-                                ' Sign In',
-                                style: GoogleFonts.poppins(
-                                  fontWeight: FontWeight.bold,
-                                  // color: Theme.of(context).primaryColor,
-                                ),
+                          const SizedBox(height: 10),
+                          SimpleTextField(
+                            controller: idController,
+                            hintText: 'Enter Your Id Number',
+                            iconData: Icons.web_rounded,
+                            isWithIcon: true,
+                            autofillHints: null,
+                          ),
+                          const SizedBox(height: 10),
+                          DropdownButtonFormField(
+                            decoration: InputDecoration(
+                              border: OutlineInputBorder(
+                                borderRadius: BorderRadius.circular(12),
+                                borderSide: BorderSide.none,
                               ),
-                            )
-                          ],
-                        ),
-                      ],
+                              fillColor: Colors.white,
+                              filled: true,
+                            ),
+                            value: selectedUserType,
+                            items: userTypes
+                                .map(
+                                  (String category) => DropdownMenuItem<String>(
+                                    value: category,
+                                    child: Text(
+                                      category,
+                                      style: TextStyle(color: Colors.grey[700]),
+                                    ),
+                                  ),
+                                )
+                                .toList(),
+                            onChanged: (value) {
+                              setState(() {
+                                selectedUserType = value!;
+                                // show student specific text fields
+                                if (value.toLowerCase() == 'student') {
+                                  _isStudent = true;
+                                } else {
+                                  _isStudent = false;
+                                }
+                              });
+                            },
+                          ),
+                          const SizedBox(height: 10),
+                          // show start and end years textfield if user is a student
+                          _isStudent
+                              ? Column(
+                                  children: [
+                                    Row(
+                                      children: [
+                                        Expanded(
+                                          child: SimpleTextField(
+                                            controller: startYearController,
+                                            hintText: 'Start Year',
+                                            iconData: Icons.date_range_rounded,
+                                            isWithIcon: true,
+                                            autofillHints: null,
+                                          ),
+                                        ),
+                                        const SizedBox(width: 10),
+                                        Expanded(
+                                          child: SimpleTextField(
+                                            controller: endYearController,
+                                            hintText: 'End Year',
+                                            iconData:
+                                                Icons.calendar_month_rounded,
+                                            isWithIcon: true,
+                                            autofillHints: null,
+                                          ),
+                                        ),
+                                      ],
+                                    ),
+                                    const SizedBox(height: 10),
+                                  ],
+                                )
+                              : Container(),
+                          TextFormField(
+                            controller: passwordController,
+                            obscureText: _passwordbscureText,
+                            decoration: InputDecoration(
+                              filled: true,
+                              fillColor: Colors.white,
+                              border: OutlineInputBorder(
+                                borderSide: BorderSide.none,
+                                borderRadius: BorderRadius.circular(12),
+                              ),
+                              prefixIcon: const Icon(Icons.lock_rounded),
+                              prefixIconColor: _prefixIconColorPassword,
+                              hintText: 'Password',
+                              suffixIcon: GestureDetector(
+                                onTap: () {
+                                  setState(() {
+                                    _passwordbscureText = !_passwordbscureText;
+                                  });
+                                },
+                                child: _passwordbscureText
+                                    ? const Icon(
+                                        Icons.visibility_rounded,
+                                        color: Colors.grey,
+                                      )
+                                    : const Icon(
+                                        Icons.visibility_off_rounded,
+                                        color: Colors.grey,
+                                      ),
+                              ),
+                            ),
+                            onChanged: (value) {
+                              if (passwordController.text.isNotEmpty) {
+                                setState(() {
+                                  _prefixIconColorPassword =
+                                      Theme.of(context).primaryColor;
+                                });
+                              } else {
+                                setState(() {
+                                  _prefixIconColorPassword = Colors.grey;
+                                });
+                              }
+                            },
+                            validator: (value) {
+                              if (value!.isEmpty) {
+                                return 'Field can\'t be empty!';
+                              }
+                              return null;
+                            },
+                          ),
+                          const SizedBox(height: 10),
+                          TextFormField(
+                            controller: confirmPasswordController,
+                            obscureText: _confirmObscureText,
+                            decoration: InputDecoration(
+                              filled: true,
+                              fillColor: Colors.white,
+                              border: OutlineInputBorder(
+                                borderSide: BorderSide.none,
+                                borderRadius: BorderRadius.circular(12),
+                              ),
+                              prefixIcon: const Icon(Icons.lock_rounded),
+                              prefixIconColor: _prefixIconColorConfirmPassword,
+                              hintText: 'Confirm Password',
+                              suffixIcon: GestureDetector(
+                                onTap: () {
+                                  setState(() {
+                                    _confirmObscureText = !_confirmObscureText;
+                                  });
+                                },
+                                child: _confirmObscureText
+                                    ? const Icon(
+                                        Icons.visibility_rounded,
+                                        color: Colors.grey,
+                                      )
+                                    : const Icon(
+                                        Icons.visibility_off_rounded,
+                                        color: Colors.grey,
+                                      ),
+                              ),
+                            ),
+                            onChanged: (value) {
+                              setState(() {
+                                value.isNotEmpty
+                                    ? _prefixIconColorConfirmPassword =
+                                        Theme.of(context).primaryColor
+                                    : _prefixIconColorConfirmPassword =
+                                        Colors.grey;
+                              });
+                            },
+                            validator: (value) {
+                              if (value!.isEmpty) {
+                                return 'Field can\'t be empty!';
+                              }
+                              if (value != passwordController.text) {
+                                return 'Passwords Don\'t Match!';
+                              }
+                              return null;
+                            },
+                          ),
+                          const SizedBox(height: 20),
+                          MyButton(
+                            onPressed: register,
+                            btnText: 'Register',
+                            isPrimary: true,
+                          ),
+                          const SizedBox(height: 10),
+                          Row(
+                            mainAxisAlignment: MainAxisAlignment.center,
+                            children: [
+                              const Text(
+                                'Already Have An Account?',
+                                // style: TextStyle(
+                                //   color: Theme.of(context).primaryColor,
+                                // ),
+                              ),
+                              GestureDetector(
+                                onTap: () =>
+                                    Navigator.of(context).pushReplacement(
+                                  MaterialPageRoute(
+                                    builder: (context) => const LoginPage(
+                                      isFromWelcomeScreen: true,
+                                    ),
+                                  ),
+                                ),
+                                child: Text(
+                                  ' Sign In',
+                                  style: GoogleFonts.poppins(
+                                    fontWeight: FontWeight.bold,
+                                    // color: Theme.of(context).primaryColor,
+                                  ),
+                                ),
+                              )
+                            ],
+                          ),
+                        ],
+                      ),
                     ),
                   ),
                 ),
               ),
             ),
-          ),
-          const MyBackButton()
-        ],
+            const MyBackButton()
+          ],
+        ),
       ),
     );
   }

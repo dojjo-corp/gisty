@@ -113,10 +113,11 @@ class _EventDetailsPageState extends State<EventDetailsPage> {
                                   child: Text(
                                     loadedEventDetails['title'],
                                     style: GoogleFonts.poppins(
-                                        fontSize: 24,
-                                        fontWeight: FontWeight.bold,
-                                        color: Colors.white,
-                                        backgroundColor: Colors.black54),
+                                      fontSize: 24,
+                                      fontWeight: FontWeight.bold,
+                                      color: Colors.white,
+                                      backgroundColor: Colors.black87,
+                                    ),
                                     softWrap: true,
                                     overflow: TextOverflow.ellipsis,
                                     maxLines: 3,
@@ -163,6 +164,33 @@ class _EventDetailsPageState extends State<EventDetailsPage> {
                                               loadedEventDetails['location']),
                                         ),
                                       ),
+
+                                      /// Event Contacts
+                                      Expanded(
+                                        child: ListTile(
+                                          contentPadding:
+                                              const EdgeInsets.all(0),
+                                          leading: Icon(
+                                            Icons.phone_rounded,
+                                            color:
+                                                Theme.of(context).primaryColor,
+                                          ),
+                                          title: const Text(
+                                            'Contacts',
+                                            style: TextStyle(
+                                                fontWeight: FontWeight.bold),
+                                          ),
+                                          subtitle: Text(
+                                              loadedEventDetails['contacts']
+                                                  .join('/')),
+                                        ),
+                                      ),
+                                    ],
+                                  ),
+
+                                  /// Event Date
+                                  Row(
+                                    children: [
                                       Expanded(
                                         child: ListTile(
                                           contentPadding:
@@ -178,27 +206,30 @@ class _EventDetailsPageState extends State<EventDetailsPage> {
                                                 fontWeight: FontWeight.bold),
                                           ),
                                           subtitle: Text(
-                                              loadedEventDetails['location']),
+                                              loadedEventDetails['event-date']),
+                                        ),
+                                      ),
+
+                                      /// Event Time
+                                      Expanded(
+                                        child: ListTile(
+                                          contentPadding:
+                                              const EdgeInsets.all(0),
+                                          leading: Icon(
+                                            Icons.timer_rounded,
+                                            color:
+                                                Theme.of(context).primaryColor,
+                                          ),
+                                          title: const Text(
+                                            'Time',
+                                            style: TextStyle(
+                                                fontWeight: FontWeight.bold),
+                                          ),
+                                          subtitle: Text(
+                                              loadedEventDetails['event-time']),
                                         ),
                                       ),
                                     ],
-                                  ),
-
-                                  /// Event Contacts
-                                  ListTile(
-                                    contentPadding: const EdgeInsets.all(0),
-                                    leading: Icon(
-                                      Icons.phone_rounded,
-                                      color: Theme.of(context).primaryColor,
-                                    ),
-                                    title: const Text(
-                                      'Contacts',
-                                      style: TextStyle(
-                                          fontWeight: FontWeight.bold),
-                                    ),
-                                    subtitle: Text(
-                                        loadedEventDetails['contacts']
-                                            .join('/')),
                                   ),
 
                                   const SizedBox(height: 25),
