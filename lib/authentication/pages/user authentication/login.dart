@@ -32,10 +32,10 @@ class _LoginPageState extends State<LoginPage> {
     final auth = AuthRepository();
 
     Future<void> login() async {
+      setState(() {
+        _isLoading = true;
+      });
       try {
-        setState(() {
-          _isLoading = true;
-        });
         final u = await auth.login(
           email: emailController.text,
           password: passwordController.text,

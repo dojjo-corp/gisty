@@ -1,4 +1,5 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
+import 'package:connectivity_plus/connectivity_plus.dart';
 import 'package:flutter/material.dart';
 import 'package:gt_daily/authentication/components/buttons/buttons.dart';
 import 'package:gt_daily/authentication/components/loading_circle.dart';
@@ -75,8 +76,15 @@ class _EditJobDetailsPageState extends State<EditJobDetailsPage> {
     );
   }
 
-  Future<Map<String, dynamic>> loadJobDetails() async {
+  Future<Map<String, dynamic>> loadJobDetails({
+    ConnectivityResult? connectionResult,
+  }) async {
     try {
+      // Throw error if device is not connected to the internet
+      if (connectionResult == ConnectivityResult.none) {
+        throw 'You are not connected to the internet';
+      }
+
       final snapshot = await FirebaseFirestore.instance
           .collection('All Jobs')
           .doc(widget.jobId)
@@ -210,11 +218,18 @@ class _EditJobDetailsPageState extends State<EditJobDetailsPage> {
           );
   }
 
-  void uploadJobChanges() async {
+  void uploadJobChanges({
+    ConnectivityResult? connectionResult,
+  }) async {
     setState(() {
       _isLoading = true;
     });
     try {
+      // Throw error if device is not connected to the internet
+      if (connectionResult == ConnectivityResult.none) {
+        throw 'You are not connected to the internet';
+      }
+      
       List<String> contacts;
       if (contactController.text.characters.contains(',')) {
         contacts = contactController.text.trim().split(',');

@@ -9,6 +9,7 @@ import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:gt_daily/authentication/helper_methods.dart/global.dart';
 import 'package:gt_daily/authentication/helper_methods.dart/profile.dart';
+import 'package:connectivity_plus/connectivity_plus.dart';
 import 'package:provider/provider.dart';
 import 'package:rxdart/rxdart.dart';
 
@@ -55,6 +56,7 @@ Future<void> sendMessage({
   required String receiverEmail,
   required String messageText,
   required BuildContext context,
+  ConnectivityResult? connectionResult,
 }) async {
   // only send a message if the message text field is not empty
   if (messageText.characters.isNotEmpty) {
@@ -66,6 +68,10 @@ Future<void> sendMessage({
     log(senderFullName);
 
     try {
+      // Throw error if device is not connected to the internet
+      if (connectionResult == ConnectivityResult.none) {
+        throw 'You are not connected to the internet';
+      }
       // sned to firstore
       await repo.sendMessage(
         text,

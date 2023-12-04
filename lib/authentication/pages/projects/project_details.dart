@@ -1,6 +1,7 @@
 import 'dart:io';
 
 import 'package:cloud_firestore/cloud_firestore.dart';
+import 'package:connectivity_plus/connectivity_plus.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:firebase_storage/firebase_storage.dart';
 import 'package:flutter/material.dart';
@@ -566,9 +567,15 @@ class _ProjectDetailsState extends State<ProjectDetails> {
   void toggleImpressions(int index,
       {required BuildContext context,
       required String pid,
+      ConnectivityResult? connectionResult,
       bool? isUserIndustryPro}) async {
     // if impression is not already selected and is now selected
     try {
+      // Throw error if device is not connected to the internet
+      if (connectionResult == ConnectivityResult.none) {
+        throw 'You are not connected to the internet';
+      }
+
       /// The Reference to the project's firestore document
       final docRef =
           store.collection('All Projects').doc(widget.projectData['pid']);
@@ -637,7 +644,9 @@ class _ProjectDetailsState extends State<ProjectDetails> {
     }
   }
 
-  void downloadProjectDoc() async {
+  void downloadProjectDoc({
+    ConnectivityResult? connectionResult,
+  }) async {
     final docFileName = widget.projectData['project-document'];
     final downloadFileRef =
         storage.ref().child('Project Documents/$docFileName');
@@ -645,6 +654,11 @@ class _ProjectDetailsState extends State<ProjectDetails> {
       _isLoading = true;
     });
     try {
+      // Throw error if device is not connected to the internet
+      if (connectionResult == ConnectivityResult.none) {
+        throw 'You are not connected to the internet';
+      }
+
       final String downloadDirectory =
           await ExternalPath.getExternalStoragePublicDirectory(
               ExternalPath.DIRECTORY_DOWNLOADS);

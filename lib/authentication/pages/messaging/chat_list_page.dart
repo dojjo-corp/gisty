@@ -51,7 +51,7 @@ class ChatListPage extends StatelessWidget {
                         children: allUsers.map(
                           (e) {
                             if (currentUser!.email != e['email'] &&
-                                e['user-type'].toLowerCase() != 'student') {
+                                e['user-type'].toLowerCase() != 'student' && e['online']) {
                               return RoundProfile(
                                 onTap: () {
                                   Navigator.push(

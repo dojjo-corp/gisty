@@ -6,6 +6,7 @@ import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:gt_daily/authentication/components/loading_circle.dart';
 import 'package:gt_daily/authentication/helper_methods.dart/global.dart';
+import 'package:gt_daily/global/homepage.dart';
 import 'package:provider/provider.dart';
 
 import '../../components/buttons/buttons.dart';
@@ -34,11 +35,23 @@ class _OtherUserAccountPageState extends State<OtherUserAccountPage> {
   @override
   void initState() {
     super.initState();
-    setAllUsers().then((value) {
-      setState(() {
-        _isLoaded = true;
+    // Go to User Account page rather if [otherUserEmail] == currentUSerEmail
+    // Else load otherUser's data
+    if (widget.otherUserEmail == FirebaseAuth.instance.currentUser?.email) {
+      WidgetsBinding.instance.addPostFrameCallback((timeStamp) {
+        Navigator.of(context).pushReplacement(
+          MaterialPageRoute(
+            builder: (context) => MyHomePage(pageIndex: 3),
+          ),
+        );
       });
-    });
+    } else {
+      setAllUsers().then((value) {
+        setState(() {
+          _isLoaded = true;
+        });
+      });
+    }
   }
 
   @override

@@ -2,6 +2,7 @@ import 'dart:convert';
 // import 'dart:developer';
 
 import 'package:cloud_firestore/cloud_firestore.dart';
+import 'package:connectivity_plus/connectivity_plus.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:gt_daily/authentication/repository/firebase_messaging.dart';
 import 'package:gt_daily/authentication/repository/firestore_repo.dart';
@@ -14,13 +15,18 @@ class Administrator {
   final adminUser = FirebaseAuth.instance.currentUser;
 
   // todo: make user admin
-  Future<void> makeUserAdmin(String uid) async {
+  Future<void> makeUserAdmin(String uid,
+      {ConnectivityResult? connectionResult}) async {
     // get user data from firestore
     final docRef = store.collection('users').doc(uid);
     final snapshot = await docRef.get();
 
     if (snapshot.exists) {
       try {
+        // Throw error if device is not connected to the internet
+        if (connectionResult == ConnectivityResult.none) {
+          throw 'You are not connected to the internet';
+        }
         await docRef.update({'admin': true});
       } catch (e) {
         rethrow;
@@ -33,13 +39,18 @@ class Administrator {
   }
 
   // todo: unmake user admin
-  Future<void> removeUserAsAdmin(String uid) async {
+  Future<void> removeUserAsAdmin(String uid,
+      {ConnectivityResult? connectionResult}) async {
     // get user data from firestore
     final docRef = store.collection('users').doc(uid);
     final snapshot = await docRef.get();
 
     if (snapshot.exists) {
       try {
+        // Throw error if device is not connected to the internet
+        if (connectionResult == ConnectivityResult.none) {
+          throw 'You are not connected to the internet';
+        }
         await docRef.update({'admin': false});
       } catch (e) {
         rethrow;
@@ -52,15 +63,19 @@ class Administrator {
   }
 
   // todo: server requests template
-  Future<http.Response?> sendServerRequestTemplate({
-    required String endpoint,
-    Map<String, dynamic>? payload,
-  }) async {
+  Future<http.Response?> sendServerRequestTemplate(
+      {required String endpoint,
+      Map<String, dynamic>? payload,
+      ConnectivityResult? connectionResult}) async {
     var url = Uri.parse('https://repo-server.onrender.com/$endpoint');
     var body = jsonEncode(payload);
     var headers = {'Content-Type': 'application/json'};
 
     try {
+      // Throw error if device is not connected to the internet
+      if (connectionResult == ConnectivityResult.none) {
+        throw 'You are not connected to the internet';
+      }
       return await http.post(
         url,
         headers: headers,
@@ -72,9 +87,17 @@ class Administrator {
   }
 
   // todo: delete user records
-  Future<void> deleteUserAccount({required String uid, required String email}) async {
+  Future<void> deleteUserAccount({
+    required String uid,
+    required String email,
+    ConnectivityResult? connectionResult,
+  }) async {
     final payload = {'uid': uid};
     try {
+      // Throw error if device is not connected to the internet
+      if (connectionResult == ConnectivityResult.none) {
+        throw 'You are not connected to the internet';
+      }
       final response = await sendServerRequestTemplate(
         endpoint: 'delete_user',
         payload: payload,
@@ -92,8 +115,15 @@ class Administrator {
   }
 
   // todo: delete event
-  Future<void> deleteEvent(String eventId) async {
+  Future<void> deleteEvent(
+    String eventId, {
+    ConnectivityResult? connectionResult,
+  }) async {
     try {
+      // Throw error if device is not connected to the internet
+      if (connectionResult == ConnectivityResult.none) {
+        throw 'You are not connected to the internet';
+      }
       await store.collection('All Events').doc(eventId).delete();
     } catch (e) {
       rethrow;
@@ -101,8 +131,15 @@ class Administrator {
   }
 
   // todo: delete job posting
-  Future<void> deleteJob(String jobId) async {
+  Future<void> deleteJob(
+    String jobId, {
+    ConnectivityResult? connectionResult,
+  }) async {
     try {
+      // Throw error if device is not connected to the internet
+      if (connectionResult == ConnectivityResult.none) {
+        throw 'You are not connected to the internet';
+      }
       await store.collection('All Jobs').doc(jobId).delete();
     } catch (e) {
       rethrow;

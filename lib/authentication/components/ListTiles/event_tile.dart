@@ -1,6 +1,7 @@
 import 'dart:developer';
 
 import 'package:cloud_firestore/cloud_firestore.dart';
+import 'package:connectivity_plus/connectivity_plus.dart';
 import 'package:firebase_storage/firebase_storage.dart';
 import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
@@ -123,10 +124,15 @@ class EventTile extends StatelessWidget {
     );
   }
 
-  Future<void> deleteEvent(BuildContext context) async {
+  Future<void> deleteEvent(BuildContext context,
+      {ConnectivityResult? connectionResult}) async {
     final id = eventDetails['id'];
     log(id);
     try {
+      // Throw error if device is not connected to the internet
+      if (connectionResult == ConnectivityResult.none) {
+        throw 'You are not connected to the internet';
+      }
       final Reference eventFilesRef =
           FirebaseStorage.instance.ref().child('/Event Files/$id}');
 

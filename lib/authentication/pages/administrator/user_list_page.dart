@@ -36,7 +36,6 @@ class _UserListPageState extends State<UserListPage> {
 
   @override
   Widget build(BuildContext context) {
-    final userList = getUserListTiles();
     return !_dataLoaded
         ? const LoadingCircle()
         : Scaffold(
@@ -57,14 +56,14 @@ class _UserListPageState extends State<UserListPage> {
                         children: [
                           PageTitle(title: '${widget.role.toUpperCase()}S'),
                           Column(
-                            children: userList.isEmpty
+                            children: allUsers!.isEmpty
                                 ? [
                                     Center(
                                       child: Text(
                                           'No ${widget.role.toUpperCase()}S Found'),
                                     )
                                   ]
-                                : userList,
+                                : getUserListTiles(),
                           )
                         ],
                       ),
@@ -79,6 +78,7 @@ class _UserListPageState extends State<UserListPage> {
           );
   }
 
+  // Convenience Methods
   Future<List<Map<String, dynamic>>?> getAllUsers() async {
     try {
       // firestore snapshot
