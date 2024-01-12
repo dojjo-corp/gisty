@@ -1,4 +1,5 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
+import 'package:connectivity_plus/connectivity_plus.dart';
 import 'package:flutter/material.dart';
 import 'package:gt_daily/authentication/components/buttons/buttons.dart';
 import 'package:gt_daily/authentication/components/buttons/custom_back_button.dart';
@@ -64,8 +65,15 @@ class _EditProjectDetailsPageState extends State<EditProjectDetailsPage> {
     );
   }
 
-  Future<Map<String, dynamic>> loadProject() async {
+  Future<Map<String, dynamic>> loadProject({
+    ConnectivityResult? connectionResult,
+  }) async {
     try {
+      // Throw error if device is not connected to the internet
+      if (connectionResult == ConnectivityResult.none) {
+        throw 'You are not connected to the internet';
+      }
+
       final snapshot = await FirebaseFirestore.instance
           .collection('All Projects')
           .doc(widget.pid)
@@ -174,11 +182,17 @@ class _EditProjectDetailsPageState extends State<EditProjectDetailsPage> {
           );
   }
 
-  void updateProjectDetails() async {
+  void updateProjectDetails({
+    ConnectivityResult? connectionResult,
+  }) async {
     setState(() {
       _isLoading = true;
     });
     try {
+      // Throw error if device is not connected to the internet
+      if (connectionResult == ConnectivityResult.none) {
+        throw 'You are not connected to the internet';
+      }
       final projectDetails = {
         'title': titleController.text,
         'year': yearController.text,

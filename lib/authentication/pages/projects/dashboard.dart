@@ -69,7 +69,7 @@ class _DashboardState extends State<Dashboard> {
                           .collection('All Projects')
                           .orderBy('time-added', descending: true)
                           .snapshots()
-                          .throttleTime(const Duration(seconds: 5)),
+                          .throttleTime(const Duration(seconds: 1)),
                       builder: (context, snapshot) {
                         if (!snapshot.hasData) {
                           return const Center(

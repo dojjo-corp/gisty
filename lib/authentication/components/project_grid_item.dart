@@ -1,6 +1,7 @@
 // ignore_for_file: no_leading_underscores_for_local_identifiers
 
 import 'package:cloud_firestore/cloud_firestore.dart';
+import 'package:connectivity_plus/connectivity_plus.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 import 'package:font_awesome_flutter/font_awesome_flutter.dart';
@@ -36,9 +37,11 @@ class _ProjectGridItemState extends State<ProjectGridItem> {
   @override
   Widget build(BuildContext context) {
     final categoryMap = context.read<ProjectProvider>().categoryMap;
-    final isUserIndustryPro =
-        Provider.of<UserProvider>(context, listen: false).userType ==
-            'industry professional';
+    final userProvider = Provider.of<UserProvider>(context, listen: false);
+    final isUserIndustryPro = userProvider.userType == 'industry professional';
+    final isUserAdmin = userProvider.isUserAdmin;
+    final isUserUniversityPro =
+        userProvider.userType == 'university professional';
     final String pid = widget.projectData['pid'];
     final String title = widget.projectData['title'];
     final String year = widget.projectData['year'];
@@ -58,8 +61,12 @@ class _ProjectGridItemState extends State<ProjectGridItem> {
     );
 
     // todo: add project to saved projects
-    Future<void> saveProject() async {
+    Future<void> saveProject({ConnectivityResult? connectionResult}) async {
       try {
+        // Throw error if device is not connected to the internet
+        if (connectionResult == ConnectivityResult.none) {
+          throw 'You are not connected to the internet';
+        }
         await FirebaseFirestore.instance
             .collection('All Projects')
             .doc(pid)
@@ -82,8 +89,12 @@ class _ProjectGridItemState extends State<ProjectGridItem> {
     }
 
     // todo: remove from saved projects
-    Future<void> unsaveProject() async {
+    Future<void> unsaveProject({ConnectivityResult? connectionResult}) async {
       try {
+        // Throw error if device is not connected to the internet
+        if (connectionResult == ConnectivityResult.none) {
+          throw 'You are not connected to the internet';
+        }
         await FirebaseFirestore.instance
             .collection('All Projects')
             .doc(pid)
@@ -160,16 +171,18 @@ class _ProjectGridItemState extends State<ProjectGridItem> {
                         /// Acts as a toggle button
                         Row(children: [
                           /// Options icon button
-                          GestureDetector(
-                            onTap: () async {
-                              showOptions(context);
-                            },
-                            child: Icon(
-                              Icons.settings_rounded,
-                              color: projectColor.withOpacity(0.8),
-                              size: 18,
-                            ),
-                          ),
+                          isUserAdmin || isUserUniversityPro
+                              ? GestureDetector(
+                                  onTap: () async {
+                                    showOptions(context);
+                                  },
+                                  child: Icon(
+                                    Icons.settings_rounded,
+                                    color: projectColor.withOpacity(0.8),
+                                    size: 18,
+                                  ),
+                                )
+                              : Container(),
                           const SizedBox(width: 10),
                           widget.showLiked
                               ? GestureDetector(
@@ -449,9 +462,15 @@ class _ProjectGridItemState extends State<ProjectGridItem> {
     );
   }
 
-  void toggleImpressions(int index, {bool? isUserIndustryPro}) async {
+  void toggleImpressions(int index,
+      {bool? isUserIndustryPro, ConnectivityResult? connectionResult}) async {
     final store = FirebaseFirestore.instance;
     try {
+      // Throw error if device is not connected to the internet
+      if (connectionResult == ConnectivityResult.none) {
+        throw 'You are not connected to the internet';
+      }
+
       /// The Reference to the project's firestore document
       final docRef =
           store.collection('All Projects').doc(widget.projectData['pid']);
@@ -459,7 +478,6 @@ class _ProjectGridItemState extends State<ProjectGridItem> {
       /// The snapshot of the document with updated fields
       final snapshot = await docRef.get();
 
-      
       if (snapshot.exists) {
         final data = snapshot.data()!;
         int industryImpressions = data['industry-impressions-sum'] ?? 0;

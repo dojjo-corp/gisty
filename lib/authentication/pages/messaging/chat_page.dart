@@ -6,6 +6,7 @@ import 'package:flutter/material.dart';
 import 'package:gt_daily/authentication/components/textfields/multi_line_textfeld.dart';
 import 'package:gt_daily/authentication/helper_methods.dart/global.dart';
 import 'package:gt_daily/authentication/helper_methods.dart/messaging.dart';
+import 'package:gt_daily/authentication/providers/connectivity_provider.dart';
 import 'package:provider/provider.dart';
 
 import '../../components/chat_bubble.dart';
@@ -56,6 +57,7 @@ class _ChatPageState extends State<ChatPage> with WidgetsBindingObserver {
   Widget build(BuildContext context) {
     final receiverData =
         context.read<UserProvider>().getUserDataFromEmail(widget.receiverEmail);
+
     final fcmToken = receiverData?['fcm-token'];
 
     if (!hasRoom) {
@@ -168,25 +170,32 @@ class _ChatPageState extends State<ChatPage> with WidgetsBindingObserver {
                             maxLines: 5,
                           ),
                         ),
-                        FloatingActionButton(
-                          mini: true,
-                          onPressed: () async {
-                            final messageText = messageController.text;
-                            messageController.clear();
-                            await sendMessage(
-                              token: fcmToken,
-                              roomId: widget.roomId,
-                              receiverEmail: widget.receiverEmail,
-                              messageText: messageText,
-                              context: context,
-                            );
-                          },
-                          backgroundColor: const Color.fromARGB(255, 75, 125, 200),
-                          child: const Icon(
-                            Icons.double_arrow_rounded,
-                            size: 35,
-                          ),
-                        )
+                        Consumer<ConnectivityProvider>(
+                            builder: (context, connectivityProvider, child) {
+                          final connectionResult =
+                              connectivityProvider.connectivityResult;
+                          return FloatingActionButton(
+                            mini: true,
+                            onPressed: () async {
+                              final messageText = messageController.text;
+                              messageController.clear();
+                              await sendMessage(
+                                token: fcmToken,
+                                roomId: widget.roomId,
+                                receiverEmail: widget.receiverEmail,
+                                messageText: messageText,
+                                context: context,
+                                connectionResult: connectionResult,
+                              );
+                            },
+                            backgroundColor:
+                                const Color.fromARGB(255, 75, 125, 200),
+                            child: const Icon(
+                              Icons.double_arrow_rounded,
+                              size: 35,
+                            ),
+                          );
+                        })
                       ],
                     ),
                   ),

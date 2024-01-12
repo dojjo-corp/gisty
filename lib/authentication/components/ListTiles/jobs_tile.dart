@@ -1,4 +1,5 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
+import 'package:connectivity_plus/connectivity_plus.dart';
 import 'package:firebase_storage/firebase_storage.dart';
 import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
@@ -119,9 +120,15 @@ class JobsTile extends StatelessWidget {
     );
   }
 
-  Future<void> deleteJob(BuildContext context) async {
+  Future<void> deleteJob(BuildContext context,
+      {ConnectivityResult? connectionResult}) async {
     final id = jobDetails['id'];
     try {
+      // Throw error if device is not connected to the internet
+      if (connectionResult == ConnectivityResult.none) {
+        throw 'You are not connected to the internet';
+      }
+
       /// Delete files in firebase storage
       final Reference eventFilesRef =
           FirebaseStorage.instance.ref().child('Job Files/$id}');

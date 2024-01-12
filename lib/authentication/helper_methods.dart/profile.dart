@@ -4,6 +4,7 @@
 import 'dart:io';
 
 import 'package:cloud_firestore/cloud_firestore.dart';
+import 'package:connectivity_plus/connectivity_plus.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:firebase_storage/firebase_storage.dart';
 import 'package:flutter/material.dart';
@@ -14,11 +15,19 @@ import 'package:path/path.dart';
 import '../pages/user authentication/login.dart';
 import '../repository/firestore_repo.dart';
 
-Future<void> changePicture(BuildContext _context, {bool? fromCamera}) async {
+Future<void> changePicture(
+  BuildContext _context, {
+  bool? fromCamera,
+  ConnectivityResult? connectionResult,
+}) async {
   fromCamera ??= false;
   ImageSource source = fromCamera ? ImageSource.camera : ImageSource.gallery;
-  
+
   try {
+    // Throw error if device is not connected to the internet
+    if (connectionResult == ConnectivityResult.none) {
+      throw 'You are not connected to the internet';
+    }
     final XFile? pickedImage = await ImagePicker().pickImage(source: source);
 
     if (pickedImage == null) return;
@@ -59,10 +68,7 @@ Widget showNoProfilePicture(BuildContext _context) => GestureDetector(
                     title: const Text('Camera'),
                     onTap: () {
                       Navigator.of(_context).pop();
-                      changePicture(
-                        _context,
-                        fromCamera: true
-                      );
+                      changePicture(_context, fromCamera: true);
                     },
                   ),
                   ListTile(
@@ -140,8 +146,13 @@ void deleteAccount({
   required BuildContext context,
   required String uid,
   required String email,
+  ConnectivityResult? connectionResult,
 }) async {
   try {
+    // Throw error if device is not connected to the internet
+    if (connectionResult == ConnectivityResult.none) {
+      throw 'You are not connected to the internet';
+    }
     await FirestoreRepo().deleteUserRecords(uid: uid, email: email);
     await FirebaseAuth.instance.currentUser!.delete();
 

@@ -1,6 +1,6 @@
-import 'dart:developer';
 import 'dart:io';
 
+import 'package:connectivity_plus/connectivity_plus.dart';
 import 'package:firebase_storage/firebase_storage.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_pdfview/flutter_pdfview.dart';
@@ -30,8 +30,14 @@ class _PDFViewPageState extends State<PDFViewPage> {
     loadPDF();
   }
 
-  Future<void> loadPDF() async {
+  Future<void> loadPDF({
+    ConnectivityResult? connectionResult,
+  }) async {
     try {
+      // Throw error if device is not connected to the internet
+      if (connectionResult == ConnectivityResult.none) {
+        throw 'You are not connected to the internet';
+      }
       final storage = FirebaseStorage.instance;
       final ref = storage.ref().child('Project Documents/$pdfUrl');
 
@@ -41,7 +47,7 @@ class _PDFViewPageState extends State<PDFViewPage> {
       await ref.writeToFile(File(localPDFPath));
       setState(() {});
     } catch (e) {
-      log(e.toString());
+      rethrow;
     }
   }
 

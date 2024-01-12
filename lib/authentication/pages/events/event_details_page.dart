@@ -1,4 +1,5 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
+import 'package:connectivity_plus/connectivity_plus.dart';
 import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:gt_daily/authentication/components/loading_circle.dart';
@@ -41,8 +42,15 @@ class _EventDetailsPageState extends State<EventDetailsPage> {
 
   /// Retrieves the latest / updated event details from firestore.
   /// Throws an exception if the event document no longer exists
-  Future<Map<String, dynamic>?> loadEventDetails() async {
+  Future<Map<String, dynamic>?> loadEventDetails({
+    ConnectivityResult? connectionResult,
+  }) async {
     try {
+      // Throw error if device is not connected to the internet
+      if (connectionResult == ConnectivityResult.none) {
+        throw 'You are not connected to the internet';
+      }
+
       /// Holds updated snapshot of event's firestore document
       final snapshot = await FirebaseFirestore.instance
           .collection('All Events')

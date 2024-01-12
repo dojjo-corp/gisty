@@ -2,6 +2,7 @@ import 'dart:developer';
 import 'dart:io';
 
 import 'package:cloud_firestore/cloud_firestore.dart';
+import 'package:connectivity_plus/connectivity_plus.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:firebase_storage/firebase_storage.dart';
 import 'package:flutter/material.dart';
@@ -426,9 +427,14 @@ class _AddNewEventPageState extends State<AddNewEventPage> {
   Future<void> uploadImages({
     required List<File> imageFiles,
     required String eventId,
+    ConnectivityResult? connectionResult,
   }) async {
     List<String> downloadUrls = [];
     try {
+      // Throw error if device is not connected to the internet
+      if (connectionResult == ConnectivityResult.none) {
+        throw 'You are not connected to the internet';
+      }
       /// Upload images to firebase storage
       for (var file in imageFiles) {
         String fileName = path.basename(file.path);

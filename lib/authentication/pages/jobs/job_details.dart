@@ -1,4 +1,5 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
+import 'package:connectivity_plus/connectivity_plus.dart';
 import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:gt_daily/authentication/components/loading_circle.dart';
@@ -28,8 +29,15 @@ class _JobDetailsPageState extends State<JobDetailsPage> {
     });
   }
 
-  Future<Map<String, dynamic>?> loadJobDetails() async {
+  Future<Map<String, dynamic>?> loadJobDetails({
+    ConnectivityResult? connectionResult,
+  }) async {
     try {
+      // Throw error if device is not connected to the internet
+      if (connectionResult == ConnectivityResult.none) {
+        throw 'You are not connected to the internet';
+      }
+      
       final snapshot = await FirebaseFirestore.instance
           .collection('All Jobs')
           .doc(widget.jobId)
@@ -139,6 +147,7 @@ class _JobDetailsPageState extends State<JobDetailsPage> {
                                         Text(loadedJobDetails['location']),
                                   ),
                                 ),
+
                                 /// Contacts
                                 Expanded(
                                   child: ListTile(
