@@ -38,7 +38,7 @@ class _ViewProfilePictureState extends State<ViewProfilePicture> {
                   .collection('users')
                   .doc(widget.uid)
                   .snapshots()
-                  .throttleTime(const Duration(milliseconds: 1500)),
+                  .throttleTime(const Duration(milliseconds: 100)),
               builder: (context, snapshot) {
                 if (!snapshot.hasData ||
                     snapshot.hasError ||

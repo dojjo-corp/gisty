@@ -1,3 +1,4 @@
+import 'dart:developer';
 import 'dart:io';
 
 import 'package:cloud_firestore/cloud_firestore.dart';
@@ -6,13 +7,15 @@ import 'package:firebase_auth/firebase_auth.dart';
 import 'package:firebase_storage/firebase_storage.dart';
 import 'package:flutter/material.dart';
 import 'package:font_awesome_flutter/font_awesome_flutter.dart';
+import 'package:gt_daily/authentication/helper_methods.dart/global.dart';
 import 'package:gt_daily/authentication/pages/projects/pdf_view_page.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:gt_daily/authentication/pages/analytics/project_analytics.dart';
 import 'package:open_file/open_file.dart';
+import 'package:path_provider/path_provider.dart';
 import 'package:provider/provider.dart';
-import 'package:external_path/external_path.dart';
 import 'package:rxdart/rxdart.dart';
+import 'package:flutter_file_downloader/flutter_file_downloader.dart';
 
 import '../../components/buttons/buttons.dart';
 import '../../components/ListTiles/comment_tile.dart';
@@ -182,7 +185,7 @@ class _ProjectDetailsState extends State<ProjectDetails> {
                           .collection('All Projects')
                           .doc(widget.projectData['pid'])
                           .snapshots()
-                          .throttleTime(const Duration(seconds: 1)),
+                          .throttleTime(const Duration(milliseconds: 100)),
                       builder: (context, snapshot) {
                         if (!snapshot.hasData) {
                           return const Center(
@@ -650,6 +653,7 @@ class _ProjectDetailsState extends State<ProjectDetails> {
     final docFileName = widget.projectData['project-document'];
     final downloadFileRef =
         storage.ref().child('Project Documents/$docFileName');
+
     setState(() {
       _isLoading = true;
     });
@@ -659,39 +663,84 @@ class _ProjectDetailsState extends State<ProjectDetails> {
         throw 'You are not connected to the internet';
       }
 
-      final String downloadDirectory =
-          await ExternalPath.getExternalStoragePublicDirectory(
-              ExternalPath.DIRECTORY_DOWNLOADS);
+      final client = HttpClient();
+      final downloadUrl = await downloadFileRef.getDownloadURL();
+      List<int> downloadData = [];
 
-      final File tempFile = File('$downloadDirectory/$docFileName');
-      await downloadFileRef.writeToFile(tempFile);
-      // await downloadFileRef.writeToFile(tempFile);
-      // on sucessful download, add current user's email to downloadedBy field in firestore
-      await store
-          .collection('All Projects')
-          .doc(widget.projectData['pid'])
-          .update({
-        'downloaded-by':
-            FieldValue.arrayUnion([FirebaseAuth.instance.currentUser!.email!])
-      });
+      // directory for storing downloaded file
+      Directory downloadDirectory;
+      downloadDirectory = (await getExternalStorageDirectory())!;
 
-      // ignore: use_build_context_synchronously
-      if (context.mounted) {
-        setState(() {
-          _isDownloaded = true;
-        });
-        ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(
-            content: Text('File downloaded to: $downloadDirectory'),
-            action: SnackBarAction(
-              label: 'Open',
-              onPressed: () async {
-                openDownloadedFile('$downloadDirectory/$docFileName');
-              },
-            ),
-          ),
+      String filePathName = "${downloadDirectory.path}/$docFileName";
+      // TODO
+      log(filePathName);
+      File savedFile = File(filePathName);
+      bool fileExists = await savedFile.exists();
+
+      if (fileExists && mounted) {
+        showSnackBar(context, "File already downloaded");
+        await openDownloadedFile(filePathName);
+      } else {
+        client.getUrl(Uri.parse(downloadUrl)).then(
+          (HttpClientRequest request) {
+            return request.close();
+          },
+        ).then(
+          (HttpClientResponse response) {
+            response.listen((d) => downloadData.addAll(d), onDone: () async {
+              await savedFile.writeAsBytes(downloadData);
+              if (mounted) {
+                ScaffoldMessenger.of(context).showSnackBar(
+                  SnackBar(
+                    content: Text(
+                        'Document downloaded to ${downloadDirectory.path}'),
+                    action: SnackBarAction(
+                      label: 'Open',
+                      onPressed: () async {
+                        await openDownloadedFile(filePathName);
+                      },
+                    ),
+                  ),
+                );
+              }
+            });
+          },
         );
       }
+
+      // String pathToUse = '';
+      // final Directory appDir = await getApplicationDocumentsDirectory();
+      // final Directory docDirectory =
+      //     Directory('${appDir.path}${Platform.pathSeparator}Documents');
+      // if (!await docDirectory.exists()) {
+      //   await docDirectory.create(recursive: true);
+      // }
+      // pathToUse = docDirectory.path;
+
+      // // final String downloadDirectory =
+      // //     await ExternalPath.getExternalStoragePublicDirectory(
+      // //         ExternalPath.DIRECTORY_DOWNLOADS);
+
+      // final File tempFile = File('$pathToUse/$docFileName');
+      // await downloadFileRef.writeToFile(tempFile);
+
+      // ignore: use_build_context_synchronously
+      // if (context.mounted) {
+      //   setState(() {
+      //     _isDownloaded = true;
+      //   });
+      //   ScaffoldMessenger.of(context).showSnackBar(
+      //     SnackBar(
+      //       content: Text('File downloaded to: $appDir'),
+      //       action: SnackBarAction(
+      //         label: 'Open',
+      //         onPressed: () async {
+      //           openDownloadedFile('$appDir/$docFileName');
+      //         },
+      //       ),
+      //     ),
+      //   );
+      // }
     } catch (e) {
       ScaffoldMessenger.of(context).showSnackBar(
         SnackBar(
@@ -708,7 +757,7 @@ class _ProjectDetailsState extends State<ProjectDetails> {
   // open downloaded pdf with device's default pdf viewer
   Future<void> openDownloadedFile(String filePath) async {
     try {
-      await OpenFile.open(filePath, type: 'pdf');
+      await OpenFile.open(filePath);
     } catch (e) {
       ScaffoldMessenger.of(context).showSnackBar(
         SnackBar(

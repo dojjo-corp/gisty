@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:gt_daily/authentication/pages/administrator/edit_contact_info.dart';
 import 'package:provider/provider.dart';
 
 import '../components/buttons/buttons.dart';
@@ -41,20 +42,40 @@ class ContactUsPage extends StatelessWidget {
                       subtitle: Text('123 Main St, City, Country'),
                     ),
                     const SizedBox(height: 20),
-                    !isUserAdmin ?
-                    MyButton(
-                      onPressed: () {
-                        Navigator.pushNamed(context, '/feedback');
-                      },
-                      btnText: 'Feedback / Report',
-                      isPrimary: true,
-                    ):Container(),
+                    !isUserAdmin
+                        ? MyButton(
+                            onPressed: () {
+                              Navigator.pushNamed(context, '/feedback');
+                            },
+                            btnText: 'Feedback / Report',
+                            isPrimary: true,
+                          )
+                        : Container(),
                   ],
                 ),
               ),
             ),
           ),
-          const MyBackButton()
+          const MyBackButton(),
+          Positioned(
+            top: 45,
+            right: 5,
+            child: Tooltip(
+              message: 'Edit Contact Info',
+              child: IconButton(
+                icon: const Icon(Icons.settings_outlined),
+                onPressed: () {
+                  Navigator.push(
+                    context,
+                    MaterialPageRoute(
+                      builder: (context) => const EditContactInfo(),
+                    ),
+                  );
+                },
+                color: Theme.of(context).primaryColor,
+              ),
+            ),
+          )
         ],
       ),
     );

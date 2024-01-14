@@ -88,7 +88,7 @@ class ChatListPage extends StatelessWidget {
                           .collection('Chat Rooms')
                           .orderBy('last-text.time', descending: true)
                           .snapshots()
-                          .throttleTime(const Duration(milliseconds: 1500)),
+                          .throttleTime(const Duration(milliseconds: 100)),
                       builder: (context, snapshot) {
                         if (!snapshot.hasData) {
                           return const Center(

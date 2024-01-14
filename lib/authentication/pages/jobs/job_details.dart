@@ -3,6 +3,7 @@ import 'package:connectivity_plus/connectivity_plus.dart';
 import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:gt_daily/authentication/components/loading_circle.dart';
+import 'package:gt_daily/authentication/helper_methods.dart/global.dart';
 
 import '../../components/buttons/custom_back_button.dart';
 
@@ -26,6 +27,8 @@ class _JobDetailsPageState extends State<JobDetailsPage> {
         _isLoaded = true;
         loadedJobDetails = value!;
       });
+    }).catchError((e) {
+      showSnackBar(context, e.toString());
     });
   }
 
@@ -37,12 +40,14 @@ class _JobDetailsPageState extends State<JobDetailsPage> {
       if (connectionResult == ConnectivityResult.none) {
         throw 'You are not connected to the internet';
       }
-      
+
       final snapshot = await FirebaseFirestore.instance
           .collection('All Jobs')
           .doc(widget.jobId)
           .get();
-      if (snapshot.exists) return snapshot.data()!;
+      if (snapshot.exists && snapshot.data()!.isNotEmpty) {
+        return snapshot.data()!;
+      }
       throw 'Job Details Not Found...';
     } catch (e) {
       rethrow;

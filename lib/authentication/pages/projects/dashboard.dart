@@ -36,92 +36,97 @@ class _DashboardState extends State<Dashboard> {
       children: [
         SizedBox(
           height: MediaQuery.of(context).size.height,
-          child: SingleChildScrollView(
-            child: Column(
-              children: [
-                Column(
-                  mainAxisAlignment: MainAxisAlignment.center,
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                    Row(
-                      children: [
-                        Text(
-                          'Hi, ',
-                          style: GoogleFonts.montserrat(
-                            fontSize: 30,
-                            fontWeight: FontWeight.w500,
-                            letterSpacing: 2,
+          child: RefreshIndicator(
+            onRefresh: () async {},
+            child: SingleChildScrollView(
+              child: Column(
+                children: [
+                  Column(
+                    mainAxisAlignment: MainAxisAlignment.center,
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      Row(
+                        children: [
+                          Text(
+                            'Hi, ',
+                            style: GoogleFonts.montserrat(
+                              fontSize: 30,
+                              fontWeight: FontWeight.w500,
+                              letterSpacing: 2,
+                            ),
                           ),
-                        ),
-                        Text(
-                          FirebaseAuth.instance.currentUser?.displayName ?? '',
-                          style: GoogleFonts.montserrat(
-                            fontWeight: FontWeight.bold,
-                            fontSize: 30,
-                            letterSpacing: 2,
+                          Text(
+                            FirebaseAuth.instance.currentUser?.displayName ??
+                                '',
+                            style: GoogleFonts.montserrat(
+                              fontWeight: FontWeight.bold,
+                              fontSize: 30,
+                              letterSpacing: 2,
+                            ),
                           ),
-                        ),
-                      ],
-                    ),
-                    const SizedBox(height: 20),
-                    StreamBuilder(
-                      stream: FirebaseFirestore.instance
-                          .collection('All Projects')
-                          .orderBy('time-added', descending: true)
-                          .snapshots()
-                          .throttleTime(const Duration(seconds: 1)),
-                      builder: (context, snapshot) {
-                        if (!snapshot.hasData) {
-                          return const Center(
-                            child: Text('No Projects Yet'),
-                          );
-                        }
+                        ],
+                      ),
+                      const SizedBox(height: 20),
+                      StreamBuilder(
+                        stream: FirebaseFirestore.instance
+                            .collection('All Projects')
+                            .orderBy('time-added', descending: true)
+                            .snapshots()
+                            .throttleTime(const Duration(milliseconds: 100)),
+                        builder: (context, snapshot) {
+                          if (!snapshot.hasData) {
+                            return const Center(
+                              child: Text('No Projects Yet'),
+                            );
+                          }
 
-                        // on error
-                        if (snapshot.hasError) {
+                          // on error
+                          if (snapshot.hasError) {
+                            return Center(
+                              child: Text(
+                                  'Error loading Projects: ${snapshot.error}'),
+                            );
+                          }
+
+                          final docs = snapshot.data!.docs;
+                          final latestProjects = docs.take(10).toList();
+                          Map<String, Map<String, dynamic>> allProjects = {};
+                          for (var doc in docs) {
+                            final category =
+                                doc.data()['category'].toLowerCase();
+                            final data = doc.data();
+                            allProjects[doc.id] = doc.data();
+                          }
+                          // load and store all projects in provider
+                          projectProvider.setAllProjects(allProjects);
+
                           return Center(
-                            child: Text(
-                                'Error loading Projects: ${snapshot.error}'),
+                            child: Column(
+                                crossAxisAlignment: CrossAxisAlignment.start,
+                                children: latestProjects
+                                    .map(
+                                      (project) => ProjectGridItem(
+                                        projectData: project.data(),
+                                        showLiked: true,
+                                      ),
+                                    )
+                                    .toList()),
                           );
-                        }
-
-                        final docs = snapshot.data!.docs;
-                        final latestProjects = docs.take(10).toList();
-                        Map<String, Map<String, dynamic>> allProjects = {};
-                        for (var doc in docs) {
-                          final category = doc.data()['category'].toLowerCase();
-                          final data = doc.data();
-                          allProjects[doc.id] = doc.data();
-                        }
-                        // load and store all projects in provider
-                        projectProvider.setAllProjects(allProjects);
-
-                        return Center(
-                          child: Column(
-                              crossAxisAlignment: CrossAxisAlignment.start,
-                              children: latestProjects
-                                  .map(
-                                    (project) => ProjectGridItem(
-                                      projectData: project.data(),
-                                      showLiked: true,
-                                    ),
-                                  )
-                                  .toList()),
-                        );
-                      },
-                    ),
-                    const SizedBox(height: 20),
-                    MyButton(
-                      onPressed: () {
-                        Navigator.pushNamed(context, '/archive');
-                      },
-                      btnText: 'See More',
-                      isPrimary: false,
-                    ),
-                    const SizedBox(height: 10),
-                  ],
-                ),
-              ],
+                        },
+                      ),
+                      const SizedBox(height: 20),
+                      MyButton(
+                        onPressed: () {
+                          Navigator.pushNamed(context, '/archive');
+                        },
+                        btnText: 'See More',
+                        isPrimary: false,
+                      ),
+                      const SizedBox(height: 10),
+                    ],
+                  ),
+                ],
+              ),
             ),
           ),
         ),

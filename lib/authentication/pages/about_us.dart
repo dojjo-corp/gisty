@@ -3,6 +3,7 @@ import 'package:gt_daily/authentication/components/page_title.dart';
 
 import '../components/buttons/buttons.dart';
 import '../components/buttons/custom_back_button.dart';
+import 'administrator/edit_about_me.dart';
 
 class AboutUsPage extends StatelessWidget {
   const AboutUsPage({super.key});
@@ -43,6 +44,18 @@ class AboutUsPage extends StatelessWidget {
                       ),
                     ),
                     const SizedBox(height: 20.0),
+                    FutureBuilder(
+                      initialData: const Text(''),
+                      builder: (context, snapshot) {
+                        if (snapshot.hasError ||
+                            !snapshot.hasData ||
+                            snapshot.connectionState == ConnectionState.none) {
+                          return const Text('Failed to load About Us Info');
+                        }
+
+                        return const Text('');
+                      },
+                    ),
                     Text(
                       'Lorem ipsum dolor sit amet, consectetur adipiscing elit. Sed et justo a odio tempus finibus. Nulla facilisi. In eget ante sit amet nisi congue auctor. Cras vel ultricies justo. Vivamus vel ligula eget turpis luctus scelerisque. Integer id orci in metus varius malesuada.',
                       style: TextStyle(
@@ -64,7 +77,23 @@ class AboutUsPage extends StatelessWidget {
               ),
             ),
           ),
-          const MyBackButton()
+          const MyBackButton(),
+          Positioned(
+            top: 45,
+            right: 5,
+            child: IconButton(
+              icon: const Icon(Icons.settings_outlined),
+              onPressed: () {
+                Navigator.push(
+                  context,
+                  MaterialPageRoute(
+                    builder: (context) => const EditAboutMe(),
+                  ),
+                );
+              },
+              color: Theme.of(context).primaryColor,
+            ),
+          )
         ],
       ),
     );

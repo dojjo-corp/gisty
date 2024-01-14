@@ -270,7 +270,7 @@ class MyDrawer extends StatelessWidget {
                                   .collection('Chat Rooms')
                                   .orderBy('last-text.time', descending: true)
                                   .snapshots()
-                                  .throttleTime(const Duration(seconds: 5)),
+                                  .throttleTime(const Duration(milliseconds: 100)),
                               builder: (context, snapshot) {
                                 if (!snapshot.hasData ||
                                     snapshot.hasError ||

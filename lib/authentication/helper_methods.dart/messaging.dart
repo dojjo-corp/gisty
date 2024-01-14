@@ -131,7 +131,7 @@ AppBar chatCustomAppBar({
             .collection('users')
             .doc(receiverData?['uid'])
             .snapshots()
-            .throttleTime(const Duration(seconds: 2)),
+            .throttleTime(const Duration(milliseconds: 100)),
         builder: (context, snapshot) {
           if (!snapshot.hasData ||
               snapshot.connectionState == ConnectionState.waiting) {

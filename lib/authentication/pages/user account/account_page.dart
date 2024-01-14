@@ -114,20 +114,28 @@ class _UserAccountPageState extends State<UserAccountPage> {
             ),
 
             const SizedBox(height: 20),
-            MyButton(
-              onPressed: () {
-                Navigator.pushNamed(context, '/edit-profile');
-              },
-              btnText: 'Edit Profile',
-              isPrimary: true,
-            ),
-            const SizedBox(height: 10),
-            MyButton(
-              onPressed: () {
-                Navigator.pushNamed(context, '/reset-password');
-              },
-              btnText: 'Reset Password',
-              isPrimary: false,
+            Row(
+              children: [
+                Expanded(
+                  child: MyButton(
+                    onPressed: () {
+                      Navigator.pushNamed(context, '/edit-profile');
+                    },
+                    btnText: 'Edit Profile',
+                    isPrimary: true,
+                  ),
+                ),
+                const SizedBox(width: 10),
+                Expanded(
+                  child: MyButton(
+                    onPressed: () {
+                      Navigator.pushNamed(context, '/reset-password');
+                    },
+                    btnText: 'Reset Password',
+                    isPrimary: false,
+                  ),
+                ),
+              ],
             ),
             const SizedBox(height: 10),
             TextButton(

@@ -27,7 +27,8 @@ class _CommentTileState extends State<CommentTile> {
         context.read<UserProvider>().getUserDataFromEmail(widget.commenter);
     final DateTime fullDate = widget.timestamp.toDate();
     final date = '${fullDate.year}/${fullDate.month}/${fullDate.day}';
-    final time = '${fullDate.hour.toString().padLeft(2,'0')}:${fullDate.minute.toString().padLeft(2,'0')}';
+    final time =
+        '${fullDate.hour.toString().padLeft(2, '0')}:${fullDate.minute.toString().padLeft(2, '0')}';
     return Container(
       margin: const EdgeInsets.only(bottom: 3),
       child: ListTile(
@@ -56,12 +57,7 @@ class _CommentTileState extends State<CommentTile> {
         trailing: Column(
           crossAxisAlignment: CrossAxisAlignment.end,
           mainAxisAlignment: MainAxisAlignment.center,
-          children: [
-            Text(
-              date,
-            ),
-            Text(time)
-          ],
+          children: [Text(date), Text(time)],
         ),
       ),
     );

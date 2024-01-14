@@ -88,6 +88,15 @@ class _MyAppState extends State<MyApp> {
             shape: RoundedRectangleBorder(
               borderRadius: BorderRadius.circular(12),
             ),
+            minVerticalPadding: 0,
+          ),
+          tooltipTheme: TooltipThemeData(
+            decoration: BoxDecoration(
+              borderRadius: BorderRadius.circular(8),
+              color: Colors.blueGrey[100],
+            ),
+            textStyle: TextStyle(color: Colors.grey[700]),
+            triggerMode: TooltipTriggerMode.longPress,
           )),
       routes: {
         '/': (context) => const AuthGate(),
@@ -125,8 +134,7 @@ class _MyAppState extends State<MyApp> {
         // Event Details Page
         if (name == '/event-details') {
           return MaterialPageRoute(
-            builder: (context) =>
-                EventDetailsPage(eventId: args['event-id']),
+            builder: (context) => EventDetailsPage(eventId: args['event-id']),
           );
         }
 
@@ -141,8 +149,7 @@ class _MyAppState extends State<MyApp> {
         // Job Details Page
         if (name == '/job-details') {
           return MaterialPageRoute(
-            builder: (context) =>
-                JobDetailsPage(jobId: args['job-id']),
+            builder: (context) => JobDetailsPage(jobId: args['job-id']),
           );
         }
 

@@ -41,7 +41,7 @@ class _UserReportsPageState extends State<UserReportsPage> {
                           .collection('All Feedbacks')
                           .orderBy('time')
                           .snapshots()
-                          .throttleTime(const Duration(seconds: 2)),
+                          .throttleTime(const Duration(milliseconds: 100)),
                       builder: (context, snapshot) {
                         // snapshot has no data
                         if (!snapshot.hasData) {

@@ -89,9 +89,9 @@ class _ChatPageState extends State<ChatPage> with WidgetsBindingObserver {
                       left: 15.0, right: 15.0, bottom: 80),
                   child: StreamBuilder(
                     stream: getThrottledStream(
-                        collectionPath: 'Chat Rooms',
-                        docPath: widget.roomId,
-                        throttleDuration: 1),
+                      collectionPath: 'Chat Rooms',
+                      docPath: widget.roomId,
+                    ),
                     builder: (context, snapshot) {
                       if (!snapshot.hasData || !snapshot.data!.exists) {
                         return const Row(

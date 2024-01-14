@@ -13,6 +13,7 @@ class MyButton extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    double deviceHeight = MediaQuery.of(context).size.height;
     Color backgroundColor =
         isPrimary ? Theme.of(context).primaryColor : Colors.grey[300]!;
     Color textColor =
@@ -21,7 +22,8 @@ class MyButton extends StatelessWidget {
       onPressed: onPressed,
       style: ElevatedButton.styleFrom(
         backgroundColor: backgroundColor,
-        minimumSize: const Size(double.infinity, 60),
+        minimumSize: const Size(double.infinity, 50),
+        maximumSize:  Size(double.infinity, deviceHeight * deviceHeight * 0.05),
         shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(15)),
       ),
       child: Text(
