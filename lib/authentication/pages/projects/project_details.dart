@@ -66,9 +66,11 @@ class _ProjectDetailsState extends State<ProjectDetails> {
   @override
   Widget build(BuildContext context) {
     final categoryMap = context.read<ProjectProvider>().categoryMap;
+    final userProvider  =  Provider.of<UserProvider>(context, listen: false);
     final isUserIndustryPro =
-        Provider.of<UserProvider>(context, listen: false).userType ==
+       userProvider.userType ==
             'industry professional';
+    final _isUserAdmin = userProvider.isUserAdmin;
     return Scaffold(
       body: Stack(
         children: [
@@ -499,6 +501,7 @@ class _ProjectDetailsState extends State<ProjectDetails> {
           const MyBackButton(),
 
           // OPTIONS ICON BUTTON
+          _isUserAdmin ?
           Positioned(
             top: 60,
             right: 15,
@@ -511,7 +514,7 @@ class _ProjectDetailsState extends State<ProjectDetails> {
                 color: Theme.of(context).primaryColor,
               ),
             ),
-          ),
+          ) : Container(),
 
           // COMMENT TEXT FIELD
           Positioned(
