@@ -59,7 +59,7 @@ Widget showNoProfilePicture(BuildContext _context) => GestureDetector(
           context: _context,
           builder: (_context) {
             return SizedBox(
-              height: 130,
+              height: 100,
               child: Column(
                 mainAxisAlignment: MainAxisAlignment.center,
                 children: [

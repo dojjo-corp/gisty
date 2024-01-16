@@ -51,17 +51,33 @@ class _SearchPageState extends State<SearchPage> {
         .allProjects
         .values
         .toList();
-    final allUsers = Provider.of<UserProvider>(context, listen: false).allUsers;
+    final userProvider = Provider.of<UserProvider>(context, listen: false);
+    final allUsers = userProvider.allUsers;
+    final isUserStudent = userProvider.userType.toLowerCase() == 'student';
 
     List<Map<String, dynamic>> getSearchResults(String searchTerm) {
-      // always start with a clean (emppty) set
+      // always start with a clean (empty) set
       setState(() {
         searchResults.clear();
       });
 
       // PROJECT SEARCH RESULTS
       for (var map in allProjects) {
-        if (map['title'].toLowerCase().contains(searchTerm.toLowerCase())) {
+        // search projects by year
+        if (searchTerm.length == 4 &&
+            RegExp(r'^[0-9]+$').hasMatch(searchTerm) &&
+            map['year'] == searchTerm) {
+          map['type'] = 'project';
+          setState(() {
+            searchResults.add(map);
+          });
+        }
+
+        // search projects by title and supervisor
+        if (map['title'].toLowerCase().contains(searchTerm.toLowerCase()) ||
+            map['supervisor-name']
+                .toLowerCase()
+                .contains(searchTerm.toLowerCase())) {
           map['type'] = 'project';
           setState(() {
             searchResults.add(map);
@@ -70,15 +86,19 @@ class _SearchPageState extends State<SearchPage> {
       }
 
       // USER SEARCH RESULTS
-      for (var user in allUsers) {
-        if (user['fullname'].toLowerCase().contains(searchTerm.toLowerCase()) ??
-            user['full-name']
-                .toLowerCase()
-                .contains(searchTerm.toLowerCase())) {
-          user['type'] = 'user';
-          setState(() {
-            searchResults.add(user);
-          });
+      if (!isUserStudent) {
+        for (var user in allUsers) {
+          if (user['fullname']
+                  .toLowerCase()
+                  .contains(searchTerm.toLowerCase()) ??
+              user['full-name']
+                  .toLowerCase()
+                  .contains(searchTerm.toLowerCase())) {
+            user['type'] = 'user';
+            setState(() {
+              searchResults.add(user);
+            });
+          }
         }
       }
       return searchResults.toList();

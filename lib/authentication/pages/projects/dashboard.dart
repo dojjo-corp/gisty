@@ -71,8 +71,7 @@ class _DashboardState extends State<Dashboard> {
                         stream: FirebaseFirestore.instance
                             .collection('All Projects')
                             .orderBy('time-added', descending: true)
-                            .snapshots()
-                            .throttleTime(const Duration(milliseconds: 100)),
+                            .snapshots(),
                         builder: (context, snapshot) {
                           if (!snapshot.hasData) {
                             return const Center(

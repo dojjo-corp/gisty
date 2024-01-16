@@ -142,7 +142,7 @@ class _LoginPageState extends State<LoginPage> {
                                   iconData: Icons.email_rounded,
                                   isWithIcon: true,
                                 ),
-                                const SizedBox(height: 10),
+                                const SizedBox(height: 5),
 
                                 // todo: Password TextField
                                 SimpleTextField(
@@ -182,7 +182,7 @@ class _LoginPageState extends State<LoginPage> {
                           btnText: 'Login',
                           isPrimary: true,
                         ),
-                        const SizedBox(height: 10),
+                        const SizedBox(height: 15),
                         Row(
                           mainAxisAlignment: MainAxisAlignment.center,
                           children: [

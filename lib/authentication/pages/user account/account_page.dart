@@ -34,16 +34,83 @@ class _UserAccountPageState extends State<UserAccountPage> {
         docPath: auth.currentUser!.uid,
       ),
       builder: (context, snapshot) {
-        if (!snapshot.hasData ||
-            snapshot.connectionState == ConnectionState.waiting) {
-          return Icon(
-            Icons.person,
-            size: 100,
-            color: Theme.of(context).primaryColor,
+        if (!snapshot.hasData || snapshot.hasError) {
+          return Column(
+            children: [
+              Icon(
+                Icons.person,
+                size: 100,
+                color: Theme.of(context).primaryColor,
+              ),
+              ListTile(
+                leading: Icon(Icons.person_rounded,
+                    color: Theme.of(context).primaryColor),
+                title: Text(
+                  'Name',
+                  style: GoogleFonts.poppins(color: Colors.grey),
+                ),
+                 subtitle: Text(
+                    'Loading...',
+                    style: TextStyle(fontWeight: FontWeight.w600),
+                  ),
+              ),
+              ListTile(
+                leading: Icon(Icons.email_rounded,
+                    color: Theme.of(context).primaryColor),
+                title: Text(
+                  'Email',
+                  style: GoogleFonts.poppins(color: Colors.grey),
+                ),
+                subtitle: Text(
+                    'Loading...',
+                    style: TextStyle(fontWeight: FontWeight.w600),
+                  ),
+              ),
+              ListTile(
+                leading: Icon(Icons.phone_rounded,
+                    color: Theme.of(context).primaryColor),
+                title: Text(
+                  'Contact',
+                  style: GoogleFonts.poppins(color: Colors.grey),
+                ),
+                subtitle: Text(
+                    'Loading...',
+                    style: TextStyle(fontWeight: FontWeight.w600),
+                  ),
+              ),
+              ListTile(
+                leading: Icon(Icons.school_rounded,
+                    color: Theme.of(context).primaryColor),
+                title: Text(
+                  'Faculty',
+                  style: GoogleFonts.poppins(color: Colors.grey),
+                ),
+                subtitle: Text(
+                    'Loading...',
+                    style: TextStyle(fontWeight: FontWeight.w600),
+                  ),
+              ),
+              ListTile(
+                leading: Icon(Icons.work_rounded,
+                    color: Theme.of(context).primaryColor),
+                title: Text(
+                  'Role',
+                  style: GoogleFonts.poppins(color: Colors.grey),
+                ),
+                subtitle: Text(
+                    'Loading...',
+                    style: TextStyle(fontWeight: FontWeight.w600),
+                  ),
+              ),
+            ],
           );
         }
+
+        // TODO Upon loading successfully
         final currentUserMap = snapshot.data!.data();
+        final role = currentUserMap['user-type'].toLowerCase();
         final profilePicture = currentUserMap?['profile-picture'];
+        bool _showFaculty = role == 'student' || role == 'university professional';
 
         /// The Widget to display as user's profile Image (depending on device's connectivity state)
         Widget profileWidget;
@@ -54,104 +121,123 @@ class _UserAccountPageState extends State<UserAccountPage> {
           profileWidget = showProfilePicture(profilePicture, context);
         }
 
-        return Column(
-          children: [
-            GestureDetector(
-                onTap: () {
-                  Navigator.of(context).push(MaterialPageRoute(
-                      builder: (context) =>
-                          ViewProfilePicture(uid: currentUser.uid)));
-                },
-                child: profileWidget),
-            // const SizedBox(height: 20),
-            ListTile(
-              leading: Icon(Icons.person_rounded,
-                  color: Theme.of(context).primaryColor),
-              title: Text(
-                'Name',
-                style: GoogleFonts.poppins(color: Colors.grey),
-              ),
-              subtitle: Text(
-                currentUserMap?['fullname'] ?? 'Fullname',
-                style: TextStyle(fontWeight: FontWeight.w600),
-              ),
-            ),
-            ListTile(
-              leading: Icon(Icons.email_rounded,
-                  color: Theme.of(context).primaryColor),
-              title: Text(
-                'Email',
-                style: GoogleFonts.poppins(color: Colors.grey),
-              ),
-              subtitle: Text(
-                currentUserMap?['email'] ?? 'Email',
-                style: TextStyle(fontWeight: FontWeight.w600),
-              ),
-            ),
-            ListTile(
-              leading: Icon(Icons.phone_rounded,
-                  color: Theme.of(context).primaryColor),
-              title: Text(
-                'Contact',
-                style: GoogleFonts.poppins(color: Colors.grey),
-              ),
-              subtitle: Text(
-                currentUserMap?['contact'] ?? 'Contact',
-                style: TextStyle(fontWeight: FontWeight.w600),
-              ),
-            ),
-            ListTile(
-              leading: Icon(Icons.work_rounded,
-                  color: Theme.of(context).primaryColor),
-              title: Text(
-                'Role',
-                style: GoogleFonts.poppins(color: Colors.grey),
-              ),
-              subtitle: Text(
-                currentUserMap?['user-type'] ?? 'Role',
-                style: TextStyle(fontWeight: FontWeight.w600),
-              ),
-            ),
-
-            const SizedBox(height: 20),
-            Row(
+        return SizedBox(
+          height: MediaQuery.of(context).size.height,
+          child: SingleChildScrollView(
+            child: Column(
               children: [
-                Expanded(
-                  child: MyButton(
-                    onPressed: () {
-                      Navigator.pushNamed(context, '/edit-profile');
-                    },
-                    btnText: 'Edit Profile',
-                    isPrimary: true,
+                GestureDetector(
+                  onTap: () {
+                    Navigator.of(context).push(MaterialPageRoute(
+                        builder: (context) =>
+                            ViewProfilePicture(uid: currentUser.uid)));
+                  },
+                  child: profileWidget,
+                ),
+                // const SizedBox(height: 20),
+                ListTile(
+                  leading: Icon(Icons.person_rounded,
+                      color: Theme.of(context).primaryColor),
+                  title: Text(
+                    'Name',
+                    style: GoogleFonts.poppins(color: Colors.grey),
+                  ),
+                  subtitle: Text(
+                    currentUserMap?['fullname'] ?? 'Fullname',
+                    style: TextStyle(fontWeight: FontWeight.w600),
                   ),
                 ),
-                const SizedBox(width: 10),
-                Expanded(
-                  child: MyButton(
-                    onPressed: () {
-                      Navigator.pushNamed(context, '/reset-password');
-                    },
-                    btnText: 'Reset Password',
-                    isPrimary: false,
+                ListTile(
+                  leading: Icon(Icons.email_rounded,
+                      color: Theme.of(context).primaryColor),
+                  title: Text(
+                    'Email',
+                    style: GoogleFonts.poppins(color: Colors.grey),
+                  ),
+                  subtitle: Text(
+                    currentUserMap?['email'] ?? 'Email',
+                    style: TextStyle(fontWeight: FontWeight.w600),
+                  ),
+                ),
+                ListTile(
+                  leading: Icon(Icons.phone_rounded,
+                      color: Theme.of(context).primaryColor),
+                  title: Text(
+                    'Contact',
+                    style: GoogleFonts.poppins(color: Colors.grey),
+                  ),
+                  subtitle: Text(
+                    currentUserMap?['contact'] ?? 'Contact',
+                    style: TextStyle(fontWeight: FontWeight.w600),
+                  ),
+                ),
+                ListTile(
+                  leading: Icon(Icons.work_rounded,
+                      color: Theme.of(context).primaryColor),
+                  title: Text(
+                    'Role',
+                    style: GoogleFonts.poppins(color: Colors.grey),
+                  ),
+                  subtitle: Text(
+                    currentUserMap?['user-type'] ?? 'Role',
+                    style: TextStyle(fontWeight: FontWeight.w600),
+                  ),
+                ),
+                _showFaculty ?
+                ListTile(
+                  leading: Icon(Icons.school_rounded,
+                      color: Theme.of(context).primaryColor),
+                  title: Text(
+                    'Faculty',
+                    style: GoogleFonts.poppins(color: Colors.grey),
+                  ),
+                  subtitle: Text(
+                    currentUserMap?['faculty'] ?? 'Faculty',
+                    style: TextStyle(fontWeight: FontWeight.w600),
+                  ),
+                ) : Container(),
+                  
+                const SizedBox(height: 20),
+                Row(
+                  children: [
+                    Expanded(
+                      child: MyButton(
+                        onPressed: () {
+                          Navigator.pushNamed(context, '/edit-profile');
+                        },
+                        btnText: 'Edit Profile',
+                        isPrimary: true,
+                      ),
+                    ),
+                    const SizedBox(width: 10),
+                    Expanded(
+                      child: MyButton(
+                        onPressed: () {
+                          Navigator.pushNamed(context, '/reset-password');
+                        },
+                        btnText: 'Reset Password',
+                        isPrimary: false,
+                      ),
+                    ),
+                  ],
+                ),
+                const SizedBox(height: 10),
+                TextButton(
+                  onPressed: () {
+                    showDeletePromptDialog(
+                      context: context,
+                      uid: currentUser.uid,
+                      email: currentUser.email!,
+                    );
+                  },
+                  child: Text(
+                    'Delete Account',
+                    style: GoogleFonts.poppins(color: Colors.red),
                   ),
                 ),
               ],
             ),
-            const SizedBox(height: 10),
-            TextButton(
-              onPressed: () {
-                showDeletePromptDialog(
-                  context: context,
-                  uid: currentUser.uid,
-                  email: currentUser.email!,
-                );
-              },
-              child: Text(
-                'Delete Account',
-                style: GoogleFonts.poppins(color: Colors.red),
-              ),
-            ),
-          ],
+          ),
         );
       },
     );

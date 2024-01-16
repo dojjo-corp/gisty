@@ -217,7 +217,7 @@ class _MyHomePageState extends State<MyHomePage> {
           ),
         ),
         body: Padding(
-          padding: const EdgeInsets.symmetric(horizontal: 15.0),
+          padding: const EdgeInsets.only(left: 15.0, right: 15),
           child: _pages[widget.pageIndex],
         ),
       ),

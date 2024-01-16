@@ -14,7 +14,7 @@ class WelcomeGreetings extends StatelessWidget {
           children: [
             // Icon(Icons.),
             ClipRRect(
-              borderRadius: BorderRadius.circular(45),
+              borderRadius: BorderRadius.circular(100),
               child: Image.asset(
                 'assets/ic_launcher_foreground.png',
                 height: 200,

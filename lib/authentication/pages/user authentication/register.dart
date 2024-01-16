@@ -39,13 +39,24 @@ class _RegisterPageState extends State<RegisterPage> {
   bool _passwordbscureText = true;
   bool _confirmObscureText = true;
   bool _isLoading = false;
-  bool _isStudent = false;
+  bool _showForStudent = false;
+  bool _showForBothUniAndStud = true;
+
   String selectedUserType = 'Choose User Type';
   final List<String> userTypes = [
     'Choose User Type',
     'Student',
     'University professional',
     'Industry professional'
+  ];
+
+  // faculty; for only students and university professionals
+  String selectedFaculty = 'Choose your faculty';
+  final List<String> faculties = [
+    'Choose your faculty',
+    'Faculty of Engineering',
+    'Faculty of Computing and Information Systems',
+    'GCTU Business School'
   ];
 
   // firebase models
@@ -56,7 +67,7 @@ class _RegisterPageState extends State<RegisterPage> {
   Widget build(BuildContext context) {
     // registration function
     Future<void> register() async {
-      if (_key.currentState!.validate()) {
+      if (_key.currentState!.validate() && selectedUserType != userTypes[0]) {
         _key.currentState!.save();
 
         try {
@@ -83,6 +94,7 @@ class _RegisterPageState extends State<RegisterPage> {
                   email: emailController.text.toLowerCase(),
                   startYear: startYearController.text,
                   endYear: endYearController.text,
+                  faculty: selectedFaculty,
                 );
                 break;
               case 'industry professional':
@@ -95,11 +107,11 @@ class _RegisterPageState extends State<RegisterPage> {
                 break;
               case 'university professional':
                 await firestoreRepo.createUniversityProfessionalDoc(
-                  uid: userId,
-                  fullName: nameController.text,
-                  userName: userNameController.text,
-                  email: emailController.text.toLowerCase(),
-                );
+                    uid: userId,
+                    fullName: nameController.text,
+                    userName: userNameController.text,
+                    email: emailController.text.toLowerCase(),
+                    faculty: selectedFaculty);
                 break;
               default:
                 log('Invalid user type');
@@ -174,6 +186,8 @@ class _RegisterPageState extends State<RegisterPage> {
                             title: 'Create Your Account',
                             // textColor: Theme.of(context).primaryColor,
                           ),
+
+                          // todo: FULLNAME
                           SimpleTextField(
                             controller: nameController,
                             hintText: 'Enter Your Fullname',
@@ -181,7 +195,9 @@ class _RegisterPageState extends State<RegisterPage> {
                             isWithIcon: true,
                             autofillHints: null,
                           ),
-                          const SizedBox(height: 10),
+                          const SizedBox(height: 5),
+
+                          // todo: EMAIL
                           SimpleTextField(
                             controller: emailController,
                             hintText: 'Enter Your Email',
@@ -189,7 +205,9 @@ class _RegisterPageState extends State<RegisterPage> {
                             isWithIcon: true,
                             autofillHints: null,
                           ),
-                          const SizedBox(height: 10),
+                          const SizedBox(height: 5),
+
+                          // todo: ID NUMBER
                           SimpleTextField(
                             controller: idController,
                             hintText: 'Enter Your Id Number',
@@ -197,7 +215,9 @@ class _RegisterPageState extends State<RegisterPage> {
                             isWithIcon: true,
                             autofillHints: null,
                           ),
-                          const SizedBox(height: 10),
+                          const SizedBox(height: 5),
+
+                          // todo: USER TYPE/ROLE
                           DropdownButtonFormField(
                             decoration: InputDecoration(
                               border: OutlineInputBorder(
@@ -220,20 +240,31 @@ class _RegisterPageState extends State<RegisterPage> {
                                 )
                                 .toList(),
                             onChanged: (value) {
+                              final val = value?.toLowerCase();
                               setState(() {
                                 selectedUserType = value!;
-                                // show student specific text fields
-                                if (value.toLowerCase() == 'student') {
-                                  _isStudent = true;
+
+                                // show usertype-specific fields
+                                if (val == 'industry professional') {
+                                  _showForBothUniAndStud = false;
                                 } else {
-                                  _isStudent = false;
+                                  // either student or university professional
+                                  _showForBothUniAndStud = true;
+                                  // only student in this cacse
+                                  if (val == 'student') {
+                                    _showForStudent = true;
+                                  } else {
+                                    _showForStudent = false;
+                                  }
                                 }
                               });
                             },
                           ),
-                          const SizedBox(height: 10),
+                          const SizedBox(height: 5),
+
+                          // todo: STUDENT START AND END YEARS
                           // show start and end years textfield if user is a student
-                          _isStudent
+                          _showForStudent
                               ? Column(
                                   children: [
                                     Row(
@@ -260,10 +291,51 @@ class _RegisterPageState extends State<RegisterPage> {
                                         ),
                                       ],
                                     ),
-                                    const SizedBox(height: 10),
+                                    const SizedBox(height: 5),
                                   ],
                                 )
                               : Container(),
+
+                          // todo FACULTY
+                          _showForBothUniAndStud
+                              ? Column(
+                                  children: [
+                                    DropdownButtonFormField(
+                                      decoration: InputDecoration(
+                                        border: OutlineInputBorder(
+                                          borderRadius:
+                                              BorderRadius.circular(12),
+                                          borderSide: BorderSide.none,
+                                        ),
+                                        fillColor: Colors.white,
+                                        filled: true,
+                                      ),
+                                      value: selectedFaculty,
+                                      items: faculties
+                                          .map(
+                                            (String faculty) =>
+                                                DropdownMenuItem<String>(
+                                              value: faculty,
+                                              child: Text(
+                                                faculty,
+                                                style: TextStyle(
+                                                    color: Colors.grey[700]),
+                                              ),
+                                            ),
+                                          )
+                                          .toList(),
+                                      onChanged: (value) {
+                                        setState(() {
+                                          selectedFaculty = value!;
+                                        });
+                                      },
+                                    ),
+                                    const SizedBox(height: 5),
+                                  ],
+                                )
+                              : Container(),
+
+                          // todo: PASSWORD
                           TextFormField(
                             controller: passwordController,
                             obscureText: _passwordbscureText,
@@ -313,7 +385,9 @@ class _RegisterPageState extends State<RegisterPage> {
                               return null;
                             },
                           ),
-                          const SizedBox(height: 10),
+                          const SizedBox(height: 5),
+
+                          // todo: CONFIRM PASSWORD
                           TextFormField(
                             controller: confirmPasswordController,
                             obscureText: _confirmObscureText,
@@ -363,13 +437,17 @@ class _RegisterPageState extends State<RegisterPage> {
                               return null;
                             },
                           ),
-                          const SizedBox(height: 20),
+                          const SizedBox(height: 10),
+
+                          // todo: REGISTER BUTTON
                           MyButton(
                             onPressed: register,
                             btnText: 'Register',
                             isPrimary: true,
                           ),
-                          const SizedBox(height: 10),
+                          const SizedBox(height: 15),
+
+                          // todo: NAVIGATE TO LOGIN
                           Row(
                             mainAxisAlignment: MainAxisAlignment.center,
                             children: [

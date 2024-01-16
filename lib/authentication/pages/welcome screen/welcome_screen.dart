@@ -1,7 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:gt_daily/authentication/pages/welcome%20screen/welcome_archive.dart';
-import 'package:gt_daily/authentication/pages/welcome%20screen/welcome_greetings.dart';
 import 'package:gt_daily/authentication/pages/welcome%20screen/welcome_jobs.dart';
 import 'package:gt_daily/authentication/pages/welcome%20screen/welcome_messaging.dart';
 
@@ -17,7 +16,6 @@ class WelcomeScreen extends StatefulWidget {
 class _WelcomeScreenState extends State<WelcomeScreen> {
   int _pageIndex = 0;
   final List<Widget> welcomePages = [
-    const WelcomeGreetings(),
     const WelcomeArchive(),
     const WelcomeMessaging(),
     const WelcomeJobs(),
@@ -33,7 +31,7 @@ class _WelcomeScreenState extends State<WelcomeScreen> {
               height: MediaQuery.of(context).size.height,
               child: welcomePages[_pageIndex],
             ),
-            _pageIndex != 3 && _pageIndex != 0
+            _pageIndex != 2 && _pageIndex != 0
                 ? Positioned(
                     top: 10,
                     left: 0,
@@ -59,7 +57,7 @@ class _WelcomeScreenState extends State<WelcomeScreen> {
           ],
         ),
       ),
-      floatingActionButton: _pageIndex != 3
+      floatingActionButton: _pageIndex != 2
           ? FloatingActionButton(
               onPressed: () => setState(() {
                 _pageIndex++;

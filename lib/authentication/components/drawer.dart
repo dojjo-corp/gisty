@@ -208,11 +208,11 @@ class MyDrawer extends StatelessWidget {
                         onTap: () {
                           // Navigate to internship page
                           Navigator.push(
-                              context,
-                              MaterialPageRoute(
-                                builder: (context) =>
-                                    const AddJobOrInternship(),
-                              ));
+                            context,
+                            MaterialPageRoute(
+                              builder: (context) => const AddJobOrInternship(),
+                            ),
+                          );
                         },
                         child: ListTile(
                           leading: Icon(
@@ -270,7 +270,8 @@ class MyDrawer extends StatelessWidget {
                                   .collection('Chat Rooms')
                                   .orderBy('last-text.time', descending: true)
                                   .snapshots()
-                                  .throttleTime(const Duration(milliseconds: 100)),
+                                  .throttleTime(
+                                      const Duration(milliseconds: 100)),
                               builder: (context, snapshot) {
                                 if (!snapshot.hasData ||
                                     snapshot.hasError ||
@@ -346,7 +347,9 @@ class MyDrawer extends StatelessWidget {
                   Navigator.pushAndRemoveUntil(
                       context,
                       MaterialPageRoute(
-                          builder: (context) => const LoginPage(isFromWelcomeScreen: false,)),
+                          builder: (context) => const LoginPage(
+                                isFromWelcomeScreen: false,
+                              )),
                       (route) => false);
                 }
               },
