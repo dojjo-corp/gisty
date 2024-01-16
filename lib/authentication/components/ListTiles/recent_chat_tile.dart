@@ -28,6 +28,7 @@ class RecentChatTile extends StatefulWidget {
 
 class _RecentChatTileState extends State<RecentChatTile> {
   Map<String, dynamic> receiverData = {};
+  bool _isReceiverDeleted = true;
 
   String getRoomId(String receiverEmail) {
     String roomId = '';
@@ -43,6 +44,10 @@ class _RecentChatTileState extends State<RecentChatTile> {
     for (var user in allUsers) {
       if (user['email'] == widget.receiver) {
         receiverData = user;
+        setState(() {
+          _isReceiverDeleted = false;
+        });
+        break;
       }
     }
     final lastTextSender = widget.lastTextData?['sender'];
@@ -79,6 +84,7 @@ class _RecentChatTileState extends State<RecentChatTile> {
               builder: (context) => ChatPage(
                 receiverEmail: widget.receiver ?? '',
                 roomId: getRoomId(widget.receiver ?? ''),
+                isReceiverDeleted: _isReceiverDeleted,
               ),
             ),
           );

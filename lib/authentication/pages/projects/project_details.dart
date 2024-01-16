@@ -15,8 +15,8 @@ import 'package:open_file/open_file.dart';
 import 'package:path_provider/path_provider.dart';
 import 'package:provider/provider.dart';
 import 'package:rxdart/rxdart.dart';
-import 'package:flutter_file_downloader/flutter_file_downloader.dart';
 
+import '../../../global/homepage.dart';
 import '../../components/buttons/buttons.dart';
 import '../../components/ListTiles/comment_tile.dart';
 import '../../components/buttons/custom_back_button.dart';
@@ -24,6 +24,7 @@ import '../../helper_methods.dart/projects.dart';
 import '../../providers/projects_provider.dart';
 import '../../providers/user_provider.dart';
 import '../user account/other_user_account_page.dart';
+import 'edit_project.dart';
 
 class ProjectDetails extends StatefulWidget {
   final Map<String, dynamic> projectData;
@@ -497,6 +498,21 @@ class _ProjectDetailsState extends State<ProjectDetails> {
           ),
           const MyBackButton(),
 
+          // OPTIONS ICON BUTTON
+          Positioned(
+            top: 60,
+            right: 15,
+            child: GestureDetector(
+              onTap: () {
+                showOptions(context);
+              },
+              child: Icon(
+                Icons.settings_outlined,
+                color: Theme.of(context).primaryColor,
+              ),
+            ),
+          ),
+
           // COMMENT TEXT FIELD
           Positioned(
             bottom: 10,
@@ -559,7 +575,7 @@ class _ProjectDetailsState extends State<ProjectDetails> {
                 ),
               ),
             ),
-          )
+          ),
         ],
       ),
       floatingActionButton: _isLoading ? const LinearProgressIndicator() : null,
@@ -707,40 +723,6 @@ class _ProjectDetailsState extends State<ProjectDetails> {
           },
         );
       }
-
-      // String pathToUse = '';
-      // final Directory appDir = await getApplicationDocumentsDirectory();
-      // final Directory docDirectory =
-      //     Directory('${appDir.path}${Platform.pathSeparator}Documents');
-      // if (!await docDirectory.exists()) {
-      //   await docDirectory.create(recursive: true);
-      // }
-      // pathToUse = docDirectory.path;
-
-      // // final String downloadDirectory =
-      // //     await ExternalPath.getExternalStoragePublicDirectory(
-      // //         ExternalPath.DIRECTORY_DOWNLOADS);
-
-      // final File tempFile = File('$pathToUse/$docFileName');
-      // await downloadFileRef.writeToFile(tempFile);
-
-      // ignore: use_build_context_synchronously
-      // if (context.mounted) {
-      //   setState(() {
-      //     _isDownloaded = true;
-      //   });
-      //   ScaffoldMessenger.of(context).showSnackBar(
-      //     SnackBar(
-      //       content: Text('File downloaded to: $appDir'),
-      //       action: SnackBarAction(
-      //         label: 'Open',
-      //         onPressed: () async {
-      //           openDownloadedFile('$appDir/$docFileName');
-      //         },
-      //       ),
-      //     ),
-      //   );
-      // }
     } catch (e) {
       ScaffoldMessenger.of(context).showSnackBar(
         SnackBar(
@@ -783,4 +765,60 @@ class _ProjectDetailsState extends State<ProjectDetails> {
   }
 
   // send comment to firestore
+  // shop project options for admins
+  /// CONVENIENCE METHODS
+  Future<void> showOptions(BuildContext context) async {
+    showGeneralDialog(
+      context: context,
+      pageBuilder: (context, animation, secondaryAnimation) => SimpleDialog(
+        backgroundColor: Colors.grey,
+        shape: RoundedRectangleBorder(
+          borderRadius: BorderRadius.circular(10),
+        ),
+        children: [
+          /// Edit Button
+          TextButton(
+            onPressed: () {
+              Navigator.pushReplacement(
+                context,
+                MaterialPageRoute(
+                  builder: (context) =>
+                      EditProjectDetailsPage(pid: widget.projectData['pid']),
+                ),
+              );
+            },
+            child: const Text(
+              'Edit',
+              style: TextStyle(color: Colors.white),
+            ),
+          ),
+
+          /// Delete Button
+          TextButton(
+            onPressed: () async {
+              await FirebaseFirestore.instance
+                  .collection('All Projects')
+                  .doc(widget.projectData['pid'])
+                  .delete();
+
+              if (mounted) {
+                Navigator.pushReplacement(
+                  context,
+                  MaterialPageRoute(
+                    builder: (context) => MyHomePage(
+                      pageIndex: 0,
+                    ),
+                  ),
+                );
+              }
+            },
+            child: const Text(
+              'Delete',
+              style: TextStyle(color: Colors.red),
+            ),
+          ),
+        ],
+      ),
+    );
+  }
 }

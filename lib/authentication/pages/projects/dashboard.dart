@@ -6,7 +6,6 @@ import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:gt_daily/authentication/components/buttons/buttons.dart';
 import 'package:provider/provider.dart';
-import 'package:rxdart/transformers.dart';
 
 import '../../components/project_grid_item.dart';
 import '../../providers/projects_provider.dart';

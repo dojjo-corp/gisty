@@ -127,6 +127,7 @@ class _MyAppState extends State<MyApp> {
             builder: (context) => ChatPage(
               roomId: args['room-id']!,
               receiverEmail: args['receiver-email']!,
+              isReceiverDeleted: args['isReceiverDeleted'],
             ),
           );
         }

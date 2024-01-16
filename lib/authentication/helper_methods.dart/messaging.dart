@@ -57,9 +57,11 @@ Future<void> sendMessage({
   required String messageText,
   required BuildContext context,
   ConnectivityResult? connectionResult,
+  bool isReceiverDeleted = false,
 }) async {
   // only send a message if the message text field is not empty
-  if (messageText.characters.isNotEmpty) {
+  // and receiver's account is not deleted
+  if (messageText.characters.isNotEmpty && !isReceiverDeleted) {
     String text = messageText;
     String senderFullName = getUserFullname(
       FirebaseAuth.instance.currentUser!.email!,
@@ -89,7 +91,8 @@ Future<void> sendMessage({
         routeName: '/chat-page',
         routeArgs: {
           'room-id': roomId,
-          'receiver-email': FirebaseAuth.instance.currentUser!.email!
+          'receiver-email': FirebaseAuth.instance.currentUser!.email!,
+          'isReceiverDeleted': isReceiverDeleted,
         },
       );
     } catch (e) {
@@ -121,7 +124,7 @@ AppBar chatCustomAppBar({
           context,
           MaterialPageRoute(
             builder: (context) => OtherUserAccountPage(
-              otherUserEmail: receiverData?['email'],
+              otherUserEmail: receiverEmail,
             ),
           ),
         );
@@ -146,13 +149,24 @@ AppBar chatCustomAppBar({
           final data = snapshot.data!.data() ?? {};
           if (data.isEmpty) {
             return Center(
-              child: Text(
-                'Deleted User',
-                style: GoogleFonts.poppins(
-                  fontSize: 14,
-                  fontWeight: FontWeight.bold,
-                  color: Colors.red,
-                ),
+              child: Row(
+                children: [
+                  const CircleAvatar(
+                    child: Icon(
+                      Icons.person,
+                      color: Colors.red,
+                    ),
+                  ),
+                  const SizedBox(width: 10),
+                  Text(
+                    'Deleted User ',
+                    style: GoogleFonts.poppins(
+                      fontWeight: FontWeight.bold,
+                      fontSize: 13,
+                      color: Colors.red,
+                    ),
+                  ),
+                ],
               ),
             );
           }

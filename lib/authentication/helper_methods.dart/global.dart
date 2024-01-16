@@ -37,10 +37,11 @@ showCustomDialog(BuildContext context,
   showDialog(
       context: context,
       builder: (context) {
-        final accept = onAccept ??
-            () {
-              Navigator.pop(context);
-            };
+        // set default callback for onAccpet
+        onAccept ??= () {
+          Navigator.pop(context);
+        };
+
         return AlertDialog(
           title: Text(title ?? 'Alert'),
           content: Text(contentText ?? ''),
@@ -52,7 +53,7 @@ showCustomDialog(BuildContext context,
               child: const Text('Cancel'),
             ),
             TextButton(
-              onPressed: accept,
+              onPressed: onAccept,
               child: const Text('Ok'),
             )
           ],

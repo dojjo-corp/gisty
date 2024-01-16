@@ -60,6 +60,7 @@ class ChatListPage extends StatelessWidget {
                                       builder: (context) => ChatPage(
                                         receiverEmail: e['email'],
                                         roomId: getRoomId(e['email']),
+                                        isReceiverDeleted: false,
                                       ),
                                     ),
                                   );

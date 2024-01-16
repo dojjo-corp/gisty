@@ -91,6 +91,12 @@ class _OtherUserAccountPageState extends State<OtherUserAccountPage> {
                           // currentUser type
                           final currentUserType = userProvider.userType;
 
+                          // if user has a faculty
+                          final _hasFaculty = otherUserMap.isNotEmpty
+                              ? otherUserMap['user-type'].toLowerCase() !=
+                                  'industry professional'
+                              : false;
+
                           return otherUserMap.isNotEmpty
                               ? Column(
                                   children: [
@@ -123,6 +129,8 @@ class _OtherUserAccountPageState extends State<OtherUserAccountPage> {
                                       },
                                     ),
                                     const SizedBox(height: 20),
+
+                                    // todo: FULLNAME
                                     ListTile(
                                       leading: Icon(Icons.person_rounded,
                                           color:
@@ -134,6 +142,8 @@ class _OtherUserAccountPageState extends State<OtherUserAccountPage> {
                                       ),
                                       subtitle: Text(otherUserMap['fullname']),
                                     ),
+
+                                    // todo: EMAIL
                                     ListTile(
                                       leading: Icon(Icons.email_rounded,
                                           color:
@@ -145,6 +155,8 @@ class _OtherUserAccountPageState extends State<OtherUserAccountPage> {
                                       ),
                                       subtitle: Text(otherUserMap['email']),
                                     ),
+
+                                    // todo: CONTACT
                                     ListTile(
                                       leading: Icon(Icons.phone_rounded,
                                           color:
@@ -156,6 +168,25 @@ class _OtherUserAccountPageState extends State<OtherUserAccountPage> {
                                       ),
                                       subtitle: Text(otherUserMap['contact']),
                                     ),
+
+                                    // todo: FACULTY
+                                    _hasFaculty
+                                        ? ListTile(
+                                            leading: Icon(Icons.school_rounded,
+                                                color: Theme.of(context)
+                                                    .primaryColor),
+                                            title: Text(
+                                              'Faculty',
+                                              style: GoogleFonts.poppins(
+                                                  color: Colors.grey),
+                                            ),
+                                            subtitle: Text(
+                                                otherUserMap['faculty'] ??
+                                                    'Faculty'),
+                                          )
+                                        : Container(),
+
+                                    // todo: USER TYPE/ROLE
                                     ListTile(
                                       leading: Icon(Icons.work_rounded,
                                           color:
@@ -184,6 +215,7 @@ class _OtherUserAccountPageState extends State<OtherUserAccountPage> {
                                                         otherUserMap['email']),
                                                     receiverEmail:
                                                         otherUserMap['email'],
+                                                    isReceiverDeleted: false,
                                                   ),
                                                 ),
                                               );
@@ -193,7 +225,7 @@ class _OtherUserAccountPageState extends State<OtherUserAccountPage> {
                                             isPrimary: false,
                                           )
                                         : Container(),
-                                    const SizedBox(height: 10),
+                                    const SizedBox(height: 5),
 
                                     isUserAdmin
                                         ? Column(
@@ -251,7 +283,7 @@ class _OtherUserAccountPageState extends State<OtherUserAccountPage> {
                                                       btnText: 'Remove Admin',
                                                       isPrimary: false,
                                                     ),
-                                              const SizedBox(height: 10),
+                                              const SizedBox(height: 5),
 
                                               // todo: Delete User Account (Only Non Admins Can Be Deleted)
                                               !isOtherUserAdmin

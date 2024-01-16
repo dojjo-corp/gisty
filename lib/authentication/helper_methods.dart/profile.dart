@@ -59,12 +59,15 @@ Widget showNoProfilePicture(BuildContext _context) => GestureDetector(
           context: _context,
           builder: (_context) {
             return SizedBox(
-              height: 100,
+              height: 120,
               child: Column(
                 mainAxisAlignment: MainAxisAlignment.center,
                 children: [
                   ListTile(
-                    leading: const Icon(Icons.camera_alt),
+                    leading: Icon(
+                      Icons.camera_alt,
+                      color: Theme.of(_context).primaryColor,
+                    ),
                     title: const Text('Camera'),
                     onTap: () {
                       Navigator.of(_context).pop();
@@ -72,7 +75,10 @@ Widget showNoProfilePicture(BuildContext _context) => GestureDetector(
                     },
                   ),
                   ListTile(
-                    leading: const Icon(Icons.photo_album),
+                    leading: Icon(
+                      Icons.photo_album,
+                      color: Theme.of(_context).primaryColor,
+                    ),
                     title: const Text('Gallery'),
                     onTap: () async {
                       Navigator.of(_context).pop();
