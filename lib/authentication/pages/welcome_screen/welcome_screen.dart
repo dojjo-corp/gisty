@@ -1,8 +1,8 @@
 import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
-import 'package:gt_daily/authentication/pages/welcome%20screen/welcome_archive.dart';
-import 'package:gt_daily/authentication/pages/welcome%20screen/welcome_jobs.dart';
-import 'package:gt_daily/authentication/pages/welcome%20screen/welcome_messaging.dart';
+import 'package:gt_daily/authentication/pages/welcome_screen/welcome_archive.dart';
+import 'package:gt_daily/authentication/pages/welcome_screen/welcome_jobs.dart';
+import 'package:gt_daily/authentication/pages/welcome_screen/welcome_messaging.dart';
 
 import '../user authentication/login.dart';
 
