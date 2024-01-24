@@ -7,6 +7,7 @@ import 'package:firebase_auth/firebase_auth.dart';
 import 'package:firebase_storage/firebase_storage.dart';
 import 'package:flutter/material.dart';
 import 'package:font_awesome_flutter/font_awesome_flutter.dart';
+import 'package:gt_daily/authentication/components/buttons/custom_appbar_button.dart';
 import 'package:gt_daily/authentication/helper_methods.dart/global.dart';
 import 'package:gt_daily/authentication/pages/projects/pdf_view_page.dart';
 import 'package:google_fonts/google_fonts.dart';
@@ -66,10 +67,8 @@ class _ProjectDetailsState extends State<ProjectDetails> {
   @override
   Widget build(BuildContext context) {
     final categoryMap = context.read<ProjectProvider>().categoryMap;
-    final userProvider  =  Provider.of<UserProvider>(context, listen: false);
-    final isUserIndustryPro =
-       userProvider.userType ==
-            'industry professional';
+    final userProvider = Provider.of<UserProvider>(context, listen: false);
+    final isUserIndustryPro = userProvider.userType == 'industry professional';
     final _isUserAdmin = userProvider.isUserAdmin;
     return Scaffold(
       body: Stack(
@@ -501,20 +500,15 @@ class _ProjectDetailsState extends State<ProjectDetails> {
           const MyBackButton(),
 
           // OPTIONS ICON BUTTON
-          _isUserAdmin ?
-          Positioned(
-            top: 60,
-            right: 15,
-            child: GestureDetector(
-              onTap: () {
-                showOptions(context);
-              },
-              child: Icon(
-                Icons.settings_outlined,
-                color: Theme.of(context).primaryColor,
-              ),
-            ),
-          ) : Container(),
+          _isUserAdmin
+              ? CustomAppBarButton(
+                  onTap: () {
+                    showOptions(context);
+                  },
+                  iconData: Icons.settings_outlined,
+                  tooltipMessage: 'Admin Options',
+                )
+              : Container(),
 
           // COMMENT TEXT FIELD
           Positioned(

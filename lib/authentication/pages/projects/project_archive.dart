@@ -2,9 +2,11 @@ import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:provider/provider.dart';
 
+import '../../components/buttons/custom_appbar_button.dart';
 import '../../components/buttons/custom_back_button.dart';
 import '../../components/dashboard_card.dart';
 import '../../providers/projects_provider.dart';
+import 'add_new_category.dart';
 
 class ProjectArchive extends StatelessWidget {
   const ProjectArchive({super.key});
@@ -33,7 +35,6 @@ class ProjectArchive extends StatelessWidget {
                       style: GoogleFonts.poppins(
                         fontSize: 40,
                         fontWeight: FontWeight.bold,
-                        
                       ),
                     ),
                     const SizedBox(height: 30),
@@ -55,7 +56,19 @@ class ProjectArchive extends StatelessWidget {
               ),
             ),
           ),
-          const MyBackButton()
+          const MyBackButton(),
+          CustomAppBarButton(
+            onTap: () {
+              Navigator.push(
+                context,
+                MaterialPageRoute(
+                  builder: (context) => const AddNewCategory(),
+                ),
+              );
+            },
+            iconData: Icons.playlist_add_rounded,
+            tooltipMessage: 'Add New Category',
+          ),
         ],
       ),
     );

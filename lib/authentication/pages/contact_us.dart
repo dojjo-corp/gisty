@@ -1,5 +1,6 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/material.dart';
+import 'package:gt_daily/authentication/components/buttons/custom_appbar_button.dart';
 import 'package:gt_daily/authentication/components/loading_circle.dart';
 import 'package:gt_daily/authentication/pages/administrator/edit_contact_info.dart';
 import 'package:provider/provider.dart';
@@ -103,25 +104,17 @@ class _ContactUsPageState extends State<ContactUsPage> {
                 ),
                 const MyBackButton(),
                 isUserAdmin
-                    ? Positioned(
-                        top: 45,
-                        right: 5,
-                        child: Tooltip(
-                          message: 'Edit Contact Info',
-                          child: IconButton(
-                            icon: const Icon(Icons.settings_outlined),
-                            onPressed: () {
-                              Navigator.push(
-                                context,
-                                MaterialPageRoute(
-                                  builder: (context) => const EditContactInfo(),
-                                ),
-                              );
-                            },
-                            color: Theme.of(context).primaryColor,
-                          ),
-                        ),
-                      )
+                    ? CustomAppBarButton(
+                        onTap: () {
+                          Navigator.push(
+                            context,
+                            MaterialPageRoute(
+                              builder: (context) => const EditContactInfo(),
+                            ),
+                          );
+                        },
+                        iconData: Icons.edit_note_rounded,
+                        tooltipMessage: 'Edit Contact Us Info')
                     : Container()
               ],
             ),

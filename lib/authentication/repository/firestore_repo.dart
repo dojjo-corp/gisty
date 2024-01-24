@@ -16,6 +16,7 @@ class FirestoreRepo {
     required String uid,
     required String startYear,
     required String endYear,
+    required String id,
     String contact = '',
   }) async {
     try {
@@ -27,6 +28,7 @@ class FirestoreRepo {
         'contact': contact,
         'user-type': 'student',
         'faculty': faculty,
+        'id-number': id,
         'start-year': startYear,
         'end-year': endYear,
         'download-id': [],
@@ -44,6 +46,7 @@ class FirestoreRepo {
     required String userName,
     required String email,
     required String faculty,
+    required String id,
     required String uid,
     String contact = '',
     String departmentId = '',
@@ -54,6 +57,7 @@ class FirestoreRepo {
       'username': userName,
       'email': email,
       'user-type': 'University Professional',
+      'id-number': id,
       'contact': contact,
       'faculty': faculty,
       'download-id': [],
@@ -84,9 +88,10 @@ class FirestoreRepo {
     required String fullName,
     required String userName,
     required String email,
+    required String id,
     required String uid,
+    required String organisation,
     String contact = '',
-    String organisationId = '',
   }) async {
     try {
       await store.collection('users').doc(uid).set({
@@ -96,7 +101,8 @@ class FirestoreRepo {
         'email': email,
         'user-type': 'Industry Professional',
         'contact': contact,
-        'organisation-id': organisationId,
+        'id-number': id,
+        'organisation': organisation,
         'download-id': [],
         'saved-projects': [],
         'online': true,

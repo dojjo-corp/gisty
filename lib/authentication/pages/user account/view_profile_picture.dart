@@ -43,13 +43,13 @@ class _ViewProfilePictureState extends State<ViewProfilePicture> {
                 if (!snapshot.hasData ||
                     snapshot.hasError ||
                     snapshot.connectionState == ConnectionState.waiting) {
-                  return const CircularProgressIndicator();
+                  return const LinearProgressIndicator();
                 }
                 final String? profilePicture =
                     snapshot.data!.data()!['profile-picture'];
 
                 if (profilePicture == null) {
-                  return const CircularProgressIndicator();
+                  return const LinearProgressIndicator();
                 }
                 return Image.network(profilePicture);
               }),

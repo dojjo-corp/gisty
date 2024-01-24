@@ -6,13 +6,16 @@ class SimpleTextField extends StatefulWidget {
   final IconData? iconData;
   final bool isWithIcon;
   final Iterable<String>? autofillHints;
+
+  final bool? enabled;
   const SimpleTextField({
     super.key,
     required this.controller,
     required this.hintText,
-    required this.iconData,
     required this.isWithIcon,
     required this.autofillHints,
+    this.iconData,
+    this.enabled,
   });
 
   @override
@@ -36,6 +39,7 @@ class _SimpleTextFieldState extends State<SimpleTextField> {
       autofillHints: widget.autofillHints,
       controller: widget.controller,
       obscureText: obscureText,
+      enabled: widget.enabled ?? true,
       decoration: InputDecoration(
         filled: true,
         fillColor: Colors.white,

@@ -109,7 +109,7 @@ Widget showProfilePicture(String downloadUrl, BuildContext _context) =>
       foregroundImage: Image.network(
         downloadUrl,
         frameBuilder: (context, child, frame, wasSynchronouslyLoaded) =>
-            const CircularProgressIndicator(),
+            const LinearProgressIndicator(),
       ).image,
       onForegroundImageError: (exception, stackTrace) =>
           showNoProfilePicture(_context),
@@ -137,7 +137,7 @@ Widget showOtherUserProfilePicture(
         foregroundImage: Image.network(
           downloadUrl,
           frameBuilder: (context, child, frame, wasSynchronouslyLoaded) =>
-              const CircularProgressIndicator(),
+              const LinearProgressIndicator(),
         ).image,
         onForegroundImageError: (exception, stackTrace) =>
             showNoOtherUserProfilePicture(_context, radius * 2),

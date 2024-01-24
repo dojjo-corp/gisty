@@ -6,54 +6,85 @@ import 'package:flutter/material.dart';
 
 class ProjectProvider extends ChangeNotifier {
   ProjectProvider();
+  final iconList = [
+    'web-mobile-development.png',
+    'ai.png',
+    'cyber.png',
+    'data.png',
+    'data-science.png',
+    'desktop.png',
+    'iot.png',
+    'robotics.png',
+    'research.png',
+    'embedded-systems.png',
+    'digital-asset-management.png',
+    'gear.png',
+    'green-technology.png',
+    'nanotechnology.png',
+    'project-management.png',
+    'responsive.png',
+    'science.png',
+    'technological.png',
+    'technology.png',
+    'world-wide-web.png',
+  ];
 
-  final Map<String, dynamic> categoryMap = {
+  Map categories = {};
+  Map<String, dynamic> categoryMap = {
     'Web & Mobile Development': {
-      'color': const Color.fromARGB(255, 57, 134, 198),
-      'image': 'assets/web-mobile-development.png',
-      'x': 0
+      'color': const Color(0xFF3986C6),
+      'image': 'assets/category_icons/web-mobile-development.png',
+      'x': 0,
     },
     'AI & ML': {
-      'color': const Color.fromARGB(255, 234, 175, 64),
-      'image': 'assets/ai.png',
-      'x': 1
+      'color': const Color(0xFFEAAF40),
+      'image': 'assets/category_icons/ai.png',
+      'x': 1,
     },
     'Cyber Security & Network Security': {
-      'color': const Color.fromARGB(255, 188, 137, 197),
-      'image': 'assets/cyber.png',
+      'color': const Color(0xFFBC89C5),
+      'image': 'assets/category_icons/cyber.png',
       'x': 2
     },
     'Data Science & Analytics': {
-      'color': const Color.fromARGB(255, 6, 134, 4),
-      'image': 'assets/data.png',
+      'color': const Color(0xFF068604),
+      'image': 'assets/category_icons/data.png',
       'x': 3
     },
     'Desktop Development': {
-      'color': const Color.fromARGB(255, 4, 134, 95),
-      'image': 'assets/desktop.png',
+      'color': const Color(0xFF04865F),
+      'image': 'assets/category_icons/desktop.png',
       'x': 4
     },
     'IoT': {
-      'color': const Color.fromARGB(255, 134, 4, 65),
-      'image': 'assets/iot.png',
+      'color': const Color(0xFF860441),
+      'image': 'assets/category_icons/iot.png',
       'x': 5
     },
     'Robotics & Automation': {
-      'color': const Color.fromARGB(255, 134, 69, 4),
-      'image': 'assets/robotics.png',
+      'color': const Color(0xFF864504),
+      'image': 'assets/category_icons/robotics.png',
       'x': 6
     },
     'Research Works': {
-      'color': const Color.fromARGB(255, 4, 134, 95),
-      'image': 'assets/research.png',
+      'color': const Color(0xFF04865F),
+      'image': 'assets/category_icons/research.png',
       'x': 7
     },
     'Embedded Systems': {
-      'color': const Color.fromARGB(255, 234, 206, 64),
-      'image': 'assets/embedded-systems.png',
+      'color': const Color(0xFFEACE40),
+      'image': 'assets/category_icons/embedded-systems.png',
       'x': 8
     },
   };
+
+  void setCategories(Map<String, dynamic> catMap) {
+    categoryMap = catMap;
+
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      notifyListeners();
+    });
+  }
 
   Map<String, Map<String, dynamic>> _allProjects = {};
   Map<String, Map<String, dynamic>> get allProjects => _allProjects;

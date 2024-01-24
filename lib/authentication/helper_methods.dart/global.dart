@@ -12,12 +12,20 @@ showSnackBar(BuildContext context, message) {
   );
 }
 
-void showCautionDialog(BuildContext context, String cautionText) {
+void showCautionDialog(
+  BuildContext context,
+  String cautionText, {
+  String? title,
+  Color? titleColor,
+}) {
   showDialog<void>(
     context: context,
     builder: (BuildContext context) {
       return AlertDialog(
-        title: const Text('Caution'),
+        title: Text(
+          title ?? 'Caution',
+          style: TextStyle(color: titleColor ?? Colors.red),
+        ),
         content: Text(cautionText),
         actions: <Widget>[
           TextButton(

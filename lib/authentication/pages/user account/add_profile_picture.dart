@@ -49,7 +49,7 @@ class _AddProfileImagePageState extends State<AddProfileImagePage> {
                         if (!snapshot.hasData) {
                           return Column(
                             children: const [
-                              CircularProgressIndicator(),
+                              LinearProgressIndicator(),
                               Text('Loading...')
                             ],
                           );

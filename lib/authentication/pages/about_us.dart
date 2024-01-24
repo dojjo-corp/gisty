@@ -1,5 +1,6 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/material.dart';
+import 'package:gt_daily/authentication/components/buttons/custom_appbar_button.dart';
 import 'package:gt_daily/authentication/components/page_title.dart';
 import 'package:provider/provider.dart';
 import 'package:rxdart/rxdart.dart';
@@ -105,22 +106,17 @@ class AboutUsPage extends StatelessWidget {
           ),
           const MyBackButton(),
           isUserAdmin
-              ? Positioned(
-                  top: 45,
-                  right: 5,
-                  child: IconButton(
-                    icon: const Icon(Icons.settings_outlined),
-                    onPressed: () {
-                      Navigator.push(
-                        context,
-                        MaterialPageRoute(
-                          builder: (context) => const EditAboutMe(),
-                        ),
-                      );
-                    },
-                    color: Theme.of(context).primaryColor,
-                  ),
-                )
+              ? CustomAppBarButton(
+                  onTap: () {
+                    Navigator.push(
+                      context,
+                      MaterialPageRoute(
+                        builder: (context) => const EditAboutMe(),
+                      ),
+                    );
+                  },
+                  iconData: Icons.edit_note_rounded,
+                  tooltipMessage: 'Edit About Us')
               : Container(),
         ],
       ),

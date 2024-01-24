@@ -61,6 +61,7 @@ dependencies:
   js_interop: ^0.0.1
   permission_handler: ^11.0.1
   flutter_file_downloader: ^1.2.1
+  flex_color_picker: ^3.3.1
 
 dev_dependencies:
   flutter_test:
@@ -96,18 +97,28 @@ flutter:
       - assets/register-background.jpg
       - assets/login-background.jpg
       - assets/app-icon.jpg
-      - assets/ai.png
-      - assets/cyber.png
-      - assets/data.png
-      - assets/iot.png
-      - assets/web-mobile-development.png
-      - assets/desktop.png
-      - assets/robotics.png
-      - assets/research.png
-      - assets/embedded-systems.png
+      - assets/category_icons/ai.png
+      - assets/category_icons/cyber.png
+      - assets/category_icons/data.png
+      - assets/category_icons/iot.png
+      - assets/category_icons/web-mobile-development.png
+      - assets/category_icons/desktop.png
+      - assets/category_icons/robotics.png
+      - assets/category_icons/research.png
+      - assets/category_icons/embedded-systems.png
       - assets/teacher.png
       - assets/student.png
       - assets/engineer.png
+      - assets/category_icons/digital-asset-management.png
+      - assets/category_icons/responsive.png
+      - assets/category_icons/nanotechnology.png
+      - assets/category_icons/project-management.png
+      - assets/category_icons/data-science.png
+      - assets/category_icons/gear.png
+      - assets/category_icons/technology.png
+      - assets/category_icons/science.png
+      - assets/category_icons/technological.png
+      - assets/category_icons/green-technology.png
       - android/app/src/main/res/mipmap-mdpi/ic_launcher.png
       - android/app/src/main/res/mipmap-hdpi/ic_launcher.png
       - android/app/src/main/res/mipmap-xhdpi/ic_launcher.png

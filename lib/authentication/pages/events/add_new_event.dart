@@ -63,6 +63,7 @@ class _AddNewEventPageState extends State<AddNewEventPage> {
                     Form(
                       key: _key,
                       child: Column(
+                        crossAxisAlignment: CrossAxisAlignment.start,
                         children: [
                           Text(
                             'Add New Event',
@@ -116,7 +117,7 @@ class _AddNewEventPageState extends State<AddNewEventPage> {
 
                           const SizedBox(height: 5),
 
-                          // todo: DATE / FIELD
+                          // todo: DATE / TIME FIELD
                           Row(
                             children: [
                               Expanded(

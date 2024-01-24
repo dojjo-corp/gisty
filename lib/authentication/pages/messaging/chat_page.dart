@@ -69,7 +69,7 @@ class _ChatPageState extends State<ChatPage> with WidgetsBindingObserver {
         width: MediaQuery.of(context).size.width,
         color: Colors.white70,
         child: const Center(
-          child: CircularProgressIndicator(),
+          child: LinearProgressIndicator(),
         ),
       );
     }

@@ -19,6 +19,9 @@ admin ability to edit user, project and event details
 remove change picture icon from other user profile picture
 available professionals row - only display pros that are online.
 
+- Use provider to hold stream builder's initial data. This is what gets updated when the page is refreshed
+
+
 ************
 
 

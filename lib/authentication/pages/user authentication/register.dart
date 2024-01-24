@@ -36,10 +36,12 @@ class _RegisterPageState extends State<RegisterPage> {
   final confirmPasswordController = TextEditingController();
   final startYearController = TextEditingController();
   final endYearController = TextEditingController();
+  final organisationContrller = TextEditingController();
   bool _passwordbscureText = true;
   bool _confirmObscureText = true;
   bool _isLoading = false;
   bool _showForStudent = false;
+  bool _showForIndustryPro = false;
   bool _showForBothUniAndStud = true;
 
   String selectedUserType = 'Choose User Type';
@@ -88,25 +90,29 @@ class _RegisterPageState extends State<RegisterPage> {
             switch (selectedUserType.toLowerCase()) {
               case 'student':
                 await firestoreRepo.createStudentDoc(
+                  id: idController.text.trim(),
                   uid: userId,
-                  fullName: nameController.text,
-                  userName: userNameController.text,
-                  email: emailController.text.toLowerCase(),
-                  startYear: startYearController.text,
-                  endYear: endYearController.text,
+                  fullName: nameController.text.trim(),
+                  userName: userNameController.text.trim(),
+                  email: emailController.text.toLowerCase().trim(),
+                  startYear: startYearController.text.trim(),
+                  endYear: endYearController.text.trim(),
                   faculty: selectedFaculty,
                 );
                 break;
               case 'industry professional':
                 await firestoreRepo.createIndustryProfessionalDoc(
+                  id: idController.text.trim(),
                   uid: userId,
                   fullName: nameController.text,
                   userName: userNameController.text,
                   email: emailController.text.toLowerCase(),
+                  organisation: '',
                 );
                 break;
               case 'university professional':
                 await firestoreRepo.createUniversityProfessionalDoc(
+                    id: idController.text.trim(),
                     uid: userId,
                     fullName: nameController.text,
                     userName: userNameController.text,
@@ -167,7 +173,7 @@ class _RegisterPageState extends State<RegisterPage> {
       },
       child: Scaffold(
         floatingActionButton:
-            _isLoading ? const CircularProgressIndicator() : null,
+            _isLoading ? const LinearProgressIndicator() : null,
         body: Stack(
           children: [
             Padding(
@@ -247,7 +253,9 @@ class _RegisterPageState extends State<RegisterPage> {
                                 // show usertype-specific fields
                                 if (val == 'industry professional') {
                                   _showForBothUniAndStud = false;
+                                  _showForIndustryPro = true;
                                 } else {
+                                  _showForIndustryPro = false;
                                   // either student or university professional
                                   _showForBothUniAndStud = true;
                                   // only student in this cacse
@@ -261,6 +269,17 @@ class _RegisterPageState extends State<RegisterPage> {
                             },
                           ),
                           const SizedBox(height: 5),
+
+                          // todo: INDUSTRY PROFESSIONAL'S ORGANISATION
+                          _showForIndustryPro
+                              ? SimpleTextField(
+                                  controller: organisationContrller,
+                                  hintText: 'Organisation',
+                                  iconData: Icons.assured_workload,
+                                  isWithIcon: true,
+                                  autofillHints: null,
+                                )
+                              : Container(),
 
                           // todo: STUDENT START AND END YEARS
                           // show start and end years textfield if user is a student

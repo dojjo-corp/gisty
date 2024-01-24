@@ -161,16 +161,16 @@ class _ProjectGridItemState extends State<ProjectGridItem> {
                     Row(
                       mainAxisAlignment: MainAxisAlignment.spaceBetween,
                       children: [
-                        /// Category Image
+                        /// todo: Category Image
                         Image.asset(
                           categoryMap[category]['image'],
                           height: 30,
                         ),
 
-                        /// Save Button
                         /// Acts as a toggle button
                         Row(children: [
-                          /// Options icon button
+                          
+                          // todo: Options icon button
                           isUserAdmin || isUserUniversityPro
                               ? GestureDetector(
                                   onTap: () async {
@@ -184,6 +184,8 @@ class _ProjectGridItemState extends State<ProjectGridItem> {
                                 )
                               : Container(),
                           const SizedBox(width: 10),
+
+                          // todo: Save Button
                           widget.showLiked
                               ? GestureDetector(
                                   onTap: () async {
@@ -200,7 +202,7 @@ class _ProjectGridItemState extends State<ProjectGridItem> {
                         ]),
                       ],
                     ),
-                    // PROJECT TITLE
+                    // todo: PROJECT TITLE
                     Column(
                       crossAxisAlignment: CrossAxisAlignment.start,
                       children: [
@@ -233,7 +235,7 @@ class _ProjectGridItemState extends State<ProjectGridItem> {
                                 ),
                                 const SizedBox(width: 10),
 
-                                /// Year project was submitted
+                                /// todo: Year project was submitted
                                 Text(year,
                                     style: GoogleFonts.montserrat(
                                         color: Colors.grey[700]))
@@ -246,7 +248,7 @@ class _ProjectGridItemState extends State<ProjectGridItem> {
                           padding: const EdgeInsets.symmetric(horizontal: 8.0),
                           child:
 
-                              /// Excerpt from project's description.
+                              /// todo: Excerpt from project's description.
                               Text(
                             description,
                             style: GoogleFonts.montserrat(
@@ -264,6 +266,8 @@ class _ProjectGridItemState extends State<ProjectGridItem> {
             ),
           ),
         ),
+
+        // todo: project impressions
         Container(
           width: MediaQuery.of(context).size.width,
           margin: const EdgeInsets.only(bottom: 12),

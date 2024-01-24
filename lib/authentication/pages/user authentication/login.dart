@@ -5,8 +5,9 @@ import 'package:firebase_auth/firebase_auth.dart';
 import 'package:firebase_messaging/firebase_messaging.dart';
 import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
+import 'package:gt_daily/authentication/pages/user%20authentication/second_authentication.dart';
+import 'package:gt_daily/global/homepage.dart';
 
-import '../../../global/homepage.dart';
 import '../../components/buttons/buttons.dart';
 import '../../components/buttons/custom_back_button.dart';
 import '../../components/textfields/simple_textfield.dart';
@@ -31,6 +32,7 @@ class _LoginPageState extends State<LoginPage> {
   Widget build(BuildContext context) {
     final auth = AuthRepository();
 
+    // todo: Login Method
     Future<void> login() async {
       setState(() {
         _isLoading = true;
@@ -54,18 +56,32 @@ class _LoginPageState extends State<LoginPage> {
                 .collection('users')
                 .doc(u.user!.uid)
                 .update({'fcm-token': fcmToken});
+
             if (context.mounted) {
-              Navigator.pushReplacement(
-                context,
-                MaterialPageRoute(
-                  builder: (context) => MyHomePage(pageIndex: 0),
-                ),
-              );
+              // Navigate students to authenticate their account with their index numbers
+              final data = docSnapshot.data();
+              if (data!['user-type'].toLowerCase() == 'student') {
+                Navigator.push(
+                  context,
+                  MaterialPageRoute(
+                    builder: (context) => const IDAuthentication(),
+                  ),
+                );
+              } else {
+                Navigator.pushReplacement(
+                  context,
+                  MaterialPageRoute(
+                    builder: (context) => MyHomePage(
+                      pageIndex: 0,
+                    ),
+                  ),
+                );
+              }
             }
           } else {
             // user's account is inactive/deleted if their document does not exist
             FirebaseAuth.instance.signOut();
-            throw 'User Accout Does Not Exist';
+            throw 'User Account Does Not Exist';
           }
         }
       } catch (e) {
@@ -106,7 +122,7 @@ class _LoginPageState extends State<LoginPage> {
       },
       child: Scaffold(
         floatingActionButton:
-            _isLoading ? const CircularProgressIndicator() : null,
+            _isLoading ? const LinearProgressIndicator() : null,
         body: Stack(
           children: [
             Padding(

@@ -35,7 +35,7 @@ class AllJobsPage extends StatelessWidget {
                       }
 
                       if (snapshot.connectionState == ConnectionState.waiting) {
-                        return const CircularProgressIndicator();
+                        return const LinearProgressIndicator();
                       }
 
                       /// Firestore job documents

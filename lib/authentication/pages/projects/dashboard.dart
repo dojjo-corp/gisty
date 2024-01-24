@@ -1,10 +1,13 @@
 // ignore_for_file: unused_local_variable, avoid_unnecessary_containers
 
 import 'package:cloud_firestore/cloud_firestore.dart';
+import 'package:connectivity_plus/connectivity_plus.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:gt_daily/authentication/components/buttons/buttons.dart';
+import 'package:gt_daily/authentication/helper_methods.dart/global.dart';
+import 'package:gt_daily/authentication/providers/connectivity_provider.dart';
 import 'package:provider/provider.dart';
 
 import '../../components/project_grid_item.dart';
@@ -19,24 +22,22 @@ class Dashboard extends StatefulWidget {
 }
 
 class _DashboardState extends State<Dashboard> {
-  Widget noProjectToDisplay() => const Center(
-        child: Text('No Project To Display!'),
-      );
+  bool _hasRefreshed = false;
+  List<QueryDocumentSnapshot<Map<String, dynamic>>> _updatedLatest = [];
 
   @override
   Widget build(BuildContext context) {
     final projectProvider =
         Provider.of<ProjectProvider>(context, listen: false);
-    final projectCategories =
-        context.watch<ProjectProvider>().categoryMap.keys.toList();
-    final categoryMap = context.watch<ProjectProvider>().categoryMap;
+    final projectCategories = projectProvider.categoryMap.keys.toList();
+    final categoryMap = projectProvider.categoryMap;
 
     return Stack(
       children: [
         SizedBox(
           height: MediaQuery.of(context).size.height,
           child: RefreshIndicator(
-            onRefresh: () async {},
+            onRefresh: updateDashboard,
             child: SingleChildScrollView(
               child: Column(
                 children: [
@@ -73,6 +74,25 @@ class _DashboardState extends State<Dashboard> {
                             .snapshots(),
                         builder: (context, snapshot) {
                           if (!snapshot.hasData) {
+                            // use snapshot docs from last refresh action,
+                            // iff dashboard has been refreshed at least once
+                            if (_hasRefreshed) {
+                              return Center(
+                                child: Column(
+                                  crossAxisAlignment: CrossAxisAlignment.start,
+                                  children: _updatedLatest
+                                      .map(
+                                        (project) => ProjectGridItem(
+                                          projectData: project.data(),
+                                          showLiked: true,
+                                        ),
+                                      )
+                                      .toList(),
+                                ),
+                              );
+                            }
+
+                            // show if dashboard has not been refreshed
                             return const Center(
                               child: Text('No Projects Yet'),
                             );
@@ -87,7 +107,11 @@ class _DashboardState extends State<Dashboard> {
                           }
 
                           final docs = snapshot.data!.docs;
-                          final latestProjects = docs.take(10).toList();
+
+                          // either docs from
+                          final latestProjects = _hasRefreshed
+                              ? _updatedLatest
+                              : docs.take(10).toList();
                           Map<String, Map<String, dynamic>> allProjects = {};
                           for (var doc in docs) {
                             final category =
@@ -95,8 +119,11 @@ class _DashboardState extends State<Dashboard> {
                             final data = doc.data();
                             allProjects[doc.id] = doc.data();
                           }
+
                           // load and store all projects in provider
                           projectProvider.setAllProjects(allProjects);
+
+                          
 
                           return Center(
                             child: Column(
@@ -153,5 +180,35 @@ class _DashboardState extends State<Dashboard> {
             : Container()
       ],
     );
+  }
+
+  // refresh method
+  Future<void> updateDashboard() async {
+    final ConnectivityResult connectionState =
+        Provider.of<ConnectivityProvider>(context, listen: false)
+            .connectivityResult;
+    try {
+      // get update snapshot from firestore
+      final snapshot = await FirebaseFirestore.instance
+          .collection('All Projects')
+          .orderBy('time-added', descending: true)
+          .get();
+
+      // refresh only possible if device is connected to internet
+      if (snapshot.docs.isNotEmpty ||
+          connectionState != ConnectivityResult.none) {
+        final docs = snapshot.docs;
+
+        setState(() {
+          _hasRefreshed = true;
+          _updatedLatest = docs.take(10).toList();
+        });
+      } else {
+        throw 'Couldn\'t refresh dashboard. Check your internet';
+      }
+    } catch (e) {
+      // show error in snackbar
+      showSnackBar(context, e.toString());
+    }
   }
 }
