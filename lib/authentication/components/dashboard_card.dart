@@ -36,8 +36,8 @@ class DashboardCard extends StatelessWidget {
             borderRadius: BorderRadius.circular(12),
             gradient: LinearGradient(
               colors: [
-                categoryMap[name]!['color']!.withOpacity(0.2),
-                categoryMap[name]!['color']!.withOpacity(0.5)
+                Color(categoryMap[name]!['color']).withOpacity(0.2),
+                Color(categoryMap[name]!['color']).withOpacity(0.5)
               ],
             ),
           ),

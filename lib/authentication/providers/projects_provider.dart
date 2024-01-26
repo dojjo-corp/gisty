@@ -6,86 +6,111 @@ import 'package:flutter/material.dart';
 
 class ProjectProvider extends ChangeNotifier {
   ProjectProvider();
+
+  final store = FirebaseFirestore.instance;
+
   final iconList = [
-    'web-mobile-development.png',
-    'ai.png',
-    'cyber.png',
-    'data.png',
-    'data-science.png',
-    'desktop.png',
-    'iot.png',
-    'robotics.png',
-    'research.png',
-    'embedded-systems.png',
-    'digital-asset-management.png',
-    'gear.png',
-    'green-technology.png',
-    'nanotechnology.png',
-    'project-management.png',
-    'responsive.png',
-    'science.png',
-    'technological.png',
-    'technology.png',
-    'world-wide-web.png',
+    'assets/category_icons/web-mobile-development.png',
+    'assets/category_icons/ai.png',
+    'assets/category_icons/cyber.png',
+    'assets/category_icons/data.png',
+    'assets/category_icons/data-science.png',
+    'assets/category_icons/desktop.png',
+    'assets/category_icons/iot.png',
+    'assets/category_icons/robotics.png',
+    'assets/category_icons/research.png',
+    'assets/category_icons/embedded-systems.png',
+    'assets/category_icons/digital-asset-management.png',
+    'assets/category_icons/gear.png',
+    'assets/category_icons/green-technology.png',
+    'assets/category_icons/nanotechnology.png',
+    'assets/category_icons/project-management.png',
+    'assets/category_icons/responsive.png',
+    'assets/category_icons/science.png',
+    'assets/category_icons/technological.png',
+    'assets/category_icons/technology.png',
+    'assets/category_icons/world-wide-web.png',
   ];
 
   Map categories = {};
+
+  // todo: PROJECT CATEGORIES GETTER AND SETTER
   Map<String, dynamic> categoryMap = {
     'Web & Mobile Development': {
-      'color': const Color(0xFF3986C6),
+      'color': const Color(0xFF3986C6).value,
       'image': 'assets/category_icons/web-mobile-development.png',
       'x': 0,
     },
     'AI & ML': {
-      'color': const Color(0xFFEAAF40),
+      'color': const Color(0xFFEAAF40).value,
       'image': 'assets/category_icons/ai.png',
       'x': 1,
     },
     'Cyber Security & Network Security': {
-      'color': const Color(0xFFBC89C5),
+      'color': const Color(0xFFBC89C5).value,
       'image': 'assets/category_icons/cyber.png',
       'x': 2
     },
     'Data Science & Analytics': {
-      'color': const Color(0xFF068604),
+      'color': const Color(0xFF068604).value,
       'image': 'assets/category_icons/data.png',
       'x': 3
     },
     'Desktop Development': {
-      'color': const Color(0xFF04865F),
+      'color': const Color(0xFF04865F).value,
       'image': 'assets/category_icons/desktop.png',
       'x': 4
     },
     'IoT': {
-      'color': const Color(0xFF860441),
+      'color': const Color(0xFF860441).value,
       'image': 'assets/category_icons/iot.png',
       'x': 5
     },
     'Robotics & Automation': {
-      'color': const Color(0xFF864504),
+      'color': const Color(0xFF864504).value,
       'image': 'assets/category_icons/robotics.png',
       'x': 6
     },
     'Research Works': {
-      'color': const Color(0xFF04865F),
+      'color': const Color(0xFF04865F).value,
       'image': 'assets/category_icons/research.png',
       'x': 7
     },
     'Embedded Systems': {
-      'color': const Color(0xFFEACE40),
+      'color': const Color(0xFFEACE40).value,
       'image': 'assets/category_icons/embedded-systems.png',
       'x': 8
     },
   };
 
-  void setCategories(Map<String, dynamic> catMap) {
-    categoryMap = catMap;
+  
 
-    WidgetsBinding.instance.addPostFrameCallback((_) {
-      notifyListeners();
-    });
+  // todo: UPDATE CATEGORIES LOCALLY
+  Future<void> setCategories() async {
+    try {
+      final snapshot = await store.collection('Project Categories').get();
+      final docs = snapshot.docs;
+
+      if (docs.isNotEmpty) {
+        Map<String, dynamic> catMap = {};
+        docs.map((e) {
+          final data = e.data();
+          data['color'] = Color(data['color']);
+          catMap[e.id] = data;
+        });
+
+        // make available globally (notify provider listeners)
+        categoryMap = catMap;
+        WidgetsBinding.instance.addPostFrameCallback((_) {
+          notifyListeners();
+        });
+      }
+    } catch (e) {
+      rethrow;
+    }
   }
 
+  // todo: ALL PROJECTS GETTER AND SETTER
   Map<String, Map<String, dynamic>> _allProjects = {};
   Map<String, Map<String, dynamic>> get allProjects => _allProjects;
 
@@ -98,17 +123,16 @@ class ProjectProvider extends ChangeNotifier {
     });
   }
 
+  // todo: GET USER'S SAVED PROJECTS
   List<Map<String, dynamic>?> _savedProjects = [];
   List<Map<String, dynamic>?> get savedProjects => _savedProjects;
 
-  // GET USER'S SAVED PROJECTS
   Future<void> setSavedProjects() async {
     // Fetch user information from Firestore
-    final DocumentSnapshot<Map<String, dynamic>> userSnapshot =
-        await FirebaseFirestore.instance
-            .collection('users')
-            .doc(FirebaseAuth.instance.currentUser!.uid)
-            .get();
+    final DocumentSnapshot<Map<String, dynamic>> userSnapshot = await store
+        .collection('users')
+        .doc(FirebaseAuth.instance.currentUser!.uid)
+        .get();
 
     final List<Map<String, dynamic>?> finalList = [];
     // retrieve list of saved projects (list of project ids)
@@ -125,6 +149,7 @@ class ProjectProvider extends ChangeNotifier {
     });
   }
 
+  // todo: PROJECT ANALYTICS DATA
   Map<String, double> getProjectAnalyticsData(String pid) {
     final Map<String, double> _projectAnalyticsData = {};
     final Map<String, dynamic>? _projectData = _allProjects[pid];

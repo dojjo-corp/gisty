@@ -28,8 +28,8 @@ class ArchiveTile extends StatelessWidget {
             borderRadius: BorderRadius.circular(12),
             gradient: LinearGradient(
               colors: [
-                categoryMap[title]!['color']!.withOpacity(0.2),
-                categoryMap[title]!['color']!.withOpacity(0.5)
+                Color(categoryMap[title]!['color'])!.withOpacity(0.2),
+                Color(categoryMap[title]!['color'])!.withOpacity(0.5)
               ],
             ),
           ),

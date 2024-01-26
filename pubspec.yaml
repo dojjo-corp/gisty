@@ -106,6 +106,7 @@ flutter:
       - assets/category_icons/robotics.png
       - assets/category_icons/research.png
       - assets/category_icons/embedded-systems.png
+      - assets/category_icons/world-wide-web.png
       - assets/teacher.png
       - assets/student.png
       - assets/engineer.png

@@ -7,6 +7,9 @@ import 'package:gt_daily/authentication/components/buttons/custom_back_button.da
 import 'package:gt_daily/authentication/components/page_title.dart';
 import 'package:gt_daily/authentication/components/textfields/simple_textfield.dart';
 import 'package:gt_daily/authentication/helper_methods.dart/global.dart';
+import 'package:provider/provider.dart';
+
+import '../../providers/projects_provider.dart';
 
 class AddNewCategory extends StatefulWidget {
   const AddNewCategory({super.key});
@@ -22,33 +25,13 @@ class _AddNewCategoryState extends State<AddNewCategory> {
   String chosenIcon = "";
   bool _isLoading = false;
   bool _chooseColor = false;
-  bool _chooseIcon = true;
-
-  final iconList = [
-    'ai.png',
-    'cyber.png',
-    'data.png',
-    'data-science.png',
-    'desktop.png',
-    'digital-asset-management.png',
-    'embedded-systems.png',
-    'gear.png',
-    'green-technology.png',
-    'iot.png',
-    'nanotechnology.png',
-    'project-management.png',
-    'research.png',
-    'responsive.png',
-    'robotics.png',
-    'science.png',
-    'technological.png',
-    'technology.png',
-    'web-mobile-development.png',
-    'world-wide-web.png',
-  ];
+  bool _chooseIcon = false;
 
   @override
   Widget build(BuildContext context) {
+    final iconList =
+        Provider.of<ProjectProvider>(context, listen: false).iconList;
+
     return Scaffold(
       body: Stack(
         children: [
@@ -109,13 +92,19 @@ class _AddNewCategoryState extends State<AddNewCategory> {
 
                     // todo: CHOOSE ICONS
                     _chooseIcon
-                        ? Card(
-                            child: GridView.count(
-                              crossAxisCount: 5,
-                              children: iconList
-                                  .map((e) =>
-                                      Image.asset('assets/category_icons/$e'))
-                                  .toList(),
+                        ? SizedBox(
+                            height: 300,
+                            child: Card(
+                              child: GridView.count(
+                                crossAxisCount: 4,
+                                crossAxisSpacing: 5,
+                                mainAxisSpacing: 5,
+                                children: iconList
+                                    .map(
+                                      (icon) => Image.asset(icon, height: 30),
+                                    )
+                                    .toList(),
+                              ),
                             ),
                           )
                         : Container(),

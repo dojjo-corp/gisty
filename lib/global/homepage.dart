@@ -8,6 +8,7 @@ import 'package:flutter/services.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:google_nav_bar/google_nav_bar.dart';
 import 'package:gt_daily/authentication/pages/projects/supervised_projects.dart';
+import 'package:gt_daily/authentication/providers/projects_provider.dart';
 import 'package:provider/provider.dart';
 import 'package:rxdart/rxdart.dart';
 
@@ -59,6 +60,7 @@ class _MyHomePageState extends State<MyHomePage> {
 
   Future<void> _initializeAppData() async {
     await Provider.of<UserProvider>(context, listen: false).setAllUsers();
+    await Provider.of<ProjectProvider>(context, listen: false).setCategories();
   }
 
   final List<Widget> _pages = [

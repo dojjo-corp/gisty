@@ -67,6 +67,8 @@ class _DashboardState extends State<Dashboard> {
                         ],
                       ),
                       const SizedBox(height: 20),
+
+                      // todo: PROJECT LIST
                       StreamBuilder(
                         stream: FirebaseFirestore.instance
                             .collection('All Projects')
@@ -76,7 +78,7 @@ class _DashboardState extends State<Dashboard> {
                           if (!snapshot.hasData) {
                             // use snapshot docs from last refresh action,
                             // iff dashboard has been refreshed at least once
-                            if (_hasRefreshed) {
+                            if (_updatedLatest.isNotEmpty) {
                               return Center(
                                 child: Column(
                                   crossAxisAlignment: CrossAxisAlignment.start,
@@ -123,8 +125,6 @@ class _DashboardState extends State<Dashboard> {
                           // load and store all projects in provider
                           projectProvider.setAllProjects(allProjects);
 
-                          
-
                           return Center(
                             child: Column(
                                 crossAxisAlignment: CrossAxisAlignment.start,
@@ -139,7 +139,11 @@ class _DashboardState extends State<Dashboard> {
                           );
                         },
                       ),
+                      // todo: PROJECT LIST END
+
                       const SizedBox(height: 20),
+
+                      // todo: PROJECT CATEGORIES BUTTON
                       MyButton(
                         onPressed: () {
                           Navigator.pushNamed(context, '/archive');
@@ -155,6 +159,8 @@ class _DashboardState extends State<Dashboard> {
             ),
           ),
         ),
+
+        // todo: ADD NEW PROJECT BUTTON
         context.watch<UserProvider>().userType.toLowerCase() ==
                 'university professional'
             ? Positioned(
@@ -182,7 +188,7 @@ class _DashboardState extends State<Dashboard> {
     );
   }
 
-  // refresh method
+  // todo: refresh method
   Future<void> updateDashboard() async {
     final ConnectivityResult connectionState =
         Provider.of<ConnectivityProvider>(context, listen: false)
@@ -204,6 +210,9 @@ class _DashboardState extends State<Dashboard> {
           _updatedLatest = docs.take(10).toList();
         });
       } else {
+        setState(() {
+          _hasRefreshed = false;
+        });
         throw 'Couldn\'t refresh dashboard. Check your internet';
       }
     } catch (e) {

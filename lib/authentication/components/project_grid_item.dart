@@ -48,7 +48,7 @@ class _ProjectGridItemState extends State<ProjectGridItem> {
     final String student = widget.projectData['student-name'];
     final String description = widget.projectData['description'];
     final String category = widget.projectData['category'];
-    final projectColor = categoryMap[category]['color'];
+    final projectColor = Color(categoryMap[category]['color']);
 
     String? userEmail = FirebaseAuth.instance.currentUser?.email!;
     bool isSaved = widget.projectData['saved'].contains(userEmail);
@@ -169,7 +169,6 @@ class _ProjectGridItemState extends State<ProjectGridItem> {
 
                         /// Acts as a toggle button
                         Row(children: [
-                          
                           // todo: Options icon button
                           isUserAdmin || isUserUniversityPro
                               ? GestureDetector(
