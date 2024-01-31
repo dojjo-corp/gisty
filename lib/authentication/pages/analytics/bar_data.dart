@@ -1,4 +1,5 @@
 import 'dart:developer';
+import 'package:flutter/material.dart';
 
 import 'individual_bar.dart';
 
@@ -23,7 +24,7 @@ class BarData {
         IndividualBar(
           x: value['x'],
           y: value['toY'],
-          barColor: value['color'],
+          barColor: Color(value['color']),
         ),
       );
     }
@@ -47,7 +48,7 @@ class BarData {
           y: [
             entry.value['user-engagement']
           ], // Individual Bar takes a list as it's 'y' field
-          barColor: entry.value['color'],
+          barColor: Color(entry.value['color']),
         ),
       );
       maxEngagement = rawDataMap['maxEngagement'];

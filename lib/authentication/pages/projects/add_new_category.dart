@@ -19,10 +19,12 @@ class AddNewCategory extends StatefulWidget {
 }
 
 class _AddNewCategoryState extends State<AddNewCategory> {
+  final _key = GlobalKey<FormState>();
   final titleController = TextEditingController();
   final store = FirebaseFirestore.instance;
   Color chosenColor = Colors.blue;
-  String chosenIcon = "";
+  String chosenIcon = 'assets/category_icons/web-mobile-development.png';
+
   bool _isLoading = false;
   bool _chooseColor = false;
   bool _chooseIcon = false;
@@ -44,14 +46,19 @@ class _AddNewCategoryState extends State<AddNewCategory> {
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
                     const PageTitle(title: 'Add New Category'),
-                    SimpleTextField(
-                      controller: titleController,
-                      hintText: 'Category Title',
-                      iconData: Icons.title,
-                      isWithIcon: true,
-                      autofillHints: null,
+                    Form(
+                      key: _key,
+                      child: SimpleTextField(
+                        controller: titleController,
+                        hintText: 'Category Title',
+                        iconData: Icons.title,
+                        isWithIcon: true,
+                        autofillHints: null,
+                      ),
                     ),
                     const SizedBox(height: 10),
+
+                    // todo: CHOOSE COLOR
                     _chooseColor
                         ? SizedBox(
                             width: double.infinity,
@@ -97,11 +104,18 @@ class _AddNewCategoryState extends State<AddNewCategory> {
                             child: Card(
                               child: GridView.count(
                                 crossAxisCount: 4,
-                                crossAxisSpacing: 5,
-                                mainAxisSpacing: 5,
+                                crossAxisSpacing: 25,
+                                mainAxisSpacing: 15,
                                 children: iconList
                                     .map(
-                                      (icon) => Image.asset(icon, height: 30),
+                                      (icon) => GestureDetector(
+                                        onTap: () {
+                                          setState(() {
+                                            chosenIcon = icon;
+                                          });
+                                        },
+                                        child: Image.asset(icon, height: 20),
+                                      ),
                                     )
                                     .toList(),
                               ),
@@ -111,27 +125,46 @@ class _AddNewCategoryState extends State<AddNewCategory> {
                     const SizedBox(height: 15),
                     Row(
                       children: [
+                        // todo: ICON LISTTILE
                         Expanded(
-                          child: MyButton(
-                            onPressed: () {
+                          child: GestureDetector(
+                            onTap: () {
                               setState(() {
-                                _chooseColor = !_chooseColor;
+                                _chooseIcon = !_chooseIcon;
+                                if (_chooseIcon) {
+                                  _chooseColor = false;
+                                } else {}
                               });
                             },
-                            btnText: 'Choose Color',
-                            isPrimary: false,
+                            child: ListTile(
+                              leading: CircleAvatar(
+                                foregroundImage: AssetImage(chosenIcon),
+                              ),
+                              title: Text(
+                                  _chooseIcon ? 'End Select' : 'Select Icon'),
+                            ),
                           ),
                         ),
                         const SizedBox(width: 10),
+
+                        // todo: COLOR LISTTILE
                         Expanded(
-                          child: MyButton(
-                            onPressed: () {
+                          child: GestureDetector(
+                            onTap: () {
                               setState(() {
-                                _chooseIcon = !_chooseIcon;
+                                _chooseColor = !_chooseColor;
+                                if (_chooseColor) {
+                                  _chooseIcon = false;
+                                } else {}
                               });
                             },
-                            btnText: 'Choose Icon',
-                            isPrimary: false,
+                            child: ListTile(
+                                leading: CircleAvatar(
+                                  backgroundColor: chosenColor,
+                                ),
+                                title: Text(_chooseColor
+                                    ? 'End Select'
+                                    : 'Select Color')),
                           ),
                         ),
                       ],
@@ -154,30 +187,33 @@ class _AddNewCategoryState extends State<AddNewCategory> {
     );
   }
 
-  void selectColor() {}
-
-  void selectIcon() {}
-
   void addNewCategory() async {
-    if (titleController.text.characters.isNotEmpty) {
+    if (_key.currentState!.validate()) {
+      _key.currentState!.save;
+
       setState(() {
         _isLoading = true;
       });
       try {
-        final docRef = store.collection('All Projects').doc('Config');
-        final snapshot = await docRef.get();
+        final collectionRef = store.collection('Project Cateogries');
+        final snapshot = await collectionRef.get();
 
-        if (snapshot.exists) {
-          final newCategoryData = {
-            titleController.text.trim(): {
-              'color': Color,
-              'image': '',
-              'x': 0,
-            }
-          };
+        final newCategoryData = {
+          'color': chosenColor.value,
+          'image': chosenIcon,
+          'x': snapshot.size + 1,
+        };
 
-          // send to firestore
-          docRef.update(newCategoryData);
+        // send to firestore
+        collectionRef
+            .doc(titleController.text.trim())
+            .set(newCategoryData, SetOptions(merge: true));
+
+        // update local categories
+        if (mounted) {
+          Provider.of<ProjectProvider>(context, listen: false).setCategories();
+          showSnackBar(context, 'Category Added Successfully!');
+          titleController.clear();
         }
       } catch (e) {
         showSnackBar(context, e.toString());
@@ -186,8 +222,6 @@ class _AddNewCategoryState extends State<AddNewCategory> {
           _isLoading = false;
         });
       }
-    } else {
-      showSnackBar(context, 'Category Title cannnot be empty');
     }
   }
 }

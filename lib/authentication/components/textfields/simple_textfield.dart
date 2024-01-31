@@ -79,7 +79,7 @@ class _SimpleTextFieldState extends State<SimpleTextField> {
       },
       validator: (value) {
         if (value!.isEmpty) {
-          return 'Field can\'t be empty!';
+          return '${widget.hintText} can\'t be empty!';
         }
         return null;
       },

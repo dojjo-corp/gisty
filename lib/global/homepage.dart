@@ -59,8 +59,8 @@ class _MyHomePageState extends State<MyHomePage> {
   }
 
   Future<void> _initializeAppData() async {
-    await Provider.of<UserProvider>(context, listen: false).setAllUsers();
-    await Provider.of<ProjectProvider>(context, listen: false).setCategories();
+    Provider.of<UserProvider>(context, listen: false).setAllUsers();
+    Provider.of<ProjectProvider>(context, listen: false).setCategories();
   }
 
   final List<Widget> _pages = [

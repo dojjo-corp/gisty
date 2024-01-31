@@ -83,30 +83,24 @@ class ProjectProvider extends ChangeNotifier {
     },
   };
 
-  
-
   // todo: UPDATE CATEGORIES LOCALLY
   Future<void> setCategories() async {
-    try {
-      final snapshot = await store.collection('Project Categories').get();
-      final docs = snapshot.docs;
+    final snapshot = await store.collection('Project Cateogries').get();
+    final docs = snapshot.docs;
 
-      if (docs.isNotEmpty) {
-        Map<String, dynamic> catMap = {};
-        docs.map((e) {
-          final data = e.data();
-          data['color'] = Color(data['color']);
-          catMap[e.id] = data;
-        });
+    if (docs.isNotEmpty) {
+      Map<String, dynamic> catMap = {};
 
-        // make available globally (notify provider listeners)
-        categoryMap = catMap;
-        WidgetsBinding.instance.addPostFrameCallback((_) {
-          notifyListeners();
-        });
+      for (var doc in docs) {
+        final data = doc.data();
+        catMap[doc.id] = data;
       }
-    } catch (e) {
-      rethrow;
+
+      // make available globally (notify provider listeners)
+      categoryMap = catMap;
+      WidgetsBinding.instance.addPostFrameCallback((_) {
+        notifyListeners();
+      });
     }
   }
 
