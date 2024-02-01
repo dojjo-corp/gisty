@@ -59,52 +59,8 @@ Widget getBottomTitlesForSingleProject(double value, TitleMeta meta) {
 // todo BOTTOM TITLES FOR ALL PROJECTS ANALYTICS CHART
 Widget getBottomTitlesForAllProjects(
     BuildContext _context, double value, TitleMeta meta) {
-  Widget image;
-  String tooltip;
   final categoryMap = _context.read<ProjectProvider>().categoryMap;
   final categoryNames = categoryMap.keys.toList();
-  switch (value.toInt()) {
-    case 0:
-      image = Image.asset(categoryMap[categoryNames[0]]['image'], height: 15);
-      tooltip = categoryNames[0];
-      break;
-    case 1:
-      image = Image.asset(categoryMap[categoryNames[1]]['image'], height: 15);
-      tooltip = categoryNames[1];
-      break;
-    case 2:
-      image = Image.asset(categoryMap[categoryNames[2]]['image'], height: 15);
-      tooltip = categoryNames[2];
-      break;
-    case 3:
-      image = Image.asset(categoryMap[categoryNames[3]]['image'], height: 15);
-      tooltip = categoryNames[3];
-      break;
-    case 4:
-      image = Image.asset(categoryMap[categoryNames[4]]['image'], height: 15);
-      tooltip = categoryNames[4];
-      break;
-    case 5:
-      image = Image.asset(categoryMap[categoryNames[5]]['image'], height: 15);
-      tooltip = categoryNames[5];
-      break;
-    case 6:
-      image = Image.asset(categoryMap[categoryNames[6]]['image'], height: 15);
-      tooltip = categoryNames[6];
-      break;
-    case 7:
-      image = Image.asset(categoryMap[categoryNames[7]]['image'], height: 15);
-      tooltip = categoryNames[7];
-      break;
-    case 8:
-      image = Image.asset(categoryMap[categoryNames[8]]['image'], height: 15);
-      tooltip = categoryNames[8];
-      break;
-
-    default:
-      image = Image.asset(categoryMap[categoryNames[0]]['image'], height: 15);
-      tooltip = '';
-  }
 
   return SideTitleWidget(
     axisSide: meta.axisSide,
@@ -113,10 +69,11 @@ Widget getBottomTitlesForAllProjects(
         borderRadius: BorderRadius.circular(8),
         color: Colors.blueGrey[100],
       ),
-      message: tooltip,
+      message: categoryNames[value.toInt()],
       textStyle: TextStyle(color: Colors.grey[700]),
       triggerMode: TooltipTriggerMode.tap,
-      child: image,
+      child: Image.asset(categoryMap[categoryNames[value.toInt()]]['image'],
+          height: 15),
     ),
   );
 }

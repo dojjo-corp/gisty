@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
+import 'package:gt_daily/authentication/providers/user_provider.dart';
 import 'package:provider/provider.dart';
 
 import '../../components/buttons/custom_appbar_button.dart';
@@ -15,6 +16,8 @@ class ProjectArchive extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final _isUserAdmin =
+        Provider.of<UserProvider>(context, listen: false).isUserAdmin;
     final categories =
         context.read<ProjectProvider>().categoryMap.keys.toList();
     final categoryMap = context.read<ProjectProvider>().categoryMap;
@@ -57,18 +60,20 @@ class ProjectArchive extends StatelessWidget {
             ),
           ),
           const MyBackButton(),
-          CustomAppBarButton(
-            onTap: () {
-              Navigator.push(
-                context,
-                MaterialPageRoute(
-                  builder: (context) => const AddNewCategory(),
-                ),
-              );
-            },
-            iconData: Icons.playlist_add_rounded,
-            tooltipMessage: 'Add New Category',
-          ),
+          _isUserAdmin
+              ? CustomAppBarButton(
+                  onTap: () {
+                    Navigator.push(
+                      context,
+                      MaterialPageRoute(
+                        builder: (context) => const AddNewCategory(),
+                      ),
+                    );
+                  },
+                  iconData: Icons.playlist_add_rounded,
+                  tooltipMessage: 'Add New Category',
+                )
+              : Container(),
         ],
       ),
     );

@@ -143,6 +143,7 @@ class _MyBarGraphState extends State<MyBarGraph> {
       touchTooltipData: BarTouchTooltipData(
         tooltipBgColor: Colors.blueGrey,
         tooltipHorizontalAlignment: FLHorizontalAlignment.right,
+        fitInsideHorizontally: true,
         tooltipMargin: -10,
         getTooltipItem: (group, groupIndex, rod, rodIndex) {
           String engagementType;
@@ -190,6 +191,7 @@ class _MyBarGraphState extends State<MyBarGraph> {
       touchTooltipData: BarTouchTooltipData(
         tooltipBgColor: Colors.blueGrey,
         tooltipHorizontalAlignment: FLHorizontalAlignment.right,
+        fitInsideHorizontally: true,
         tooltipMargin: -10,
         getTooltipItem: (group, groupIndex, rod, rodIndex) {
           
